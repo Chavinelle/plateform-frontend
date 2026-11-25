@@ -104,14 +104,13 @@
           @if (error()) { <p class="form-error" role="alert">{{ error() }}</p> }
 
           @if (loading() && !result()) {
-            <p>Chargement…</p>
+            <app-loading variant="cards" [count]="6" />
           } @else if (result(); as r) {
             @if (r.content.length === 0) {
-              <div class="card">
-                <p><strong>Aucune offre ne correspond à votre recherche.</strong></p>
-                <p class="muted">Essayez avec moins de filtres ou d'autres mots-clés.</p>
+              <app-empty-state icon="search" heading="Aucune offre ne correspond à votre recherche">
+                <p>Essayez avec moins de filtres ou d'autres mots-clés.</p>
                 <button type="button" (click)="reset()">Effacer les filtres</button>
-              </div>
+              </app-empty-state>
             } @else {
               <div class="job-grid" [class.loading]="loading()">
                 @for (j of r.content; track j.id) { <app-job-card [job]="j" /> }

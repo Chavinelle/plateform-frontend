@@ -6,11 +6,12 @@ import { AuthService } from '../../../../core/services/auth.service';
 import { EvaluationTemplateService } from '../../../../core/services/evaluation-template.service';
 import { extractErrorMessage } from '../../../../core/utils/http-error';
 import { TemplateEditor } from './template-editor/template-editor';
+import { Loading } from '../../../shared/loading/loading';
 
 /** Grilles d'évaluation de l'entreprise : liste, création, modification, grille par défaut, archivage. */
 @Component({
   selector: 'app-evaluation-templates',
-  imports: [TemplateEditor],
+  imports: [Loading, TemplateEditor],
   templateUrl: './evaluation-templates.html',
   styleUrl: './evaluation-templates.scss',
   changeDetection: ChangeDetectionStrategy.OnPush

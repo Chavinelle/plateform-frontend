@@ -29,7 +29,7 @@
   </label>
 
   @if (loading()) {
-    <p>Chargement…</p>
+    <app-loading />
   } @else {
     <ul class="templates">
       @for (t of templates(); track t.id) {

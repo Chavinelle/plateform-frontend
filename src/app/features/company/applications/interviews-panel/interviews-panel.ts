@@ -14,6 +14,8 @@ import { InterviewService } from '../../../../../core/services/interview.service
 import { parseLocal } from '../../../../../core/utils/calendar';
 import { extractErrorMessage } from '../../../../../core/utils/http-error';
 import { InterviewReports } from '../interview-reports/interview-reports';
+import { Loading } from '../../../../shared/loading/loading';
+import { EmptyState } from '../../../../shared/empty-state/empty-state';
 
 /**
  * Entretiens d'une candidature : liste, planification, report et annulation.
@@ -21,7 +23,7 @@ import { InterviewReports } from '../interview-reports/interview-reports';
  */
 @Component({
   selector: 'app-interviews-panel',
-  imports: [DatePipe, ReactiveFormsModule, InterviewReports],
+  imports: [EmptyState, Loading, DatePipe, ReactiveFormsModule, InterviewReports],
   templateUrl: './interviews-panel.html',
   styleUrl: './interviews-panel.scss',
   changeDetection: ChangeDetectionStrategy.OnPush

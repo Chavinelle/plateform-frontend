@@ -12,6 +12,7 @@ import { JobService } from '../../../../../core/services/job.service';
 import { RecruiterApplicationService } from '../../../../../core/services/recruiter-application.service';
 import { formatSize } from '../../../../../core/utils/format';
 import { extractErrorMessage } from '../../../../../core/utils/http-error';
+import { Loading } from '../../../../shared/loading/loading';
 
 const MAX_CV_BYTES = 5 * 1024 * 1024;
 const CV_EXTENSIONS = ['pdf', 'docx'];
@@ -22,7 +23,7 @@ const CV_EXTENSIONS = ['pdf', 'docx'];
  */
 @Component({
   selector: 'app-manual-application',
-  imports: [RefDatalist, ReactiveFormsModule, RouterLink],
+  imports: [Loading, RefDatalist, ReactiveFormsModule, RouterLink],
   templateUrl: './manual-application.html',
   styleUrl: './manual-application.scss',
   changeDetection: ChangeDetectionStrategy.OnPush

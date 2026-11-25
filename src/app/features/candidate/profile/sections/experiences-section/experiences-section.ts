@@ -6,10 +6,11 @@ import {Experience, ExperienceRequest } from './../../../../../../core/models/ca
 import { CandidateService } from './../../../../../../core/services/candidate.service';
 import { extractErrorMessage } from './../../../../../../core/utils/http-error';
 import { blankToNull } from './../../../../../../core/utils/text';
+import { Loading } from '../../../../../shared/loading/loading';
 
 @Component({
   selector: 'app-experiences-section',
-  imports: [ReactiveFormsModule, DatePipe],
+  imports: [Loading, ReactiveFormsModule, DatePipe],
   standalone: true,
   templateUrl: './experiences-section.html',
   styleUrl: './experiences-section.scss',

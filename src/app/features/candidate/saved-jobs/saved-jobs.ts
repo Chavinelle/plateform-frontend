@@ -6,10 +6,12 @@ import { CONTRACT_LABELS } from '../../../../core/models/candidate.models';
 import { FavoritesService } from '../../../../core/services/favorites.service';
 import { PublicService } from '../../../../core/services/public.service';
 import { extractErrorMessage } from '../../../../core/utils/http-error';
+import { Loading } from '../../../shared/loading/loading';
+import { EmptyState } from '../../../shared/empty-state/empty-state';
 
 @Component({
   selector: 'app-saved-jobs',
-  imports: [RouterLink, DatePipe],
+  imports: [EmptyState, Loading, RouterLink, DatePipe],
   templateUrl: './saved-jobs.html',
   styleUrl: './saved-jobs.scss'
 })

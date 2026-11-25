@@ -9,13 +9,14 @@ import { INTERVIEW_OPINION_LABELS, InterviewOpinion } from '../../../../../core/
 import { ATTEMPT_STATUS_LABELS } from '../../../../../core/models/test.models';
 import { RecruiterApplicationService } from '../../../../../core/services/recruiter-application.service';
 import { extractErrorMessage } from '../../../../../core/utils/http-error';
+import { Loading } from '../../../../shared/loading/loading';
 
 interface TestRow { testId: number; title: string }
 
 /** Comparaison côte à côte de 2 à 4 candidats d'une offre (un candidat par colonne). */
 @Component({
   selector: 'app-candidate-comparison',
-  imports: [DatePipe, DecimalPipe, RouterLink],
+  imports: [Loading, DatePipe, DecimalPipe, RouterLink],
   templateUrl: './candidate-comparison.html',
   styleUrl: './candidate-comparison.scss',
   changeDetection: ChangeDetectionStrategy.OnPush

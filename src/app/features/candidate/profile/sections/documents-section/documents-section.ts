@@ -4,6 +4,7 @@ import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { DOCUMENT_LABELS, DocumentItem, DocumentType } from './../../../../../../core/models/candidate.models';
 import { CandidateService } from './../../../../../../core/services/candidate.service';
 import { extractErrorMessage } from './../../../../../../core/utils/http-error';
+import { Loading } from '../../../../../shared/loading/loading';
 
 const MAX_BYTES = 5 * 1024 * 1024;
 const TEXT_EXTENSIONS = ['pdf', 'docx'];
@@ -11,7 +12,7 @@ const ANY_EXTENSIONS = ['pdf', 'docx', 'jpg', 'jpeg', 'png'];
 
 @Component({
   selector: 'app-documents-section',
-  imports: [ReactiveFormsModule, DatePipe],
+  imports: [Loading, ReactiveFormsModule, DatePipe],
   standalone: true,
   templateUrl: './documents-section.html',
   styleUrl: './documents-section.scss'

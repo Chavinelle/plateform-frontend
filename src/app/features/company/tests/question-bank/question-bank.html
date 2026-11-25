@@ -48,7 +48,7 @@
 </div>
 
 @if (loading()) {
-  <p>Chargement…</p>
+  <app-loading />
 } @else {
   <p class="muted count">{{ questions().length }} question{{ questions().length > 1 ? 's' : '' }}</p>
   <ul class="questions">

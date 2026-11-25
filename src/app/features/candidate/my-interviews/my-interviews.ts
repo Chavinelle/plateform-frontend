@@ -10,13 +10,15 @@ import {
 } from '../../../../core/models/interview.models';
 import { ApplicationService } from '../../../../core/services/application.service';
 import { extractErrorMessage } from '../../../../core/utils/http-error';
+import { Loading } from '../../../shared/loading/loading';
+import { EmptyState } from '../../../shared/empty-state/empty-state';
 
 type AnswerMode = Exclude<InterviewCandidateResponse, 'ACCEPTE'>;
 
 /** Entretiens d'une candidature côté candidat : consultation et réponse à l'invitation. */
 @Component({
   selector: 'app-my-interviews',
-  imports: [DatePipe, ReactiveFormsModule],
+  imports: [EmptyState, Loading, DatePipe, ReactiveFormsModule],
   templateUrl: './my-interviews.html',
   styleUrl: './my-interviews.scss',
   changeDetection: ChangeDetectionStrategy.OnPush

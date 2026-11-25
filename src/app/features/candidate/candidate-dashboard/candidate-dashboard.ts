@@ -7,11 +7,12 @@ import { CandidateService } from '../../../../core/services/candidate.service';
 import { CandidatePool } from '../../../../core/models/talent-pool.models';
 import { TalentPoolService } from '../../../../core/services/talent-pool.service';
 import { extractErrorMessage } from '../../../../core/utils/http-error';
+import { Loading } from '../../../shared/loading/loading';
 
 /** Tableau de bord du candidat : ce qui l'attend (entretiens, tests, messages) et l'avancement de ses candidatures. */
 @Component({
   selector: 'app-candidate-dashboard',
-  imports: [DatePipe, RouterLink],
+  imports: [Loading, DatePipe, RouterLink],
   templateUrl: './candidate-dashboard.html',
   styleUrl: './candidate-dashboard.scss',
   changeDetection: ChangeDetectionStrategy.OnPush

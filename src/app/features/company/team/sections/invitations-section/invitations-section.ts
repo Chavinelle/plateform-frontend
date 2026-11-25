@@ -6,10 +6,11 @@ import {
 } from '../../../../../../core/models/company.models';
 import { TeamService } from '../../../../../../core/services/team.service';
 import { extractErrorMessage } from '../../../../../../core/utils/http-error';
+import { Loading } from '../../../../../shared/loading/loading';
 
 @Component({
   selector: 'app-invitations-section',
-  imports: [ReactiveFormsModule, DatePipe],
+  imports: [Loading, ReactiveFormsModule, DatePipe],
   templateUrl: './invitations-section.html',
   styleUrl: './invitations-section.scss'
 })

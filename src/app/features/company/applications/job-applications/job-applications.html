@@ -93,12 +93,18 @@
     <div class="applications-layout" [class.with-preview]="selected() !== null">
       <div>
         @if (loading() && !result()) {
-          <p>Chargement…</p>
+          <app-loading variant="table" [count]="5" />
         } @else if (result(); as r) {
           @if (r.content.length === 0) {
-            <p class="muted">
-              {{ hasFilters() ? 'Aucune candidature ne correspond à ces critères.' : 'Aucune candidature reçue pour cette offre.' }}
-            </p>
+            @if (hasFilters()) {
+              <app-empty-state icon="search" heading="Aucune candidature ne correspond à ces critères">
+                <p>Modifiez ou retirez des filtres pour élargir la recherche.</p>
+              </app-empty-state>
+            } @else {
+              <app-empty-state icon="users" heading="Aucune candidature reçue pour cette offre">
+                <p>Les candidatures arriveront ici. Vous pouvez aussi ajouter un candidat reçu par un autre canal.</p>
+              </app-empty-state>
+            }
           } @else {
             <div class="table-wrap" [class.loading]="loading()">
               <table class="table">
@@ -199,6 +205,6 @@
       }
     </div>
   } @else {
-    <p>Chargement…</p>
+    <app-loading variant="page" />
   }
 </div>

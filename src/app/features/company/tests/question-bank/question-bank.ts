@@ -8,11 +8,12 @@ import { AuthService } from '../../../../../core/services/auth.service';
 import { TestQuestionService } from '../../../../../core/services/test-question.service';
 import { extractErrorMessage } from '../../../../../core/utils/http-error';
 import { QuestionEditor } from '../question-editor/question-editor';
+import { Loading } from '../../../../shared/loading/loading';
 
 /** Banque de questions : filtres, création, modification, duplication, archivage. */
 @Component({
   selector: 'app-question-bank',
-  imports: [QuestionEditor],
+  imports: [Loading, QuestionEditor],
   templateUrl: './question-bank.html',
   styleUrl: './question-bank.scss',
   changeDetection: ChangeDetectionStrategy.OnPush

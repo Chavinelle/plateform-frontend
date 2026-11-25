@@ -11,13 +11,14 @@ import { filenameFrom, readBlobError, saveBlob } from '../../../../core/utils/do
 import { BarItem, BarList } from '../../../shared/charts/bar-list/bar-list';
 import { ColumnChart, ColumnItem } from '../../../shared/charts/column-chart/column-chart';
 import { FunnelChart, FunnelStep } from '../../../shared/charts/funnel-chart/funnel-chart';
+import { Loading } from '../../../shared/loading/loading';
 
 type Preset = '7' | '30' | '90' | '365' | 'custom';
 
 /** Tableau de bord recruteur : indicateurs clés, candidatures dans le temps, par source, par offre ou par étape. */
 @Component({
   selector: 'app-dashboard',
-  imports: [DecimalPipe, BarList, ColumnChart, FunnelChart],
+  imports: [Loading, DecimalPipe, BarList, ColumnChart, FunnelChart],
   templateUrl: './dashboard.html',
   styleUrl: './dashboard.scss',
   changeDetection: ChangeDetectionStrategy.OnPush

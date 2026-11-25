@@ -4,7 +4,7 @@
       @if (error()) { <p class="form-error" role="alert">{{ error() }}</p> }
 
       @if (loading()) {
-        <p>Chargement…</p>
+        <app-loading variant="table" [count]="3" />
       } @else {
         <div class="table-wrap">
           <table class="table">

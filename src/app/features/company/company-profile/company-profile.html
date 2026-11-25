@@ -2,7 +2,7 @@
       <h1>Mon entreprise</h1>
 
       @if (loading()) {
-        <p>Chargement…</p>
+        <app-loading variant="page" />
       } @else if (loadError()) {
         <p class="form-error" role="alert">{{ loadError() }}</p>
       } @else if (company(); as c) {

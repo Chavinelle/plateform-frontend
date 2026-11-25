@@ -11,6 +11,7 @@ import {
 } from '../../../../core/models/test.models';
 import { PublicTestService } from '../../../../core/services/public-test.service';
 import { extractErrorMessage } from '../../../../core/utils/http-error';
+import { Loading } from '../../../shared/loading/loading';
 
 type SaveState = 'saving' | 'saved' | 'error';
 interface Draft { selected: number[]; text: string }
@@ -22,7 +23,7 @@ interface Draft { selected: number[]; text: string }
  */
 @Component({
   selector: 'app-take-test',
-  imports: [DatePipe],
+  imports: [Loading, DatePipe],
   templateUrl: './take-test.html',
   styleUrl: './take-test.scss',
   changeDetection: ChangeDetectionStrategy.OnPush

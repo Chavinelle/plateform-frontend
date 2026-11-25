@@ -6,10 +6,11 @@ import { CandidateService } from './../../../../../../core/services/candidate.se
 import { extractErrorMessage } from './../../../../../../core/utils/http-error';
 import { blankToNull } from './../../../../../../core/utils/text';
 
+import { Loading } from '../../../../../shared/loading/loading';
 
 @Component({
   selector: 'app-skills-section',
-  imports: [RefDatalist, ReactiveFormsModule],
+  imports: [Loading, RefDatalist, ReactiveFormsModule],
   standalone: true,
   templateUrl: './skills-section.html',
   styleUrl: './skills-section.scss'

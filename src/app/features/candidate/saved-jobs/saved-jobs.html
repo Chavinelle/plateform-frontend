@@ -4,13 +4,12 @@
       @if (error()) { <p class="form-error" role="alert">{{ error() }}</p> }
 
       @if (loading()) {
-        <p>Chargement…</p>
+        <app-loading variant="cards" />
       } @else if (items().length === 0) {
-        <div class="card">
-          <p><strong>Vous n'avez pas encore enregistré d'offre.</strong></p>
-          <p class="muted">Cliquez sur le cœur d'une offre pour la retrouver ici.</p>
+        <app-empty-state icon="heart" heading="Aucune offre enregistrée">
+          <p>Cliquez sur le cœur d'une offre pour la retrouver ici.</p>
           <a class="button-link primary" routerLink="/offres">Chercher des offres</a>
-        </div>
+        </app-empty-state>
       } @else {
         <ul class="application-list">
           @for (s of items(); track s.jobId) {

@@ -1,17 +1,20 @@
 import { Component, inject, signal } from '@angular/core';
 import { RefDatalist } from '../../../shared/ref-datalist/ref-datalist';
 import { AbstractControl, FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 
 import { AuthService } from './../../../../core/services/auth.service';
 import { extractErrorMessage } from '../../../../core/utils/http-error';
 import { PASSWORD_HINT, PASSWORD_PATTERN } from '../../../../core/utils/validators';
 
 import { PasswordRules } from '../../../shared/password-rules/password-rules';
+import { NavIcon } from '../../../layout/nav-icon/nav-icon';
+
+type AccountType = 'candidat' | 'entreprise';
+
 @Component({
   selector: 'app-register',
-  imports: [RefDatalist, ReactiveFormsModule, RouterLink, PasswordRules],
-  standalone: true,
+  imports: [RefDatalist, ReactiveFormsModule, RouterLink, PasswordRules, NavIcon],
   templateUrl: './register.html',
   styleUrl: './register.scss'
 })
@@ -21,7 +24,8 @@ export class Register {
   private auth = inject(AuthService);
   private router = inject(Router);
 
-  mode = signal<'candidat' | 'entreprise'>('candidat');
+  /** Type de compte ; « ?type=entreprise » dans l'adresse ouvre directement le formulaire entreprise. */
+  mode = signal<AccountType>(inject(ActivatedRoute).snapshot.queryParamMap.get('type') === 'entreprise' ? 'entreprise' : 'candidat');
   loading = signal(false);
   error = signal<string | null>(null);
   passwordHint = PASSWORD_HINT;
@@ -77,6 +81,12 @@ export class Register {
 
   /** Adresse refusée car déjà inscrite (propose de confirmer ce compte). */
   existingEmail = signal<string | null>(null);
+
+  selectMode(m: AccountType) {
+    this.mode.set(m);
+    this.error.set(null);
+    this.existingEmail.set(null);
+  }
 
   private run(request$: ReturnType<AuthService['registerCandidate']>, email: string) {
     this.loading.set(true);

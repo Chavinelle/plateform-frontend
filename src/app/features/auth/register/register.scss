@@ -1,0 +1,43 @@
+// Inscription : choix du type de compte (cartes radio), puis formulaire groupé.
+.register { max-width: 560px; }
+
+// ---- type de compte ----
+.account-type { display: grid; grid-template-columns: 1fr 1fr; gap: .75rem; border: 0; padding: 0; margin: 0 0 1.5rem; }
+.account-type legend { padding: 0; margin-bottom: .6rem; font-size: .88rem; }
+.type-option {
+  position: relative; display: flex; align-items: flex-start; gap: .75rem; margin: 0; padding: 1rem;
+  border: 1.5px solid var(--border-strong); border-radius: var(--radius-lg); background: var(--surface);
+  font-weight: 400; cursor: pointer; transition: border-color .15s, background-color .15s, box-shadow .15s;
+}
+.type-option:hover { border-color: var(--border-input); }
+.type-option.selected { border-color: var(--primary-solid); background: var(--primary-soft); box-shadow: 0 0 0 1px var(--primary-solid); }
+// le bouton radio natif reste dans l'ordre du clavier (flèches entre les deux choix) mais devient invisible ;
+// la carte entière affiche l'état et l'anneau de focus
+.type-option input { position: absolute; opacity: 0; inset: 0; width: 100%; height: 100%; margin: 0; cursor: pointer; }
+.type-option:has(input:focus-visible) { outline: 2px solid var(--primary); outline-offset: 2px; }
+.type-icon {
+  display: grid; place-items: center; width: 38px; height: 38px; flex: none; border-radius: 10px;
+  background: var(--surface-2); color: var(--text-muted);
+}
+.selected .type-icon { background: var(--primary-solid); color: var(--on-primary); }
+.type-text { display: flex; flex-direction: column; gap: .15rem; line-height: 1.3; }
+.type-text strong { font-size: .95rem; }
+.type-text small { font-size: .8rem; color: var(--text-muted); }
+
+// ---- formulaire ----
+.field label { margin-top: 0; }
+.field { gap: .35rem; }
+form { gap: .9rem; }
+.pair { display: grid; grid-template-columns: 1fr 1fr; gap: .9rem; }
+.group { display: flex; flex-direction: column; gap: .9rem; margin: 0; padding: 1.1rem 1.1rem 1.2rem; border-radius: var(--radius-lg); }
+.group legend { padding: 0 .4rem; font-size: .9rem; }
+.terms { font-size: .88rem; margin-top: .25rem; }
+.notice {
+  display: flex; gap: .6rem; align-items: flex-start; margin: 0; padding: .75rem .9rem;
+  font-size: .88rem; background: var(--primary-soft); border: 1px solid var(--primary-border); border-radius: var(--radius); color: var(--text);
+}
+.notice app-nav-icon { color: var(--primary); margin-top: .1rem; }
+
+@media (max-width: 480px) {
+  .account-type, .pair { grid-template-columns: 1fr; }
+}

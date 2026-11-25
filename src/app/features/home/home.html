@@ -23,11 +23,13 @@
     </div>
 
     @if (loading()) {
-      <p>Chargement…</p>
+      <app-loading variant="cards" [count]="6" />
     } @else if (error()) {
       <p class="form-error" role="alert">Impossible de charger les offres pour le moment.</p>
     } @else if (jobs().length === 0) {
-      <p class="muted">Aucune offre n'est publiée pour le moment.</p>
+      <app-empty-state icon="briefcase" heading="Aucune offre publiée pour le moment">
+        <p>Revenez bientôt : les entreprises validées publient régulièrement de nouvelles offres.</p>
+      </app-empty-state>
     } @else {
       <div class="job-grid">
         @for (j of jobs(); track j.id) { <app-job-card [job]="j" /> }
@@ -69,7 +71,7 @@
         <span class="cta-icon" aria-hidden="true"><app-nav-icon name="building" [size]="22" /></span>
         <h2>Vous recrutez ?</h2>
         <p>Publiez vos offres et gérez vos candidatures sur un tableau de suivi.</p>
-        <a class="button-link" routerLink="/inscription">Inscrire mon entreprise</a>
+        <a class="button-link" routerLink="/inscription" [queryParams]="{ type: 'entreprise' }">Inscrire mon entreprise</a>
       </div>
     </section>
   }

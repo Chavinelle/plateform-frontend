@@ -1,7 +1,7 @@
-import { DatePipe } from '@angular/common';
+import { DatePipe, DOCUMENT, Location } from '@angular/common';
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { ActivatedRoute, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { Observable, catchError, forkJoin, map, of, switchMap, tap } from 'rxjs';
 import {
   APPLICATION_SOURCE_LABELS, APPLICATION_STATUS_LABELS, ApplicationDocumentView,
@@ -22,10 +22,17 @@ import { NotesPanel } from '../notes-panel/notes-panel';
 import { StageMover } from '../stage-mover/stage-mover';
 import { StarRating } from '../star-rating/star-rating';
 import { TagEditor } from '../tag-editor/tag-editor';
+import { NavIcon } from '../../../../layout/nav-icon/nav-icon';
+import { Loading } from '../../../../shared/loading/loading';
+
+/** Onglets du dossier ; l'identifiant sert aussi dans l'adresse (?onglet=messages). */
+const TAB_IDS = ['profil', 'documents', 'entretiens', 'evaluations', 'tests', 'messages', 'notes'] as const;
+type TabId = typeof TAB_IDS[number];
+interface TabDef { id: TabId; label: string; icon: string; count: number | null; }
 
 @Component({
   selector: 'app-application-detail',
-  imports: [RouterLink, DatePipe, DocumentPreview, StageMover, StarRating, TagEditor, NotesPanel, InterviewsPanel, EvaluationsPanel, TestsPanel, MessageThread, TalentPoolAdd],
+  imports: [Loading, RouterLink, DatePipe, DocumentPreview, StageMover, StarRating, TagEditor, NotesPanel, InterviewsPanel, EvaluationsPanel, TestsPanel, MessageThread, TalentPoolAdd, NavIcon],
   templateUrl: './application-detail.html',
   styleUrl: './application-detail.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -34,6 +41,9 @@ export class ApplicationDetail {
   private route = inject(ActivatedRoute);
   private api = inject(RecruiterApplicationService);
   private jobApi = inject(JobService);
+  private router = inject(Router);
+  private location = inject(Location);
+  private document = inject(DOCUMENT);
 
   a = signal<RecruiterApplicationDetail | null>(null);
   loading = signal(true);
@@ -61,6 +71,25 @@ export class ApplicationDetail {
     const c = this.a()?.candidate;
     return c ? [c.city, c.country].filter(Boolean).join(', ') : '';
   });
+  initials = computed(() => {
+    const c = this.a()?.candidate;
+    return c ? `${c.firstName?.[0] ?? ''}${c.lastName?.[0] ?? ''}`.toUpperCase() : '';
+  });
+
+  /** Onglet affiché ; à l'ouverture, celui de l'adresse s'il est valide. */
+  tab = signal<TabId>(this.initialTab());
+  /** Onglets déjà ouverts : leur contenu reste monté (masqué), un brouillon en cours n'est pas perdu. */
+  visited = signal<ReadonlySet<TabId>>(new Set([this.tab()]));
+  tabs = computed<TabDef[]>(() => [
+    { id: 'profil', label: 'Profil', icon: 'user', count: null },
+    { id: 'documents', label: 'Documents', icon: 'log', count: this.a()?.documents.length ?? 0 },
+    { id: 'entretiens', label: 'Entretiens', icon: 'calendar', count: null },
+    { id: 'evaluations', label: 'Évaluations', icon: 'clipboard', count: null },
+    { id: 'tests', label: 'Tests', icon: 'quiz', count: null },
+    { id: 'messages', label: 'Messages', icon: 'mail', count: null },
+    { id: 'notes', label: 'Notes', icon: 'list', count: null },
+  ]);
+
   hasLinks = computed(() => {
     const c = this.a()?.candidate;
     return !!c && !!(c.linkedinUrl || c.githubUrl || c.portfolioUrl);
@@ -141,6 +170,31 @@ export class ApplicationDetail {
         this.triageError.set(extractErrorMessage(err));
       }
     });
+  }
+
+  selectTab(id: TabId, moveFocus = false) {
+    this.tab.set(id);
+    this.visited.update(set => (set.has(id) ? set : new Set([...set, id])));
+    // adresse à jour sans nouvelle navigation (pas d'entrée d'historique, pas de rechargement)
+    const tree = this.router.createUrlTree([], {
+      relativeTo: this.route, queryParams: { onglet: id === 'profil' ? null : id }, queryParamsHandling: 'merge'
+    });
+    this.location.replaceState(this.router.serializeUrl(tree));
+    if (moveFocus) this.document.getElementById('tab-' + id)?.focus();
+  }
+
+  /** Clavier des onglets (motif ARIA) : flèches gauche/droite, Début, Fin ; activation immédiate. */
+  onTabKeydown(event: KeyboardEvent, index: number) {
+    const last = TAB_IDS.length - 1;
+    const next = { ArrowRight: index === last ? 0 : index + 1, ArrowLeft: index === 0 ? last : index - 1, Home: 0, End: last }[event.key];
+    if (next === undefined) return;
+    event.preventDefault();
+    this.selectTab(TAB_IDS[next], true);
+  }
+
+  private initialTab(): TabId {
+    const asked = this.route.snapshot.queryParamMap.get('onglet');
+    return (TAB_IDS as readonly string[]).includes(asked ?? '') ? asked as TabId : 'profil';
   }
 
   selectDoc(d: ApplicationDocumentView) {

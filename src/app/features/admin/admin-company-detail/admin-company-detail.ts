@@ -8,6 +8,7 @@ import {
 } from '../../../../core/models/admin.models';
 import { AdminService } from '../../../../core/services/admin.service';
 import { extractErrorMessage } from '../../../../core/utils/http-error';
+import { Loading } from '../../../shared/loading/loading';
 
 const ACTION_LABELS: Record<CompanyStatus, string> = {
   VALIDEE: 'Valider',
@@ -19,7 +20,7 @@ const ACTION_LABELS: Record<CompanyStatus, string> = {
 /** Fiche d'une entreprise : informations, membres, et décision (validation, refus, suspension). */
 @Component({
   selector: 'app-admin-company-detail',
-  imports: [DatePipe, RouterLink],
+  imports: [Loading, DatePipe, RouterLink],
   templateUrl: './admin-company-detail.html',
   styleUrl: '../admin.scss',
   changeDetection: ChangeDetectionStrategy.OnPush

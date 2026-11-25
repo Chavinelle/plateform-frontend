@@ -23,6 +23,8 @@ import { BulkMessageResponse } from '../../../../../core/models/message.models';
 import { DocumentPreview } from '../document-preview/document-preview';
 import { StarRating } from '../star-rating/star-rating';
 import { NavIcon } from '../../../../layout/nav-icon/nav-icon';
+import { Loading } from '../../../../shared/loading/loading';
+import { EmptyState } from '../../../../shared/empty-state/empty-state';
 
 const PAGE_SIZE = 20;
 
@@ -30,7 +32,7 @@ type KnockoutFilter = '' | 'true' | 'false';
 
 @Component({
   selector: 'app-job-applications',
-  imports: [RouterLink, DatePipe, DecimalPipe, DocumentPreview, StarRating, BulkActions, CdkMenu, CdkMenuItem, CdkMenuTrigger, NavIcon],
+  imports: [EmptyState, Loading, RouterLink, DatePipe, DecimalPipe, DocumentPreview, StarRating, BulkActions, CdkMenu, CdkMenuItem, CdkMenuTrigger, NavIcon],
   templateUrl: './job-applications.html',
   styleUrl: './job-applications.scss',
   changeDetection: ChangeDetectionStrategy.OnPush

@@ -8,11 +8,12 @@ import { OnlineTestService } from '../../../../../core/services/online-test.serv
 import { TestAttemptService } from '../../../../../core/services/test-attempt.service';
 import { extractErrorMessage } from '../../../../../core/utils/http-error';
 import { TestAttemptReview } from '../test-attempt-review/test-attempt-review';
+import { Loading } from '../../../../shared/loading/loading';
 
 /** Tests en ligne d'une candidature : envois, statut des passages, envoi d'un nouveau test. */
 @Component({
   selector: 'app-tests-panel',
-  imports: [DatePipe, DecimalPipe, ReactiveFormsModule, TestAttemptReview],
+  imports: [Loading, DatePipe, DecimalPipe, ReactiveFormsModule, TestAttemptReview],
   templateUrl: './tests-panel.html',
   styleUrl: './tests-panel.scss',
   changeDetection: ChangeDetectionStrategy.OnPush

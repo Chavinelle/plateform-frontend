@@ -8,6 +8,7 @@ import { ApplicationService } from '../../../../core/services/application.servic
 import { CandidateService } from '../../../../core/services/candidate.service';
 import { extractErrorMessage } from '../../../../core/utils/http-error';
 import { FavoritesService } from '../../../../core/services/favorites.service';
+import { Loading } from '../../../shared/loading/loading';
 
 interface AnswerState {
   text: string;
@@ -20,7 +21,7 @@ const MAX_BYTES = 5 * 1024 * 1024;
 
 @Component({
   selector: 'app-application-form',
-  imports: [RouterLink, DatePipe],
+  imports: [Loading, RouterLink, DatePipe],
   templateUrl: './application-form.html',
   styleUrl: './application-form.scss'
 })

@@ -11,6 +11,8 @@ import { JobSearchParams, PublicFilters, PublicJobSummary } from '../../../../co
 import { PublicService } from '../../../../core/services/public.service';
 import { extractErrorMessage } from '../../../../core/utils/http-error';
 import { JobCard } from '../job-card/job-card';
+import { Loading } from '../../../shared/loading/loading';
+import { EmptyState } from '../../../shared/empty-state/empty-state';
 
 type ListKey = 'contractType' | 'experienceLevel' | 'remotePolicy';
 
@@ -18,7 +20,7 @@ const PAGE_SIZE = 12;
 
 @Component({
   selector: 'app-job-search',
-  imports: [ReactiveFormsModule, JobCard],
+  imports: [EmptyState, Loading, ReactiveFormsModule, JobCard],
   templateUrl: './job-search.html',
   styleUrl: './job-search.scss'
 })

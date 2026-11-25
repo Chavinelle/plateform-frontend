@@ -5,7 +5,7 @@
         les renommer et changer leur couleur. Les autres peuvent être ajoutées, déplacées et supprimées.
       </p>
 
-      @if (loading()) { <p>Chargement…</p> }
+      @if (loading()) { <app-loading variant="block" /> }
 
       <ol class="stage-list">
         @for (s of items(); track $index; let i = $index) {

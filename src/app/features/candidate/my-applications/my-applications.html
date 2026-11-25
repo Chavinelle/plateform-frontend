@@ -14,17 +14,19 @@
       @if (error()) { <p class="form-error" role="alert">{{ error() }}</p> }
 
       @if (loading() && !result()) {
-        <p>Chargement…</p>
+        <app-loading [count]="4" />
       } @else if (result(); as r) {
         @if (r.content.length === 0) {
-          <div class="card">
-            @if (status() === '') {
-              <p><strong>Vous n'avez pas encore postulé.</strong></p>
+          @if (status() === '') {
+            <app-empty-state icon="send" heading="Vous n'avez pas encore postulé">
+              <p>Trouvez une offre qui vous correspond : vous suivrez ici chaque étape de vos candidatures.</p>
               <a class="button-link primary" routerLink="/offres">Chercher des offres</a>
-            } @else {
-              <p>Aucune candidature avec ce statut.</p>
-            }
-          </div>
+            </app-empty-state>
+          } @else {
+            <app-empty-state icon="list" heading="Aucune candidature avec ce statut">
+              <p>Choisissez un autre statut pour voir vos autres candidatures.</p>
+            </app-empty-state>
+          }
         } @else {
           <ul class="application-list" [class.loading]="loading()">
             @for (a of r.content; track a.id) {

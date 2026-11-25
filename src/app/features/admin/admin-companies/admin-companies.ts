@@ -7,11 +7,12 @@ import { AdminCompanyItem, COMPANY_STATUS_LABELS, CompanyStatus } from '../../..
 import { PageResponse } from '../../../../core/models/company.models';
 import { AdminService } from '../../../../core/services/admin.service';
 import { extractErrorMessage } from '../../../../core/utils/http-error';
+import { EmptyState } from '../../../shared/empty-state/empty-state';
 
 /** Entreprises inscrites : recherche, filtre par statut (les inscriptions en attente d'abord par défaut). */
 @Component({
   selector: 'app-admin-companies',
-  imports: [DatePipe, RouterLink],
+  imports: [EmptyState, DatePipe, RouterLink],
   templateUrl: './admin-companies.html',
   styleUrl: '../admin.scss',
   changeDetection: ChangeDetectionStrategy.OnPush

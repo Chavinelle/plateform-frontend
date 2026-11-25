@@ -53,7 +53,9 @@
         </div>
       }
     } @else {
-      <p class="muted">{{ status() === 'EN_ATTENTE' ? 'Aucune inscription en attente de validation.' : 'Aucune entreprise.' }}</p>
+      <app-empty-state icon="building" [heading]="status() === 'EN_ATTENTE' ? 'Aucune inscription en attente de validation' : 'Aucune entreprise'">
+        @if (status() === 'EN_ATTENTE') { <p>Les nouvelles inscriptions d'entreprises apparaîtront ici.</p> }
+      </app-empty-state>
     }
   }
 </div>

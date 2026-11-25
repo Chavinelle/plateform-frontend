@@ -19,10 +19,13 @@
       @if (error()) { <p class="form-error" role="alert">{{ error() }}</p> }
 
       @if (loading() && !result()) {
-        <p>Chargement…</p>
+        <app-loading variant="table" [count]="4" />
       } @else if (result(); as r) {
         @if (r.content.length === 0) {
-          <p class="muted">Aucune offre ne correspond à votre recherche.</p>
+          <app-empty-state icon="briefcase" heading="Aucune offre à afficher">
+            <p>Aucune offre ne correspond à cette recherche ou à ce statut. Créez une offre pour commencer à recruter.</p>
+            <a class="button-link primary" routerLink="/recruteur/offres/nouvelle">+ Nouvelle offre</a>
+          </app-empty-state>
         } @else {
           <div class="table-wrap">
             <table class="table">

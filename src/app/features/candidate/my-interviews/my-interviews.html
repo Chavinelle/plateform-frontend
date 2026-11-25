@@ -1,5 +1,5 @@
 @if (loading()) {
-  <p>Chargement…</p>
+  <app-loading />
 } @else if (error()) {
   <p class="form-error" role="alert">{{ error() }}</p>
 } @else if (interviews().length) {
@@ -79,5 +79,7 @@
     }
   </ul>
 } @else {
-  <p class="muted">Aucun entretien pour le moment.</p>
+  <app-empty-state icon="calendar" heading="Aucun entretien pour le moment" [compact]="true">
+    <p>Les entretiens proposés par le recruteur apparaîtront ici.</p>
+  </app-empty-state>
 }

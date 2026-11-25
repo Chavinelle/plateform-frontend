@@ -6,11 +6,13 @@ import { AuthService } from '../../../../../core/services/auth.service';
 import { OnlineTestService } from '../../../../../core/services/online-test.service';
 import { extractErrorMessage } from '../../../../../core/utils/http-error';
 import { TestEditor } from '../test-editor/test-editor';
+import { Loading } from '../../../../shared/loading/loading';
+import { EmptyState } from '../../../../shared/empty-state/empty-state';
 
 /** Tests de l'entreprise : liste, création, modification, duplication, archivage. */
 @Component({
   selector: 'app-test-list',
-  imports: [TestEditor],
+  imports: [EmptyState, Loading, TestEditor],
   templateUrl: './test-list.html',
   styleUrl: './test-list.scss',
   changeDetection: ChangeDetectionStrategy.OnPush

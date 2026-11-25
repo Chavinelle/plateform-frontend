@@ -8,10 +8,11 @@ import { PublicService } from '../../../../core/services/public.service';
 import { extractErrorMessage } from '../../../../core/utils/http-error';
 import { MyInterviews } from '../my-interviews/my-interviews';
 import { MessageThread } from '../../../shared/message-thread/message-thread';
+import { Loading } from '../../../shared/loading/loading';
 
 @Component({
   selector: 'app-my-application-detail',
-  imports: [RouterLink, DatePipe, MyInterviews, MessageThread],
+  imports: [Loading, RouterLink, DatePipe, MyInterviews, MessageThread],
   templateUrl: './my-application-detail.html',
   styleUrl: './my-application-detail.scss'
 })

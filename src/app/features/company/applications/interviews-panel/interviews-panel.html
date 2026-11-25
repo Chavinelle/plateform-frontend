@@ -1,5 +1,5 @@
 @if (loading()) {
-  <p>Chargement…</p>
+  <app-loading [count]="2" />
 } @else if (error()) {
   <p class="form-error" role="alert">{{ error() }}</p>
 } @else {
@@ -23,7 +23,7 @@
           <span class="muted">Avec {{ names(i) }}</span>
           @if (i.candidateResponse; as r) {
             <span>Réponse du candidat : <strong>{{ responseLabels[r] }}</strong>
-              @if (i.respondedAt) { <span class="muted">(le {{ i.respondedAt | date: 'd MMM, HH:mm' }})</span> }
+              @if (i.respondedAt) { <span class="muted"> (le {{ i.respondedAt | date: 'd MMM, HH:mm' }})</span> }
             </span>
             @if (i.candidateProposedAt) {
               <span>Créneau proposé : {{ i.candidateProposedAt | date: 'EEEE d MMMM y, HH:mm' }}</span>
@@ -82,7 +82,7 @@
     </ul>
   }
   @if (!interviews().length) {
-    <p class="muted">Aucun entretien planifié.</p>
+    <app-empty-state icon="calendar" heading="Aucun entretien planifié" [compact]="true" />
   }
 
   @if (canPlan()) {

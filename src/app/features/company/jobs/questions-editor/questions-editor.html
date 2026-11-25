@@ -7,7 +7,7 @@
         }
       </p>
 
-      @if (loading()) { <p>Chargement…</p> }
+      @if (loading()) { <app-loading variant="block" /> }
 
       @for (q of items(); track $index; let i = $index) {
         <div class="card question">

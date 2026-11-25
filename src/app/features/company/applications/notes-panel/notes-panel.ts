@@ -8,6 +8,7 @@ import { PersonRef } from '../../../../../core/models/company.models';
 import { ApplicationNoteService } from '../../../../../core/services/application-note.service';
 import { extractErrorMessage } from '../../../../../core/utils/http-error';
 import { MentionInput } from '../mention-input/mention-input';
+import { Loading } from '../../../../shared/loading/loading';
 
 const MAX_NOTE = 4000;
 
@@ -17,7 +18,7 @@ interface NoteView { note: ApplicationNote; segments: Segment[]; }
 /** Notes internes de l'équipe sur une candidature (RG7 : jamais visibles par le candidat). */
 @Component({
   selector: 'app-notes-panel',
-  imports: [DatePipe, ReactiveFormsModule, MentionInput],
+  imports: [Loading, DatePipe, ReactiveFormsModule, MentionInput],
   templateUrl: './notes-panel.html',
   styleUrl: './notes-panel.scss',
   changeDetection: ChangeDetectionStrategy.OnPush

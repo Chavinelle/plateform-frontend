@@ -1,42 +1,66 @@
- <div class="page">
+<div class="page page-wide">
+  <header class="page-header">
+    <div>
       <h1>Mon profil</h1>
+      <p>Les recruteurs voient ces informations quand vous postulez. Un profil complet est mieux classé dans leurs recherches.</p>
+    </div>
+  </header>
 
-      @if (loading()) {
-        <p>Chargement…</p>
-      } @else if (loadError()) {
-        <p class="form-error" role="alert">{{ loadError() }}</p>
-      } @else {
+  @if (loading()) {
+    <app-loading variant="page" />
+  } @else if (loadError()) {
+    <p class="form-error" role="alert">{{ loadError() }}</p>
+  } @else {
+    <div class="profile-layout">
+      <!-- ===== Sommaire (grand écran : fixe à gauche) ===== -->
+      <aside class="profile-aside">
+        <nav class="toc" aria-label="Sections du profil">
+          <ul>
+            @for (s of sections; track s.id) {
+              <li>
+                <a [attr.href]="pagePath() + '#' + s.id" [class.active]="active() === s.id"
+                   [attr.aria-current]="active() === s.id ? 'location' : null" (click)="goTo($event, s.id)">
+                  {{ s.label }}
+                </a>
+              </li>
+            }
+          </ul>
+        </nav>
+        <app-completion-card />
+      </aside>
 
-        <!-- Photo -->
-        <section class="card">
-          <h2>Photo</h2>
-          <div class="actions">
-            <div class="avatar">
-              @if (photoUrl()) {
-                <img [src]="photoUrl()" alt="Photo de profil" class="avatar-img" />
-              } @else {
-                <span>{{ initials() }}</span>
-              }
-            </div>
-            <div>
+      <div class="profile-main">
+        <!-- ===== Photo et aperçu ===== -->
+        <section class="card identity-card anchor" id="photo" tabindex="-1" aria-labelledby="photo-title">
+          <h2 id="photo-title" class="sr-only">Photo</h2>
+          <div class="avatar">
+            @if (photoUrl()) {
+              <img [src]="photoUrl()" alt="Photo de profil" class="avatar-img" />
+            } @else {
+              <span aria-hidden="true">{{ initials() }}</span>
+            }
+          </div>
+          <div class="identity-text">
+            <p class="identity-name">{{ profile()?.firstName }} {{ profile()?.lastName }}</p>
+            <p class="muted">{{ profile()?.headline || 'Ajoutez un titre professionnel dans « Présentation ».' }}</p>
+            <div class="actions">
               <label class="file-button">
                 {{ photoUrl() ? 'Changer la photo' : 'Ajouter une photo' }}
                 <input type="file" accept="image/jpeg,image/png" (change)="onPhotoSelected($event)" hidden />
               </label>
               @if (photoUrl()) {
-                <button type="button" (click)="removePhoto()">Supprimer</button>
+                <button type="button" class="danger" (click)="removePhoto()">Supprimer la photo</button>
               }
-              <p><small>JPG ou PNG, 2 Mo maximum.</small></p>
-              @if (photoBusy()) { <p class="form-info">Envoi en cours…</p> }
-              @if (photoError()) { <p class="form-error" role="alert">{{ photoError() }}</p> }
             </div>
+            <p class="hint">JPG ou PNG, 2 Mo maximum.</p>
+            @if (photoBusy()) { <p class="form-info">Envoi en cours…</p> }
+            @if (photoError()) { <p class="form-error" role="alert">{{ photoError() }}</p> }
           </div>
         </section>
 
-        <!-- Informations -->
+        <!-- ===== Informations (un seul enregistrement pour ces quatre sections) ===== -->
         <form [formGroup]="form" (ngSubmit)="save()" novalidate>
-
-          <section class="card">
+          <section class="card anchor" id="identite" tabindex="-1">
             <h2>Identité et contact</h2>
             <div class="form-grid">
               <div class="field">
@@ -74,7 +98,7 @@
             </div>
           </section>
 
-          <section class="card">
+          <section class="card anchor" id="presentation" tabindex="-1">
             <h2>Présentation</h2>
             <div class="form-grid">
               <div class="field full">
@@ -84,14 +108,14 @@
               </div>
               <div class="field full">
                 <label for="summary">Résumé</label>
-                <textarea id="summary" rows="5" formControlName="summary"></textarea>
-                <small>{{ form.controls.summary.value.length }} / 3000</small>
+                <textarea id="summary" rows="5" formControlName="summary" aria-describedby="summary-count"></textarea>
+                <small id="summary-count" class="hint">{{ form.controls.summary.value.length }} / 3000</small>
                 @if (bad('summary')) { <small class="field-error">3000 caractères maximum.</small> }
               </div>
             </div>
           </section>
 
-          <section class="card">
+          <section class="card anchor" id="liens" tabindex="-1">
             <h2>Liens</h2>
             <div class="form-grid">
               <div class="field">
@@ -112,7 +136,7 @@
             </div>
           </section>
 
-          <section class="card">
+          <section class="card anchor" id="preferences" tabindex="-1">
             <h2>Préférences de recherche</h2>
             <div class="form-grid">
               <div class="field">
@@ -134,27 +158,42 @@
                 @if (bad('expectedSalary')) { <small class="field-error">Le montant doit être positif.</small> }
               </div>
               <div class="field">
-                <label><input type="checkbox" formControlName="mobile" /> Prêt à déménager</label>
+                <label class="check"><input type="checkbox" formControlName="mobile" /> Prêt à déménager</label>
               </div>
             </div>
           </section>
 
-          @if (message()) { <p class="form-info" role="status">{{ message() }}</p> }
-          @if (error()) { <p class="form-error" role="alert">{{ error() }}</p> }
-
-          <div class="actions">
-            <button type="submit" [disabled]="saving()">{{ saving() ? 'Enregistrement…' : 'Enregistrer' }}</button>
+          <!-- barre d'enregistrement : reste visible en bas de l'écran tant que ces sections sont affichées -->
+          <p class="sr-only" role="status" aria-live="polite">{{ message() }}</p>
+          <div class="save-bar">
+            <p class="save-state" [class.dirty]="form.dirty">
+              @if (error()) {
+                <span class="form-error" role="alert">{{ error() }}</span>
+              } @else if (form.dirty) {
+                Modifications non enregistrées
+              } @else {
+                {{ message() ?? 'Identité, présentation, liens et préférences à jour.' }}
+              }
+            </p>
+            <div class="actions">
+              @if (form.dirty) {
+                <button type="button" (click)="discard()" [disabled]="saving()">Annuler les modifications</button>
+              }
+              <button type="submit" [disabled]="saving()">{{ saving() ? 'Enregistrement…' : 'Enregistrer' }}</button>
+            </div>
           </div>
         </form>
-        <app-experiences-section />
-        <app-educations-section />
-        <app-skills-section />
-        <app-languages-section />
-        <app-documents-section />
+
+        <div class="anchor" id="experiences" tabindex="-1"><app-experiences-section /></div>
+        <div class="anchor" id="formations" tabindex="-1"><app-educations-section /></div>
+        <div class="anchor" id="competences" tabindex="-1"><app-skills-section /></div>
+        <div class="anchor" id="langues" tabindex="-1"><app-languages-section /></div>
+        <div class="anchor" id="documents" tabindex="-1"><app-documents-section /></div>
         @if (profile(); as p) {
-       <app-visibility-card [visibility]="p.visibility" />
-    }
-        <app-completion-card />
-        <app-delete-account />
-      }
+          <div class="anchor" id="confidentialite" tabindex="-1"><app-visibility-card [visibility]="p.visibility" /></div>
+        }
+        <div class="anchor" id="compte" tabindex="-1"><app-delete-account /></div>
+      </div>
     </div>
+  }
+</div>

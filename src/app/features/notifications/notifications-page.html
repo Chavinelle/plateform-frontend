@@ -19,7 +19,7 @@
   @if (error()) { <p class="form-error" role="alert">{{ error() }}</p> }
 
   @if (loading() && !result()) {
-    <p>Chargement…</p>
+    <app-loading [count]="5" />
   } @else if (result(); as r) {
     <ul class="list">
       @for (n of r.content; track n.id) {
@@ -40,7 +40,9 @@
           }
         </li>
       } @empty {
-        <li class="muted">{{ unreadOnly() ? 'Aucune notification non lue.' : 'Aucune notification pour le moment.' }}</li>
+        <li><app-empty-state icon="bell" [heading]="unreadOnly() ? 'Aucune notification non lue' : 'Aucune notification pour le moment'">
+          <p>Vous serez prévenu ici des nouvelles étapes, messages et entretiens.</p>
+        </app-empty-state></li>
       }
     </ul>
 

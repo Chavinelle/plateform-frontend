@@ -25,7 +25,7 @@
     </form>
 
     @if (loading() && !view()) {
-      <p>Chargement…</p>
+      <app-loading />
     } @else if (view(); as v) {
       <div class="ref-grid">
         <section class="card" aria-labelledby="items-title">

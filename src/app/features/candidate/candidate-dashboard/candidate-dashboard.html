@@ -2,7 +2,7 @@
   <h1>Tableau de bord</h1>
 
   @if (loading()) {
-    <p>Chargement…</p>
+    <app-loading variant="page" />
   } @else if (error()) {
     <p class="form-error" role="alert">{{ error() }}</p>
   } @else if (data(); as d) {

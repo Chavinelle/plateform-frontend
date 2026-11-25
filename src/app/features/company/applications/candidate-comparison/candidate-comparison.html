@@ -5,7 +5,7 @@
   <h1>Comparer les candidats</h1>
 
   @if (loading()) {
-    <p>Chargement…</p>
+    <app-loading variant="table" />
   } @else if (data(); as d) {
     <p class="muted">{{ d.jobTitle }} · {{ d.candidates.length }} candidats</p>
     @if (anyHidden()) {

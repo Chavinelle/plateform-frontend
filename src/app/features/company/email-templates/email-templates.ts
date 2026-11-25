@@ -5,11 +5,12 @@ import { AuthService } from '../../../../core/services/auth.service';
 import { EmailTemplateService } from '../../../../core/services/email-template.service';
 import { extractErrorMessage } from '../../../../core/utils/http-error';
 import { EmailTemplateEditor } from './email-template-editor/email-template-editor';
+import { Loading } from '../../../shared/loading/loading';
 
 /** Modèles d'e-mails envoyés aux candidats (administrateur : modification ; recruteurs : consultation). */
 @Component({
   selector: 'app-email-templates',
-  imports: [DatePipe, EmailTemplateEditor],
+  imports: [Loading, DatePipe, EmailTemplateEditor],
   templateUrl: './email-templates.html',
   styleUrl: './email-templates.scss',
   changeDetection: ChangeDetectionStrategy.OnPush

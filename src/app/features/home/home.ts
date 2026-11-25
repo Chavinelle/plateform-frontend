@@ -6,10 +6,12 @@ import { AuthService } from '../../../core/services/auth.service';
 import { PublicService } from '../../../core/services/public.service';
 import { NavIcon } from '../../layout/nav-icon/nav-icon';
 import { JobCard } from '../public/job-card/job-card';
+import { Loading } from '../../shared/loading/loading';
+import { EmptyState } from '../../shared/empty-state/empty-state';
 
 @Component({
   selector: 'app-home',
-  imports: [ReactiveFormsModule, RouterLink, JobCard, NavIcon],
+  imports: [EmptyState, Loading, ReactiveFormsModule, RouterLink, JobCard, NavIcon],
   templateUrl: './home.html',
   styleUrl: './home.scss'
 })

@@ -30,7 +30,7 @@
       <nav aria-labelledby="footer-companies">
         <h2 id="footer-companies">Entreprises</h2>
         <ul>
-          <li><a routerLink="/inscription">Inscrire mon entreprise</a></li>
+          <li><a routerLink="/inscription" [queryParams]="{ type: 'entreprise' }">Inscrire mon entreprise</a></li>
           <li><a routerLink="/login">Espace recruteur</a></li>
         </ul>
       </nav>

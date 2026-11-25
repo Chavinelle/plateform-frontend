@@ -11,6 +11,8 @@ import { InterviewService } from '../../../../../core/services/interview.service
 import { extractErrorMessage } from '../../../../../core/utils/http-error';
 import { EvaluationCard } from '../evaluation-card/evaluation-card';
 import { EvaluationForm } from '../evaluation-form/evaluation-form';
+import { Loading } from '../../../../shared/loading/loading';
+import { EmptyState } from '../../../../shared/empty-state/empty-state';
 
 /**
  * Évaluations d'une candidature : score global, mes évaluations, celles des collègues.
@@ -18,7 +20,7 @@ import { EvaluationForm } from '../evaluation-form/evaluation-form';
  */
 @Component({
   selector: 'app-evaluations-panel',
-  imports: [DatePipe, DecimalPipe, ReactiveFormsModule, EvaluationCard, EvaluationForm],
+  imports: [EmptyState, Loading, DatePipe, DecimalPipe, ReactiveFormsModule, EvaluationCard, EvaluationForm],
   templateUrl: './evaluations-panel.html',
   styleUrl: './evaluations-panel.scss',
   changeDetection: ChangeDetectionStrategy.OnPush

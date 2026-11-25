@@ -2,7 +2,7 @@
       <p><a routerLink="/offres">← Retour aux offres</a></p>
 
       @if (loading()) {
-        <p>Chargement…</p>
+        <app-loading variant="page" />
       } @else if (notFound()) {
         <div class="card">
           <h1>Entreprise introuvable</h1>

@@ -11,13 +11,15 @@ import {
 import { JobService } from '../../../../../core/services/job.service';
 import { extractErrorMessage } from '../../../../../core/utils/http-error';
 import { NavIcon } from '../../../../layout/nav-icon/nav-icon';
+import { Loading } from '../../../../shared/loading/loading';
+import { EmptyState } from '../../../../shared/empty-state/empty-state';
 
 const PAGE_SIZE = 10;
 const NEEDS_CONFIRMATION: JobStatus[] = ['SUSPENDUE', 'CLOTUREE', 'POURVUE', 'ARCHIVEE'];
 
 @Component({
   selector: 'app-jobs-list',
-  imports: [RouterLink, DatePipe, CdkMenu, CdkMenuItem, CdkMenuTrigger, NavIcon],
+  imports: [EmptyState, Loading, RouterLink, DatePipe, CdkMenu, CdkMenuItem, CdkMenuTrigger, NavIcon],
   templateUrl: './jobs-list.html',
   styleUrl: './jobs-list.scss'
 })

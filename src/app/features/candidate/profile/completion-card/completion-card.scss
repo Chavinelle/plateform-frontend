@@ -1,0 +1,6 @@
+// Carte compacte : elle se place dans la colonne du sommaire du profil.
+.card { padding: 1rem 1.1rem; margin: 0; }
+h2 { font-size: .95rem; margin-bottom: .6rem; }
+.todo-list { font-size: .85rem; }
+.todo-list li { display: flex; gap: .4rem; align-items: baseline; }
+.todo-list .badge { flex: none; margin: 0; }

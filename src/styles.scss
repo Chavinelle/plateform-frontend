@@ -54,7 +54,13 @@ input:not([type='checkbox']):not([type='radio']):focus-visible, select:focus-vis
 input:disabled, select:disabled, textarea:disabled { background: var(--surface-2); color: var(--text-muted); cursor: not-allowed; }
 input[aria-invalid='true'], select[aria-invalid='true'], textarea[aria-invalid='true'] { border-color: var(--danger); }
 input[type='checkbox'], input[type='radio'] { accent-color: var(--primary-solid); width: 1.05rem; height: 1.05rem; }
-input[type='file'] { font-size: .9rem; }
+input[type='file'] { font-size: .9rem; color: var(--text-muted); }
+input[type='file']::file-selector-button {
+  margin-right: .75rem; padding: .45rem .9rem; min-height: 36px; cursor: pointer;
+  font: inherit; font-weight: 600; color: var(--text);
+  background: var(--surface); border: 1px solid var(--border-strong); border-radius: var(--radius-sm); box-shadow: var(--shadow-xs);
+}
+input[type='file']::file-selector-button:hover { background: var(--surface-2); }
 label { font-weight: 550; }
 fieldset { border: 1px solid var(--border); border-radius: var(--radius); }
 legend { font-weight: 600; }
@@ -191,6 +197,30 @@ p.form-info { background: var(--success-soft); border: 1px solid var(--success-b
 .todo-list { margin: .25rem 0 0; padding-left: 0; list-style: none; }
 .todo-list li { margin: .25rem 0; }
 
+/* =============================== Fil d'Ariane =============================== */
+.breadcrumb ol { list-style: none; display: flex; flex-wrap: wrap; gap: .3rem; padding: 0; margin: 0 0 1rem; font-size: .85rem; color: var(--text-muted); }
+.breadcrumb li + li::before { content: '›'; margin-right: .3rem; }
+.breadcrumb a { color: var(--text-muted); }
+
+/* =============================== Onglets (motif ARIA « tabs ») ===============================
+ * .tab-list[role=tablist] > button.tab[role=tab][aria-selected] ; .tab-panel[role=tabpanel]. Soulignement de l'onglet actif. */
+.tab-list { display: flex; gap: 0; padding: 0 .5rem; border-bottom: 1px solid var(--border); overflow-x: auto; scrollbar-width: thin; }
+button.tab {
+  position: relative; flex: none; gap: .4rem; min-height: 48px; padding: 0 .7rem;
+  border: 0; border-radius: 0; background: none; box-shadow: none; color: var(--text-muted); font-weight: 600; font-size: .88rem;
+}
+button.tab:hover:not(:disabled) { background: none; color: var(--text); }
+button.tab[aria-selected='true'] { color: var(--primary); }
+button.tab[aria-selected='true']::after { content: ''; position: absolute; left: .5rem; right: .5rem; bottom: -1px; height: 2px; border-radius: 2px 2px 0 0; background: var(--primary-solid); }
+button.tab:focus-visible { outline-offset: -4px; }
+/* écran moyen : on garde les libellés, on retire les icônes pour que tous les onglets tiennent */
+@media (max-width: 1380px) { button.tab app-nav-icon { display: none; } }
+.tab .count { min-width: 1.35rem; padding: 0 .35rem; border-radius: 999px; background: var(--surface-3); color: var(--text); font-size: .72rem; line-height: 1.35rem; }
+.tab-panel { padding: 1.4rem 1.5rem; }
+.tab-panel:focus-visible { outline-offset: -3px; }
+@media (max-width: 700px) { .tab-panel { padding: 1.1rem; } }
+@media (forced-colors: active) { button.tab[aria-selected='true']::after { background: Highlight; } }
+
 /* =============================== Menus d'actions (CDK Menu) ===============================
  * Bouton « ⋯ » ou « Exporter ▾ » qui ouvre une liste d'actions secondaires.
  * Le menu est rendu dans la couche de superposition (hors du composant) : ses styles sont donc globaux.
@@ -228,6 +258,11 @@ a.menu-item { text-decoration: none; }
   .menu { border: 1px solid CanvasText; }
   .menu-item:focus { outline: 2px solid Highlight; }
 }
+
+/* contenu projeté dans <app-empty-state> (explication, actions) */
+app-empty-state .body p { margin: 0 0 .9rem; }
+app-empty-state .body p:last-child { margin-bottom: 0; }
+app-empty-state .body .actions { justify-content: center; }
 
 /* =============================== Indicateurs (tableaux de bord) =============================== */
 .kpis { list-style: none; padding: 0; margin: 0 0 1.25rem; display: grid; grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr)); gap: 1rem; }

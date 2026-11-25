@@ -11,10 +11,11 @@ import { AuthService } from '../../../../core/services/auth.service';
 import { PublicService } from '../../../../core/services/public.service';
 import { formatSalary, timeAgo } from '../../../../core/utils/format';
 import { FavoritesService } from '../../../../core/services/favorites.service';
+import { Loading } from '../../../shared/loading/loading';
 
 @Component({
   selector: 'app-job-detail',
-  imports: [RouterLink, DatePipe, ReportJob],
+  imports: [Loading, RouterLink, DatePipe, ReportJob],
   templateUrl: './job-detail.html',
   styleUrl: './job-detail.scss'
 })

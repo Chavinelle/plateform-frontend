@@ -3,7 +3,7 @@
 @if (error()) { <p class="form-error" role="alert">{{ error() }}</p> }
 
 @if (loading()) {
-  <p>Chargement…</p>
+  <app-loading [count]="2" />
 } @else {
   <ul class="notes">
     @for (v of views(); track v.note.id) {

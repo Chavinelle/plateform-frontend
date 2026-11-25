@@ -2,7 +2,7 @@
       <p><a routerLink="/candidat/candidatures">← Mes candidatures</a></p>
 
       @if (loading()) {
-        <p>Chargement…</p>
+        <app-loading variant="page" />
       } @else if (notFound()) {
         <div class="card">
           <h1>Candidature introuvable</h1>

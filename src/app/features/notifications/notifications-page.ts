@@ -7,13 +7,15 @@ import { PageResponse } from '../../../core/models/company.models';
 import { AppNotification } from '../../../core/models/notification.models';
 import { NotificationService } from '../../../core/services/notification.service';
 import { extractErrorMessage } from '../../../core/utils/http-error';
+import { Loading } from '../../shared/loading/loading';
+import { EmptyState } from '../../shared/empty-state/empty-state';
 
 const PAGE_SIZE = 20;
 
 /** Historique complet des notifications de l'utilisateur connecté. */
 @Component({
   selector: 'app-notifications-page',
-  imports: [DatePipe, RouterLink],
+  imports: [EmptyState, Loading, DatePipe, RouterLink],
   templateUrl: './notifications-page.html',
   styleUrl: './notifications-page.scss',
   changeDetection: ChangeDetectionStrategy.OnPush

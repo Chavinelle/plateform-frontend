@@ -1,15 +1,21 @@
 <div class="page page-full">
-  <p><a routerLink="/recruteur/offres">← Mes offres</a></p>
 
   @if (loading()) {
-    <p>Chargement…</p>
+    <app-loading variant="cards" />
   } @else if (loadError() && !board()) {
     <p class="form-error" role="alert">{{ loadError() }}</p>
   } @else if (board(); as b) {
-    <div class="section-head">
+    <nav class="breadcrumb" aria-label="Fil d'Ariane">
+      <ol>
+        <li><a routerLink="/recruteur/offres">Mes offres</a></li>
+        <li><a [routerLink]="['/recruteur/offres', b.jobId, 'candidatures']">{{ b.jobTitle }}</a></li>
+        <li><span aria-current="page">Pipeline</span></li>
+      </ol>
+    </nav>
+    <div class="page-header">
       <div>
         <h1>Pipeline</h1>
-        <p class="muted">{{ b.jobTitle }} · {{ b.total }} candidature(s)</p>
+        <p>{{ b.jobTitle }} · {{ b.total }} candidature{{ b.total > 1 ? 's' : '' }}</p>
       </div>
       <div class="row-actions">
         <a class="button-link" [routerLink]="['/recruteur/offres', b.jobId, 'candidatures']">Vue liste</a>
@@ -34,7 +40,8 @@
     <div class="board" cdkDropListGroup>
       @for (col of columns(); track col.stage.id) {
         <section class="column" [attr.aria-labelledby]="'col-' + col.stage.id">
-          <header class="column-head" [style.border-top-color]="col.stage.color">
+          <header class="column-head">
+            <span class="stage-dot" [style.background]="col.stage.color" aria-hidden="true"></span>
             <h2 [id]="'col-' + col.stage.id">{{ col.stage.name }}</h2>
             <span class="count" [attr.aria-label]="col.cards.length + ' candidature(s)'">{{ col.cards.length }}</span>
           </header>
@@ -44,10 +51,17 @@
             @for (c of col.cards; track c.id) {
               <li class="board-card" cdkDrag [cdkDragData]="c" [cdkDragDisabled]="!canDrag(c)"
                   [class.withdrawn]="c.status === 'RETIREE'" [class.busy]="busyIds().has(c.id)">
-                <a [routerLink]="['/recruteur/candidatures', c.id]"><strong>{{ c.candidateName }}</strong></a>
-                @if (c.headline) { <small class="muted">{{ c.headline }}</small> }
-                <small class="muted">Reçue le {{ c.appliedAt | date: 'd MMM y' }}</small>
-                <app-star-rating [value]="c.rating" [readonly]="true" />
+                <div class="card-head">
+                  <span class="avatar-xs" aria-hidden="true">{{ initials(c.candidateName) }}</span>
+                  <div class="card-who">
+                    <a [routerLink]="['/recruteur/candidatures', c.id]">{{ c.candidateName }}</a>
+                    @if (c.headline) { <small>{{ c.headline }}</small> }
+                  </div>
+                </div>
+                <div class="card-meta">
+                  <small>Reçue le {{ c.appliedAt | date: 'd MMM' }}</small>
+                  <app-star-rating [value]="c.rating" [readonly]="true" />
+                </div>
                 @if (c.tags.length) {
                   <ul class="card-tags" aria-label="Étiquettes">
                     @for (t of c.tags; track t) { <li>{{ t }}</li> }
@@ -65,7 +79,7 @@
                 }
               </li>
             } @empty {
-              <li class="empty muted">Aucun candidat</li>
+              <li class="empty">Aucun candidat</li>
             }
           </ul>
         </section>

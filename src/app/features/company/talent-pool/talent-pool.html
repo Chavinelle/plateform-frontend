@@ -73,9 +73,15 @@
             <app-talent-card [item]="t" [lists]="lists()" [jobs]="jobs()" [canManage]="canManage()"
                              (changed)="onChanged($event)" (removed)="onRemoved($event)" (info)="message.set($event)" />
           } @empty {
-            <p class="muted">
-              Aucun candidat {{ q() || skill() || city() || tag() || listId() ? 'ne correspond à ces critères' : 'dans le vivier : ajoutez-en depuis une fiche candidature' }}.
-            </p>
+            @if (q() || skill() || city() || tag() || listId()) {
+              <app-empty-state icon="search" heading="Aucun candidat ne correspond à ces critères">
+                <p>Modifiez ou retirez des filtres pour élargir la recherche.</p>
+              </app-empty-state>
+            } @else {
+              <app-empty-state icon="star" heading="Votre vivier est vide">
+                <p>Ajoutez des candidats prometteurs depuis leur fiche candidature, pour les recontacter sur vos prochains postes.</p>
+              </app-empty-state>
+            }
           }
         </div>
         @if (r.totalPages > 1) {

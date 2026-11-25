@@ -3,11 +3,12 @@ import { RouterLink } from '@angular/router';
 import { NotificationPreference, NotificationType } from '../../../../core/models/notification.models';
 import { NotificationService } from '../../../../core/services/notification.service';
 import { extractErrorMessage } from '../../../../core/utils/http-error';
+import { Loading } from '../../../shared/loading/loading';
 
 /** Préférences de notification : dans l'application et par e-mail, pour chaque type d'événement. */
 @Component({
   selector: 'app-notification-preferences',
-  imports: [RouterLink],
+  imports: [Loading, RouterLink],
   templateUrl: './notification-preferences.html',
   styleUrl: './notification-preferences.scss',
   changeDetection: ChangeDetectionStrategy.OnPush

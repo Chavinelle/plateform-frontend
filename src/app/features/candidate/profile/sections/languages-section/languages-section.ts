@@ -3,10 +3,11 @@ import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { LANGUAGE_LEVELS, Language, LanguageLevel } from './../../../../../../core/models/candidate.models';
 import { CandidateService } from './../../../../../../core/services/candidate.service';
 import { extractErrorMessage } from './../../../../../../core/utils/http-error';
+import { Loading } from '../../../../../shared/loading/loading';
 
 @Component({
   selector: 'app-languages-section',
-  imports: [ReactiveFormsModule],
+  imports: [Loading, ReactiveFormsModule],
   standalone: true,
   templateUrl: './languages-section.html',
   styleUrl: './languages-section.scss'

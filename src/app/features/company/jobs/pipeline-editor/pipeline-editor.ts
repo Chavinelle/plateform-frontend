@@ -2,6 +2,7 @@ import { Component, OnInit, inject, input, signal } from '@angular/core';
 import { Stage, StageKind, StageRequest } from '../../../../../core/models/company.models';
 import { JobService } from '../../../../../core/services/job.service';
 import { extractErrorMessage } from '../../../../../core/utils/http-error';
+import { Loading } from '../../../../shared/loading/loading';
 
 interface StageDraft {
   id: number | null;
@@ -22,7 +23,7 @@ const KIND_LABELS: Record<StageKind, string> = {
 
 @Component({
   selector: 'app-pipeline-editor',
-  imports: [],
+  imports: [Loading, ],
   templateUrl: './pipeline-editor.html',
   styleUrl: './pipeline-editor.scss'
 })

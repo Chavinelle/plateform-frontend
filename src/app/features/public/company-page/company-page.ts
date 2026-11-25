@@ -5,10 +5,11 @@ import { PageResponse } from '../../../../core/models/company.models';
 import { PublicCompanyProfile, PublicJobSummary } from '../../../../core/models/public.models';
 import { PublicService } from '../../../../core/services/public.service';
 import { JobCard } from '../job-card/job-card';
+import { Loading } from '../../../shared/loading/loading';
 
 @Component({
   selector: 'app-company-page',
-  imports: [RouterLink, JobCard],
+  imports: [Loading, RouterLink, JobCard],
   templateUrl: './company-page.html',
   styleUrl: './company-page.scss'
 })

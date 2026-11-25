@@ -4,6 +4,7 @@ import {
 } from '../../../../../core/models/company.models';
 import { JobService } from '../../../../../core/services/job.service';
 import { extractErrorMessage } from '../../../../../core/utils/http-error';
+import { Loading } from '../../../../shared/loading/loading';
 
 interface QuestionDraft {
   id: number | null;
@@ -22,7 +23,7 @@ const isChoice = (t: QuestionType) => t === 'CHOIX_UNIQUE' || t === 'CHOIX_MULTI
 
 @Component({
   selector: 'app-questions-editor',
-  imports: [],
+  imports: [Loading, ],
   templateUrl: './questions-editor.html',
   styleUrl: './questions-editor.scss'
 })

@@ -27,7 +27,7 @@
 </label>
 
 @if (loading()) {
-  <p>Chargement…</p>
+  <app-loading />
 } @else {
   <ul class="tests">
     @for (t of tests(); track t.id) {
@@ -82,7 +82,9 @@
         }
       </li>
     } @empty {
-      <li class="muted">Aucun test pour le moment.</li>
+      <li><app-empty-state icon="quiz" heading="Aucun test pour le moment">
+        <p>Créez un test pour évaluer les candidats en ligne, puis envoyez-le depuis leur fiche.</p>
+      </app-empty-state></li>
     }
   </ul>
 }

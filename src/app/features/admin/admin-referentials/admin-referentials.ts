@@ -4,10 +4,12 @@ import { Observable, catchError, of, switchMap, tap } from 'rxjs';
 import { REFERENTIAL_LABELS, ReferentialKind, ReferentialView } from '../../../../core/models/referential.models';
 import { ReferentialService } from '../../../../core/services/referential.service';
 import { extractErrorMessage } from '../../../../core/utils/http-error';
+import { Loading } from '../../../shared/loading/loading';
 
 /** Référentiels (secteurs, compétences, villes) : entrées, valeurs libres à intégrer, fusion des doublons. */
 @Component({
   selector: 'app-admin-referentials',
+  imports: [Loading],
   templateUrl: './admin-referentials.html',
   styleUrl: '../admin.scss',
   changeDetection: ChangeDetectionStrategy.OnPush

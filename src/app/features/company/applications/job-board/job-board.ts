@@ -15,13 +15,14 @@ import { RecruiterApplicationService } from '../../../../../core/services/recrui
 import { extractErrorMessage } from '../../../../../core/utils/http-error';
 import { RejectForm } from '../reject-form/reject-form';
 import { StarRating } from '../star-rating/star-rating';
+import { Loading } from '../../../../shared/loading/loading';
 
 interface BoardColumn { stage: Stage; cards: RecruiterApplicationItem[]; }
 interface PendingReject { card: RecruiterApplicationItem; stage: Stage; }
 
 @Component({
   selector: 'app-job-board',
-  imports: [RouterLink, DatePipe, CdkDropListGroup, CdkDropList, CdkDrag, StarRating, RejectForm],
+  imports: [Loading, RouterLink, DatePipe, CdkDropListGroup, CdkDropList, CdkDrag, StarRating, RejectForm],
   templateUrl: './job-board.html',
   styleUrl: './job-board.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -122,6 +123,12 @@ export class JobBoardPage {
     const stage = this.stages().find(s => s.id === Number(select.value));
     select.value = '';
     if (stage) this.requestMove(card, stage);
+  }
+
+  /** Initiales affichées dans la pastille de la carte (« Awa Kouassi » → « AK »). */
+  initials(name: string): string {
+    const parts = name.trim().split(/\s+/);
+    return ((parts[0]?.[0] ?? '') + (parts.length > 1 ? parts[parts.length - 1][0] : '')).toUpperCase();
   }
 
   canDrag(card: RecruiterApplicationItem): boolean {

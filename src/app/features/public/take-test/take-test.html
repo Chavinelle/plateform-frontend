@@ -2,7 +2,7 @@
   <p class="sr-only" role="status" aria-live="polite">{{ announce() }}</p>
 
   @if (loading()) {
-    <p>Chargement…</p>
+    <app-loading variant="page" />
   } @else if (view(); as v) {
     @switch (v.status) {
       @case ('ENVOYE') {

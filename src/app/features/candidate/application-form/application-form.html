@@ -1,6 +1,6 @@
  <div class="page">
       @if (loading()) {
-        <p>Chargement…</p>
+        <app-loading variant="page" />
       } @else if (notFound()) {
         <div class="card">
           <h1>Cette offre n'est plus disponible</h1>

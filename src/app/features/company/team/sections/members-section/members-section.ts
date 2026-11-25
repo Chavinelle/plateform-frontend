@@ -5,10 +5,11 @@ import {
 import { AuthService } from '../../../../../../core/services/auth.service';
 import { TeamService } from '../../../../../../core/services/team.service';
 import { extractErrorMessage } from '../../../../../../core/utils/http-error';
+import { Loading } from '../../../../../shared/loading/loading';
 
 @Component({
   selector: 'app-members-section',
-  imports: [],
+  imports: [Loading, ],
   templateUrl: './members-section.html',
   styleUrl: './members-section.scss'
 })

@@ -6,10 +6,11 @@ import {Education, EducationRequest } from './../../../../../../core/models/cand
 import { CandidateService } from './../../../../../../core/services/candidate.service';
 import { extractErrorMessage } from './../../../../../../core/utils/http-error';
 import { blankToNull } from './../../../../../../core/utils/text';
+import { Loading } from '../../../../../shared/loading/loading';
 
 @Component({
   selector: 'app-educations-section',
-  imports: [ReactiveFormsModule, DatePipe],
+  imports: [Loading, ReactiveFormsModule, DatePipe],
   standalone: true,
   templateUrl: './educations-section.html',
   styleUrl: './educations-section.scss'

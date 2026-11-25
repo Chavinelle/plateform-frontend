@@ -10,12 +10,14 @@ import { PageResponse } from '../../../../core/models/company.models';
 import { ApplicationService } from '../../../../core/services/application.service';
 import { PublicService } from '../../../../core/services/public.service';
 import { extractErrorMessage } from '../../../../core/utils/http-error';
+import { Loading } from '../../../shared/loading/loading';
+import { EmptyState } from '../../../shared/empty-state/empty-state';
 
 const PAGE_SIZE = 10;
 
 @Component({
   selector: 'app-my-applications',
-  imports: [RouterLink, DatePipe],
+  imports: [EmptyState, Loading, RouterLink, DatePipe],
   templateUrl: './my-applications.html',
   styleUrl: './my-applications.scss'
 })

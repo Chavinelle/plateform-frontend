@@ -49,7 +49,7 @@
       @if (error()) { <p class="form-error" role="alert">{{ error() }}</p> }
 
       @if (loading()) {
-        <p>Chargement…</p>
+        <app-loading variant="block" />
       } @else if (items().length === 0 && !formOpen()) {
         <p class="muted">Aucune formation renseignée.</p>
       }

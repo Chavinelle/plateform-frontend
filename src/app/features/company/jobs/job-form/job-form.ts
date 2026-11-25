@@ -18,6 +18,7 @@ import { extractErrorMessage } from '../../../../../core/utils/http-error';
 import { blankToNull } from '../../../../../core/utils/text';
 import { PipelineEditor } from '../pipeline-editor/pipeline-editor';
 import { QuestionsEditor } from '../questions-editor/questions-editor';
+import { Loading } from '../../../../shared/loading/loading';
 
 const STEPS = [
   { n: 1, label: 'Informations' },
@@ -49,7 +50,7 @@ const notInPast = (c: AbstractControl): ValidationErrors | null => {
 
 @Component({
   selector: 'app-job-form',
-  imports: [RefDatalist, ReactiveFormsModule, RouterLink, DatePipe, QuestionsEditor, PipelineEditor],
+  imports: [Loading, RefDatalist, ReactiveFormsModule, RouterLink, DatePipe, QuestionsEditor, PipelineEditor],
   templateUrl: './job-form.html',
   styleUrl: './job-form.scss'
 })

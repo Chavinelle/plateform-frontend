@@ -10,13 +10,14 @@ import { AuthService } from '../../../../core/services/auth.service';
 import { CompanyService } from '../../../../core/services/company.service';
 import { extractErrorMessage } from '../../../../core/utils/http-error';
 import { blankToNull } from '../../../../core/utils/text';
+import { Loading } from '../../../shared/loading/loading';
 
 const URL_PATTERN = /^$|^https?:\/\/\S+$/;
 const MAX_BYTES: Record<CompanyImageSlot, number> = { logo: 2 * 1024 * 1024, banner: 4 * 1024 * 1024 };
 
 @Component({
   selector: 'app-company-profile',
-  imports: [RefDatalist, ReactiveFormsModule],
+  imports: [Loading, RefDatalist, ReactiveFormsModule],
   templateUrl: './company-profile.html',
   styleUrl: './company-profile.scss'
 })

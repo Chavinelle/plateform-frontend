@@ -9,11 +9,12 @@ import { TalentPoolService } from '../../../../core/services/talent-pool.service
 import { extractErrorMessage } from '../../../../core/utils/http-error';
 import { RefDatalist } from '../../../shared/ref-datalist/ref-datalist';
 import { TalentCard } from './talent-card/talent-card';
+import { EmptyState } from '../../../shared/empty-state/empty-state';
 
 /** Vivier de talents de l'entreprise : recherche, listes nommées, proposition sur une offre. */
 @Component({
   selector: 'app-talent-pool',
-  imports: [TalentCard, RefDatalist],
+  imports: [EmptyState, TalentCard, RefDatalist],
   templateUrl: './talent-pool.html',
   styleUrl: './talent-pool.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
