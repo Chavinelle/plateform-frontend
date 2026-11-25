@@ -1,0 +1,62 @@
+<p class="sr-only" role="status" aria-live="polite">{{ announce() }}</p>
+@if (loading()) {
+  <p>Chargement des réponses…</p>
+} @else if (detail(); as d) {
+  <p class="summary">
+    @if (d.attempt.status === 'CORRIGE') {
+      Score : <strong>{{ (d.attempt.autoScore ?? 0) + (d.attempt.manualScore ?? 0) | number: '1.0-2' }}
+      / {{ d.attempt.maxScore }}</strong> points, soit <strong>{{ d.attempt.scorePercent | number: '1.0-1' }} %</strong>
+    } @else {
+      QCM : {{ d.attempt.autoScore ?? 0 | number: '1.0-2' }} points.
+      <strong>{{ d.attempt.ungradedCount }}</strong> question{{ d.attempt.ungradedCount > 1 ? 's' : '' }} à corriger.
+    }
+  </p>
+
+  <ol class="answers">
+    @for (a of d.answers; track a.answerId; let i = $index) {
+      <li class="answer" [class.todo]="a.pointsAwarded === null">
+        <div class="answer-head">
+          <strong>Question {{ i + 1 }}</strong>
+          <span class="muted">{{ typeLabels[a.type] }}</span>
+          <span class="badge" [class.badge-warn]="a.pointsAwarded === null">
+            @if (a.pointsAwarded === null) { À corriger } @else { {{ a.pointsAwarded | number: '1.0-2' }} / {{ a.points }} pt{{ a.points > 1 ? 's' : '' }} }
+          </span>
+          @if (a.autoCorrect !== null) {
+            <span class="badge" [class.badge-ok]="a.autoCorrect">{{ a.autoCorrect ? 'Juste' : 'Faux' }}</span>
+          }
+        </div>
+        <p class="statement">{{ a.statement }}</p>
+
+        @if (isChoice(a.type)) {
+          <div class="table-wrap" tabindex="0" role="region" [attr.aria-label]="'Choix de la question ' + (i + 1)">
+            <table class="table options">
+              <caption class="sr-only">Choix de la question {{ i + 1 }}</caption>
+              <thead><tr><th scope="col">Choix</th><th scope="col">Bonne réponse</th><th scope="col">Choisi par le candidat</th></tr></thead>
+              <tbody>
+                @for (o of a.options; track o.id) {
+                  <tr [class.mismatch]="o.correct !== o.selected">
+                    <th scope="row">{{ o.label }}</th>
+                    <td>{{ o.correct ? '✓ Oui' : 'Non' }}</td>
+                    <td>{{ o.selected ? '● Oui' : 'Non' }}</td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+          @if (!a.options.length) { <p class="muted">Les choix de cette question ne sont plus disponibles.</p> }
+        } @else {
+          @if (a.answerText) {
+            <pre class="response" [class.code]="a.type === 'CODE'" tabindex="0"
+                 [attr.aria-label]="'Réponse du candidat à la question ' + (i + 1)">{{ a.answerText }}</pre>
+          } @else {
+            <p class="muted">Pas de réponse.</p>
+          }
+          <app-answer-grader [applicationId]="applicationId()" [attemptId]="attemptId()" [answer]="a"
+                             (graded)="onGraded($event)" />
+        }
+      </li>
+    }
+  </ol>
+} @else if (error()) {
+  <p class="form-error" role="alert">{{ error() }}</p>
+}

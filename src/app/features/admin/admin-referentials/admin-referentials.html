@@ -1,0 +1,97 @@
+<div class="page">
+  <h1>Référentiels</h1>
+  <p class="muted">
+    Les entrées actives sont proposées dans les formulaires ; la saisie libre reste possible. Ajouter, renommer ou fusionner
+    harmonise les données existantes (majuscules et espaces ignorés).
+  </p>
+
+  <div class="tabs" role="tablist" aria-label="Référentiels">
+    @for (k of kinds; track k; let i = $index) {
+      <button #tab type="button" role="tab" class="tab" [id]="'ref-tab-' + k" [attr.aria-selected]="kind() === k"
+              aria-controls="ref-panel" [tabIndex]="kind() === k ? 0 : -1" [class.active]="kind() === k"
+              (click)="select(k)" (keydown)="onTabKey($event, i)">{{ labels[k] }}</button>
+    }
+  </div>
+
+  <section id="ref-panel" role="tabpanel" [attr.aria-labelledby]="'ref-tab-' + kind()">
+    <p class="sr-only" role="status" aria-live="polite">{{ message() }}</p>
+    @if (message()) { <p class="form-info">{{ message() }}</p> }
+    @if (error()) { <p class="form-error" role="alert">{{ error() }}</p> }
+
+    <form class="inline-add" (submit)="$event.preventDefault(); add()">
+      <label for="ref-new">Nouvelle entrée</label>
+      <input id="ref-new" maxlength="100" [value]="newLabel()" (input)="newLabel.set($any($event.target).value)" />
+      <button type="submit" [disabled]="busy() || !newLabel().trim()">Ajouter</button>
+    </form>
+
+    @if (loading() && !view()) {
+      <p>Chargement…</p>
+    } @else if (view(); as v) {
+      <div class="ref-grid">
+        <section class="card" aria-labelledby="items-title">
+          <h2 id="items-title">Entrées ({{ v.items.length }})</h2>
+          <ul class="ref-list">
+            @for (i of v.items; track i.id) {
+              <li [class.archived]="i.archived">
+                @if (editingId() === i.id) {
+                  <form class="inline-add" (submit)="$event.preventDefault(); saveEdit()">
+                    <label class="sr-only" [for]="'ref-edit-' + i.id">Nouveau libellé pour {{ i.label }}</label>
+                    <input [id]="'ref-edit-' + i.id" maxlength="100" [value]="editLabel()" (input)="editLabel.set($any($event.target).value)" />
+                    <button type="submit" [disabled]="busy()">Enregistrer</button>
+                    <button type="button" (click)="editingId.set(null)">Annuler</button>
+                  </form>
+                } @else {
+                  <span class="ref-label">{{ i.label }}</span>
+                  <span class="muted small">{{ i.usage }} utilisation{{ i.usage > 1 ? 's' : '' }}</span>
+                  @if (i.archived) { <span class="badge">Archivée</span> }
+                  <span class="row-actions">
+                    <button type="button" class="small" (click)="startEdit(i.id, i.label)" [attr.aria-label]="'Renommer ' + i.label">Renommer</button>
+                    <button type="button" class="small" (click)="setArchived(i.id, !i.archived)" [disabled]="busy()"
+                            [attr.aria-label]="(i.archived ? 'Réactiver ' : 'Archiver ') + i.label">{{ i.archived ? 'Réactiver' : 'Archiver' }}</button>
+                  </span>
+                }
+              </li>
+            } @empty {
+              <li class="muted">Aucune entrée pour le moment.</li>
+            }
+          </ul>
+        </section>
+
+        <section class="card" aria-labelledby="free-title">
+          <h2 id="free-title">Valeurs saisies librement</h2>
+          <p class="muted small">Les plus fréquentes, absentes du référentiel.</p>
+          <ul class="ref-list">
+            @for (f of v.freeValues; track f.value) {
+              <li>
+                <span class="ref-label">{{ f.value }}</span>
+                <span class="muted small">{{ f.count }} utilisation{{ f.count > 1 ? 's' : '' }}
+                  @if (f.variants > 1) { · {{ f.variants }} orthographes }</span>
+                @if (merging() === f.value) {
+                  <span class="merge" role="group" [attr.aria-label]="'Fusionner ' + f.value">
+                    <label class="sr-only" [for]="'merge-' + $index">Remplacer par</label>
+                    <select [id]="'merge-' + $index" (change)="mergeTarget.set(+$any($event.target).value)">
+                      @for (i of activeItems(); track i.id) { <option [value]="i.id" [selected]="mergeTarget() === i.id">{{ i.label }}</option> }
+                    </select>
+                    <button type="button" class="small" (click)="confirmMerge()" [disabled]="busy() || mergeTarget() === null">Fusionner</button>
+                    <button type="button" class="small" (click)="merging.set(null)">Annuler</button>
+                  </span>
+                } @else {
+                  <span class="row-actions">
+                    <button type="button" class="small" (click)="add(f.value)" [disabled]="busy()"
+                            [attr.aria-label]="'Ajouter ' + f.value + ' au référentiel'">Ajouter</button>
+                    @if (activeItems().length) {
+                      <button type="button" class="small" (click)="startMerge(f.value)"
+                              [attr.aria-label]="'Fusionner ' + f.value + ' dans une entrée'">Fusionner dans…</button>
+                    }
+                  </span>
+                }
+              </li>
+            } @empty {
+              <li class="muted">Toutes les valeurs saisies figurent au référentiel.</li>
+            }
+          </ul>
+        </section>
+      </div>
+    }
+  </section>
+</div>

@@ -1,0 +1,51 @@
+<form [formGroup]="form" (ngSubmit)="submit()" novalidate>
+  <div class="field">
+    <label [for]="id + '-reason'">Motif du rejet (obligatoire)</label>
+    <select (change)="useReason($event)" [attr.aria-label]="'Choisir un motif fréquent'">
+      <option value="">Motifs fréquents…</option>
+      @for (r of reasons; track r) { <option [value]="r">{{ r }}</option> }
+    </select>
+    <textarea [id]="id + '-reason'" rows="2" formControlName="reason" [attr.maxlength]="maxReason"
+              [attr.aria-invalid]="submitted() && form.controls.reason.invalid"
+              [attr.aria-describedby]="id + '-reason-help'"></textarea>
+    <small [id]="id + '-reason-help'" class="muted">Note interne, jamais visible par le candidat.</small>
+    @if (submitted() && form.controls.reason.hasError('required')) {
+      <small class="field-error" role="alert">Indiquez le motif du rejet.</small>
+    }
+  </div>
+
+  <label class="check">
+    <input type="checkbox" formControlName="notify" />
+    Prévenir le candidat par e-mail
+  </label>
+
+  @if (notify()) {
+    <div class="field">
+      <label [for]="id + '-message'">Message au candidat</label>
+      @if (preview(); as p) {
+        <small class="muted">
+          À : {{ bulk() ? recipientCount() + ' candidat' + (recipientCount() > 1 ? 's' : '') : p.to }} · Objet : {{ p.subject }}
+        </small>
+      } @else if (previewError()) {
+        <small class="field-error">{{ previewError() }} Le message par défaut sera utilisé.</small>
+      } @else {
+        <small class="muted" role="status">Chargement du message…</small>
+      }
+      <textarea [id]="id + '-message'" rows="9" formControlName="message" [attr.maxlength]="maxMessage"
+                [attr.aria-describedby]="id + '-vars'"></textarea>
+      <small [id]="id + '-vars'" class="muted">
+        Variables remplacées pour chaque candidat : {{ '{' }}prénom{{ '}' }}, {{ '{' }}nom{{ '}' }}, {{ '{' }}poste{{ '}' }}, {{ '{' }}entreprise{{ '}' }}.
+      </small>
+      <button type="button" class="link" (click)="restoreMessage()" [disabled]="!preview()">Rétablir le message par défaut</button>
+    </div>
+  } @else {
+    <p class="status-banner">Le candidat ne sera pas prévenu. Il verra seulement que sa candidature n'a pas été retenue.</p>
+  }
+
+  <div class="actions">
+    <button type="submit" class="primary danger-fill" [disabled]="busy()">
+      {{ busy() ? 'Enregistrement…' : (notify() ? 'Rejeter et envoyer' : 'Rejeter') }}
+    </button>
+    <button type="button" (click)="cancelled.emit()" [disabled]="busy()">Annuler</button>
+  </div>
+</form>

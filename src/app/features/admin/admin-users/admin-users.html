@@ -1,0 +1,109 @@
+<div class="page page-wide">
+  <h1>Comptes</h1>
+
+  <div class="filters" role="group" aria-label="Filtrer les comptes">
+    <div class="field">
+      <label for="user-q">Rechercher</label>
+      <input id="user-q" type="search" [value]="q()" (input)="setQuery($any($event.target).value)" placeholder="Nom ou e-mail" />
+    </div>
+    <div class="field">
+      <label for="user-role">Rôle</label>
+      <select id="user-role" (change)="setRole($any($event.target).value)">
+        <option value="">Tous</option>
+        @for (r of roles; track r) { <option [value]="r">{{ roleLabels[r] }}</option> }
+      </select>
+    </div>
+    <div class="field">
+      <label for="user-status">Statut</label>
+      <select id="user-status" (change)="setStatus($any($event.target).value)">
+        <option value="">Tous</option>
+        @for (s of statuses; track s) { <option [value]="s">{{ statusLabels[s] }}</option> }
+      </select>
+    </div>
+    @if (loading()) { <span class="muted" role="status">Chargement…</span> }
+  </div>
+
+  <p class="sr-only" role="status" aria-live="polite">{{ message() }}</p>
+  @if (message()) { <p class="form-info">{{ message() }}</p> }
+  @if (error()) { <p class="form-error" role="alert">{{ error() }}</p> }
+
+  @if (result(); as r) {
+    <p class="muted count">{{ r.totalElements }} compte{{ r.totalElements > 1 ? 's' : '' }}</p>
+    <div class="table-wrap">
+      <table class="table">
+        <caption class="sr-only">Comptes</caption>
+        <thead>
+          <tr><th scope="col">Nom</th><th scope="col">Rôle</th><th scope="col">Entreprise</th><th scope="col">Statut</th>
+            <th scope="col">Créé le</th><th scope="col">Actions</th></tr>
+        </thead>
+        <tbody>
+          @for (u of r.content; track u.id) {
+            <tr>
+              <th scope="row">
+                {{ u.firstName }} {{ u.lastName }}
+                <small class="muted block">{{ u.email }}{{ u.emailVerified ? '' : ' · non vérifié' }}</small>
+              </th>
+              <td>{{ roleLabels[u.role] ?? u.role }}</td>
+              <td>
+                @if (u.companyId) { <a [routerLink]="['/admin/entreprises', u.companyId]">{{ u.companyName }}</a> } @else { — }
+              </td>
+              <td>
+                @if (u.erasedAt) {
+                  <span class="badge status-DESACTIVE">Données effacées</span>
+                  <small class="muted block">le {{ u.erasedAt | date: 'd MMM y' }}</small>
+                } @else {
+                  <span class="badge status-{{ u.status }}">{{ statusLabels[u.status] }}</span>
+                }
+              </td>
+              <td>{{ u.createdAt | date: 'd MMM y' }}</td>
+              <td>
+                @if (u.email === myEmail()) {
+                  <span class="muted">Votre compte</span>
+                } @else if (pending()?.id === u.id) {
+                  <div class="row-confirm" role="group" [attr.aria-label]="'Confirmer pour ' + u.firstName + ' ' + u.lastName">
+                    @if (pending()!.to === 'ERASE') {
+                      <p class="erase-warning" [id]="'erase-warning-' + u.id"><strong>Définitif.</strong> Profil, documents et contenu des
+                        candidatures supprimés ; compte anonymisé ; candidatures en cours retirées.</p>
+                      <label [for]="'reason-' + u.id">Référence de la demande (obligatoire : date, canal ; aucune donnée personnelle)</label>
+                      <textarea [id]="'reason-' + u.id" rows="2" maxlength="300" [value]="reason()" required
+                                [attr.aria-describedby]="'erase-warning-' + u.id"
+                                (input)="reason.set($any($event.target).value)"></textarea>
+                    } @else if (pending()!.to !== 'ACTIF') {
+                      <label [for]="'reason-' + u.id">Motif (facultatif, envoyé à la personne)</label>
+                      <textarea [id]="'reason-' + u.id" rows="2" maxlength="1000" [value]="reason()"
+                                (input)="reason.set($any($event.target).value)"></textarea>
+                    }
+                    <div class="actions">
+                      <button type="button" [class.danger]="pending()!.to !== 'ACTIF'" (click)="confirm(u)" [disabled]="busy()">
+                        {{ busy() ? '…' : pending()!.to === 'ERASE' ? 'Effacer définitivement' : 'Confirmer' }}
+                      </button>
+                      <button type="button" (click)="pending.set(null)" [disabled]="busy()">Annuler</button>
+                    </div>
+                  </div>
+                } @else {
+                  <div class="actions">
+                    @for (a of actionsFor(u); track a.to) {
+                      <button type="button" [class.danger]="a.to !== 'ACTIF'" (click)="ask(u, a.to)"
+                              [attr.aria-label]="a.label + ' : ' + u.firstName + ' ' + u.lastName">{{ a.label }}</button>
+                    } @empty {
+                      <span class="muted">Aucune action possible</span>
+                    }
+                  </div>
+                }
+              </td>
+            </tr>
+          } @empty {
+            <tr><td colspan="6" class="muted">Aucun compte.</td></tr>
+          }
+        </tbody>
+      </table>
+    </div>
+    @if (r.totalPages > 1) {
+      <div class="pager">
+        <button type="button" (click)="page.set(r.page - 1)" [disabled]="r.page === 0">Précédent</button>
+        <span>Page {{ r.page + 1 }} / {{ r.totalPages }}</span>
+        <button type="button" (click)="page.set(r.page + 1)" [disabled]="r.page + 1 >= r.totalPages">Suivant</button>
+      </div>
+    }
+  }
+</div>

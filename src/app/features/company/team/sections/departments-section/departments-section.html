@@ -1,0 +1,44 @@
+ <section class="card">
+      <h2>Services</h2>
+      <p class="muted">Les services permettent de classer vos offres (Technique, Ressources humaines…).</p>
+
+      @if (canManage()) {
+        <form [formGroup]="form" (ngSubmit)="add()" novalidate class="inline-form">
+          <input formControlName="name" placeholder="Nom du nouveau service" aria-label="Nom du service" />
+          <button type="submit" [disabled]="saving()">Ajouter</button>
+        </form>
+        @if (form.controls.name.touched && form.controls.name.invalid) {
+          <small class="field-error">Le nom du service est obligatoire (100 caractères max).</small>
+        }
+      }
+      @if (error()) { <p class="form-error" role="alert">{{ error() }}</p> }
+
+      @if (loading()) {
+        <p>Chargement…</p>
+      } @else if (items().length === 0) {
+        <p class="muted">Aucun service pour le moment.</p>
+      }
+
+      <ul class="item-list">
+        @for (d of items(); track d.id) {
+          <li class="item">
+            @if (editingId() === d.id) {
+              <div class="inline-form">
+                <input [value]="editName()" (input)="editName.set($any($event.target).value)"
+                       aria-label="Nouveau nom du service" />
+                <button type="button" (click)="saveRename(d)">Enregistrer</button>
+                <button type="button" (click)="editingId.set(null)">Annuler</button>
+              </div>
+            } @else {
+              <span>{{ d.name }}</span>
+              @if (canManage()) {
+                <div class="item-actions">
+                  <button type="button" (click)="startRename(d)">Renommer</button>
+                  <button type="button" class="danger" (click)="remove(d)">Supprimer</button>
+                </div>
+              }
+            }
+          </li>
+        }
+      </ul>
+    </section>

@@ -1,0 +1,120 @@
+<div class="auth-card">
+      <h1>Créer un compte</h1>
+
+      <div class="tabs" role="tablist">
+        <button type="button" role="tab" [class.active]="mode() === 'candidat'"
+                (click)="mode.set('candidat')">Candidat</button>
+        <button type="button" role="tab" [class.active]="mode() === 'entreprise'"
+                (click)="mode.set('entreprise')">Entreprise</button>
+      </div>
+
+      @if (mode() === 'candidat') {
+        <form [formGroup]="candidateForm" (ngSubmit)="submitCandidate()" novalidate>
+          <label for="c-firstName">Prénom</label>
+          <input id="c-firstName" formControlName="firstName" autocomplete="given-name" />
+          @if (bad(candidateForm.controls.firstName)) { <small class="field-error">Le prénom est obligatoire.</small> }
+
+          <label for="c-lastName">Nom</label>
+          <input id="c-lastName" formControlName="lastName" autocomplete="family-name" />
+          @if (bad(candidateForm.controls.lastName)) { <small class="field-error">Le nom est obligatoire.</small> }
+
+          <label for="c-email">E-mail</label>
+          <input id="c-email" type="email" formControlName="email" autocomplete="email" />
+          @if (bad(candidateForm.controls.email)) { <small class="field-error">Une adresse e-mail valide est requise.</small> }
+
+          <label for="c-password">Mot de passe</label>
+          <input id="c-password" type="password" formControlName="password" autocomplete="new-password"
+                 aria-describedby="c-password-rules" [attr.aria-invalid]="bad(candidateForm.controls.password)" />
+          <app-password-rules rulesId="c-password-rules" [value]="candidateForm.controls.password.value" />
+          @if (bad(candidateForm.controls.password)) { <small class="field-error">Le mot de passe ne respecte pas encore ces règles.</small> }
+
+          <label class="check terms">
+            <input id="c-terms" type="checkbox" formControlName="acceptTerms" required
+                   [attr.aria-invalid]="bad(candidateForm.controls.acceptTerms)"
+                   [attr.aria-describedby]="bad(candidateForm.controls.acceptTerms) ? 'c-terms-error' : null" />
+            <span>J'ai lu et j'accepte les <a routerLink="/conditions-utilisation" target="_blank" rel="noopener">conditions d'utilisation</a>
+            et la <a routerLink="/confidentialite" target="_blank" rel="noopener">politique de confidentialité</a>
+            <span class="sr-only">(s'ouvrent dans un nouvel onglet)</span></span>
+          </label>
+          @if (bad(candidateForm.controls.acceptTerms)) {
+            <small id="c-terms-error" class="field-error">Vous devez accepter les conditions pour créer un compte.</small>
+          }
+
+          @if (error()) { <p class="form-error" role="alert">{{ error() }}</p> }
+          @if (existingEmail(); as e) {
+            <p class="muted">Vous avez déjà créé ce compte sans confirmer l'adresse ?
+              <a routerLink="/verification-email" [queryParams]="{ email: e }">Recevoir un nouveau code</a>.
+              Sinon, <a routerLink="/login">connectez-vous</a> ou <a routerLink="/mot-de-passe-oublie">réinitialisez votre mot de passe</a>.</p>
+          }
+          <button type="submit" [disabled]="loading()">{{ loading() ? 'Création…' : 'Créer mon compte' }}</button>
+        </form>
+      } @else {
+        <form [formGroup]="companyForm" (ngSubmit)="submitCompany()" novalidate>
+          <label for="e-companyName">Nom de l'entreprise</label>
+          <input id="e-companyName" formControlName="companyName" autocomplete="organization" />
+          @if (bad(companyForm.controls.companyName)) { <small class="field-error">Le nom de l'entreprise est obligatoire.</small> }
+
+          <label for="e-sector">Secteur</label>
+          <input id="e-sector" formControlName="sector" list="ref-SECTEUR" autocomplete="off" />
+          <app-ref-datalist kind="SECTEUR" />
+
+          <label for="e-size">Taille</label>
+          <select id="e-size" formControlName="size">
+            <option value="">— Choisir —</option>
+            <option>1-10</option>
+            <option>11-50</option>
+            <option>51-200</option>
+            <option>201-500</option>
+            <option>500+</option>
+          </select>
+
+          <label for="e-country">Pays</label>
+          <input id="e-country" formControlName="country" autocomplete="country-name" />
+
+          <label for="e-website">Site web</label>
+          <input id="e-website" type="url" formControlName="website" placeholder="https://" />
+
+          <h2>Responsable du compte</h2>
+
+          <label for="e-firstName">Prénom</label>
+          <input id="e-firstName" formControlName="firstName" autocomplete="given-name" />
+          @if (bad(companyForm.controls.firstName)) { <small class="field-error">Le prénom est obligatoire.</small> }
+
+          <label for="e-lastName">Nom</label>
+          <input id="e-lastName" formControlName="lastName" autocomplete="family-name" />
+          @if (bad(companyForm.controls.lastName)) { <small class="field-error">Le nom est obligatoire.</small> }
+
+          <label for="e-email">E-mail professionnel</label>
+          <input id="e-email" type="email" formControlName="email" autocomplete="email" />
+          @if (bad(companyForm.controls.email)) { <small class="field-error">Une adresse e-mail valide est requise.</small> }
+
+          <label for="e-password">Mot de passe</label>
+          <input id="e-password" type="password" formControlName="password" autocomplete="new-password"
+                 aria-describedby="e-password-rules" [attr.aria-invalid]="bad(companyForm.controls.password)" />
+          <app-password-rules rulesId="e-password-rules" [value]="companyForm.controls.password.value" />
+          @if (bad(companyForm.controls.password)) { <small class="field-error">Le mot de passe ne respecte pas encore ces règles.</small> }
+
+          <label class="check terms">
+            <input id="e-terms" type="checkbox" formControlName="acceptTerms" required
+                   [attr.aria-invalid]="bad(companyForm.controls.acceptTerms)"
+                   [attr.aria-describedby]="bad(companyForm.controls.acceptTerms) ? 'e-terms-error' : null" />
+            <span>J'ai lu et j'accepte les <a routerLink="/conditions-utilisation" target="_blank" rel="noopener">conditions d'utilisation</a>
+            et la <a routerLink="/confidentialite" target="_blank" rel="noopener">politique de confidentialité</a>
+            <span class="sr-only">(s'ouvrent dans un nouvel onglet)</span></span>
+          </label>
+          @if (bad(companyForm.controls.acceptTerms)) {
+            <small id="e-terms-error" class="field-error">Vous devez accepter les conditions pour créer un compte.</small>
+          }
+
+          @if (error()) { <p class="form-error" role="alert">{{ error() }}</p> }
+          @if (existingEmail(); as e) {
+            <p class="muted">Vous avez déjà créé ce compte sans confirmer l'adresse ?
+              <a routerLink="/verification-email" [queryParams]="{ email: e }">Recevoir un nouveau code</a>.
+              Sinon, <a routerLink="/login">connectez-vous</a> ou <a routerLink="/mot-de-passe-oublie">réinitialisez votre mot de passe</a>.</p>
+          }
+          <button type="submit" [disabled]="loading()">{{ loading() ? 'Création…' : 'Enregistrer mon entreprise' }}</button>
+        </form>
+      }
+
+      <p>Déjà un compte ? <a routerLink="/login">Se connecter</a></p>
+    </div>

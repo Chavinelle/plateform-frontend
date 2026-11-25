@@ -1,0 +1,105 @@
+<div class="section-head">
+  <h2>Banque de questions</h2>
+  @if (canEdit() && editing() === null) {
+    <button type="button" (click)="openEditor('new')">Nouvelle question</button>
+  }
+</div>
+@if (!canEdit()) {
+  <p class="muted">Seuls l'administrateur et les recruteurs peuvent modifier la banque de questions.</p>
+}
+
+<p class="sr-only" role="status" aria-live="polite">{{ message() }}</p>
+@if (message()) { <p class="form-info">{{ message() }}</p> }
+@if (error()) { <p class="form-error" role="alert">{{ error() }}</p> }
+
+@if (editing() !== null) {
+  <section class="card" aria-labelledby="question-editor-title">
+    <h3 id="question-editor-title" #editorHeading tabindex="-1">
+      {{ editingQuestion() ? 'Modifier la question' : 'Nouvelle question' }}
+    </h3>
+    <app-question-editor [question]="editingQuestion()" [categories]="categories()"
+                         (saved)="onSaved()" (cancelled)="closeEditor()" />
+  </section>
+}
+
+<div class="filters" role="group" aria-label="Filtrer les questions">
+  <div class="field">
+    <label for="bank-category">Catégorie</label>
+    <select id="bank-category" (change)="setCategory($any($event.target).value)">
+      <option value="" [selected]="category() === null">Toutes</option>
+      @for (c of categories(); track c) {
+        <option [value]="c" [selected]="category() === c">{{ c }}</option>
+      }
+    </select>
+  </div>
+  <div class="field">
+    <label for="bank-type">Type</label>
+    <select id="bank-type" (change)="setType($any($event.target).value)">
+      <option value="" [selected]="type() === null">Tous</option>
+      @for (t of types; track t.value) {
+        <option [value]="t.value" [selected]="type() === t.value">{{ t.label }}</option>
+      }
+    </select>
+  </div>
+  <label class="check">
+    <input type="checkbox" [checked]="showArchived()" (change)="showArchived.set($any($event.target).checked)" />
+    Afficher les questions archivées
+  </label>
+</div>
+
+@if (loading()) {
+  <p>Chargement…</p>
+} @else {
+  <p class="muted count">{{ questions().length }} question{{ questions().length > 1 ? 's' : '' }}</p>
+  <ul class="questions">
+    @for (q of questions(); track q.id) {
+      <li class="card question" [class.archived]="q.archived">
+        <div class="question-head">
+          <span class="badge">{{ typeLabels[q.type] }}</span>
+          <span class="badge">{{ q.points }} pt{{ q.points > 1 ? 's' : '' }}</span>
+          @if (q.category) { <span class="badge">{{ q.category }}</span> }
+          @if (q.usedInTests) {
+            <span class="badge">Dans {{ q.usedInTests }} test{{ q.usedInTests > 1 ? 's' : '' }}</span>
+          }
+          @if (q.locked) { <span class="badge badge-warn">Verrouillée</span> }
+          @if (q.archived) { <span class="badge">Archivée</span> }
+        </div>
+        <p class="statement">{{ q.statement }}</p>
+
+        @if (q.options.length) {
+          <ul class="options">
+            @for (o of q.options; track o.id) {
+              <li [class.correct]="o.correct">
+                <span aria-hidden="true">{{ o.correct ? '✓' : '○' }}</span>
+                {{ o.label }}
+                @if (o.correct) { <span class="sr-only">(bonne réponse)</span> }
+              </li>
+            }
+          </ul>
+        }
+
+        @if (q.locked) {
+          <p class="muted small">Cette question fait partie d'un test déjà envoyé : dupliquez-la pour en faire une variante.</p>
+        }
+
+        @if (canEdit()) {
+          <div class="row-actions">
+            @if (!q.archived) {
+              @if (!q.locked) {
+                <button type="button" (click)="openEditor(q)" [disabled]="busyId() === q.id">Modifier</button>
+              }
+              <button type="button" (click)="duplicate(q)" [disabled]="busyId() === q.id">Dupliquer</button>
+              <button type="button" class="danger" (click)="remove(q)" [disabled]="busyId() === q.id">
+                {{ q.usedInTests ? 'Archiver' : 'Supprimer' }}
+              </button>
+            } @else {
+              <button type="button" (click)="restore(q)" [disabled]="busyId() === q.id">Restaurer</button>
+            }
+          </div>
+        }
+      </li>
+    } @empty {
+      <li class="muted">Aucune question{{ category() || type() ? ' pour ces filtres' : '' }}.</li>
+    }
+  </ul>
+}

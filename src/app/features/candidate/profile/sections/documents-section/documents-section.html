@@ -1,0 +1,53 @@
+ <section class="card">
+      <h2>Documents</h2>
+      <p class="muted">
+        CV et lettre de motivation : PDF ou DOCX. Diplômes et attestations : PDF, DOCX, JPG ou PNG.
+        5 Mo maximum par fichier, 20 documents au total.
+      </p>
+
+      <div class="inline-form">
+        <select [formControl]="typeControl" aria-label="Type de document">
+          @for (t of types; track t.value) {
+            <option [value]="t.value">{{ t.label }}</option>
+          }
+        </select>
+        <input type="file" #fileInput (change)="onFileSelected($event)"
+               accept=".pdf,.docx,.jpg,.jpeg,.png" aria-label="Fichier à envoyer" />
+        <button type="button" (click)="upload()" [disabled]="uploading() || !file()">
+          {{ uploading() ? 'Envoi…' : 'Envoyer' }}
+        </button>
+      </div>
+
+      @if (error()) { <p class="form-error" role="alert">{{ error() }}</p> }
+
+      @if (loading()) {
+        <p>Chargement…</p>
+      } @else if (items().length === 0) {
+        <p class="muted">Aucun document pour le moment.</p>
+      }
+
+      <ul class="item-list">
+        @for (d of items(); track d.id) {
+          <li class="item">
+            <div>
+              <span class="badge">{{ typeLabel(d.docType) }}</span>
+              @if (d.defaultDocument) { <span class="badge badge-ok">CV par défaut</span> }
+              <strong>{{ d.originalName }}</strong>
+              <div class="muted">
+                {{ formatSize(d.sizeBytes) }} · ajouté le {{ d.uploadedAt | date: 'd MMMM y' }}
+              </div>
+            </div>
+            <div class="item-actions">
+              @if (canPreview(d)) {
+                <button type="button" (click)="preview(d)" [disabled]="busyId() === d.id">Aperçu</button>
+              }
+              <button type="button" (click)="download(d)" [disabled]="busyId() === d.id">Télécharger</button>
+              @if (d.docType === 'CV' && !d.defaultDocument) {
+                <button type="button" (click)="makeDefault(d)" [disabled]="busyId() === d.id">Définir par défaut</button>
+              }
+              <button type="button" class="danger" (click)="remove(d)" [disabled]="busyId() === d.id">Supprimer</button>
+            </div>
+          </li>
+        }
+      </ul>
+    </section>

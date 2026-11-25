@@ -1,0 +1,10 @@
+.filters { display: flex; flex-wrap: wrap; gap: .75rem 1rem; align-items: flex-end; margin: .5rem 0 1rem; }
+.charts { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem; }
+.chart { margin: 0; }
+.chart.wide { grid-column: 1 / -1; }
+@media (max-width: 800px) {
+  .charts { grid-template-columns: 1fr; }
+}
+.small { font-size: .85rem; margin-top: .75rem; }
+
+.exports { margin-left: auto; }

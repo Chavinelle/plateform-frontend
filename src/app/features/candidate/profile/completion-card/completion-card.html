@@ -1,0 +1,24 @@
+<section class="card">
+      <h2>Complétion du profil</h2>
+
+      @if (completion.data(); as c) {
+        <div class="progress-row">
+          <progress [value]="c.percentage" max="100"
+                    [attr.aria-label]="'Profil complété à ' + c.percentage + ' pour cent'"></progress>
+          <strong>{{ c.percentage }} %</strong>
+        </div>
+
+        @if (c.percentage === 100) {
+          <p class="form-info">Votre profil est complet. Bravo !</p>
+        } @else {
+          <p class="muted">Pour améliorer votre profil :</p>
+          <ul class="todo-list">
+            @for (i of missing(); track i.key) {
+              <li><span class="badge">+{{ i.points }} %</span> {{ i.label }}</li>
+            }
+          </ul>
+        }
+      } @else {
+        <p>Calcul en cours…</p>
+      }
+    </section>

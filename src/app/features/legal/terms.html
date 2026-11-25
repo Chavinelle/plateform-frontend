@@ -1,0 +1,74 @@
+@let i = info;
+<article class="page legal">
+  <h1>Conditions d'utilisation</h1>
+  <p class="updated">Dernière mise à jour : {{ i.lastUpdate }}</p>
+  <p class="draft">Projet de texte, à faire relire avant une mise en ligne publique.</p>
+
+  <nav class="toc" aria-label="Sommaire">
+    <ol>
+      <li><a routerLink="/conditions-utilisation" fragment="objet">Objet</a></li>
+      <li><a routerLink="/conditions-utilisation" fragment="comptes">Comptes</a></li>
+      <li><a routerLink="/conditions-utilisation" fragment="candidats">Engagements des candidats</a></li>
+      <li><a routerLink="/conditions-utilisation" fragment="entreprises">Engagements des entreprises</a></li>
+      <li><a routerLink="/conditions-utilisation" fragment="outils">Entretiens, tests et messages</a></li>
+      <li><a routerLink="/conditions-utilisation" fragment="moderation">Signalements et modération</a></li>
+      <li><a routerLink="/conditions-utilisation" fragment="responsabilite">Responsabilité</a></li>
+      <li><a routerLink="/conditions-utilisation" fragment="modifications">Modifications et droit applicable</a></li>
+    </ol>
+  </nav>
+
+  <h2 id="objet">1. Objet</h2>
+  <p>{{ i.platformName }} met en relation des entreprises qui recrutent et des candidats. Elle permet de publier des offres,
+    de postuler, de suivre les candidatures, d'organiser des entretiens et des tests, et d'échanger des messages. L'utilisation
+    de la plateforme implique l'acceptation des présentes conditions, demandée lors de l'inscription.</p>
+
+  <h2 id="comptes">2. Comptes</h2>
+  <ul>
+    <li>Chaque compte est personnel. Vous êtes responsable de la confidentialité de votre mot de passe et des actions
+      réalisées avec votre compte.</li>
+    <li>L'adresse e-mail doit être vérifiée avant la première connexion. Après plusieurs mots de passe erronés, le compte
+      est temporairement verrouillé.</li>
+    <li>L'inscription d'une entreprise est soumise à la validation de l'administrateur de la plateforme ; tant qu'elle n'est
+      pas validée, l'entreprise ne peut pas publier d'offre.</li>
+    <li>L'administrateur peut suspendre ou fermer un compte, ou suspendre une entreprise, en cas de manquement aux présentes
+      conditions ; la personne concernée en est informée par e-mail avec le motif.</li>
+  </ul>
+
+  <h2 id="candidats">3. Engagements des candidats</h2>
+  <ul>
+    <li>Fournir des informations exactes (profil, CV, réponses aux questions et aux tests).</li>
+    <li>Passer les tests en ligne personnellement, sans aide extérieure non autorisée, et ne pas partager le lien reçu.</li>
+    <li>Rester courtois dans les messages échangés avec les entreprises.</li>
+  </ul>
+
+  <h2 id="entreprises">4. Engagements des entreprises</h2>
+  <ul>
+    <li>Publier des offres réelles, exactes et à jour.</li>
+    <li>Ne demander aucune somme d'argent aux candidats, à aucun moment du recrutement.</li>
+    <li>Ne pratiquer aucune discrimination (âge, sexe, origine, religion, handicap, opinions, situation familiale…).</li>
+    <li>N'utiliser les données des candidats que pour le recrutement, informer le candidat ajouté au vivier de talents
+      et respecter sa demande de retrait.</li>
+    <li>Garder confidentielles les notes et évaluations internes ; elles ne sont jamais montrées aux candidats.</li>
+  </ul>
+
+  <h2 id="outils">5. Entretiens, tests et messages</h2>
+  <p>Les convocations, rappels et fichiers d'agenda sont envoyés par e-mail. Un test en ligne se passe dans une durée limitée,
+    comptée par le serveur à partir du démarrage. Les messages sont limités en nombre pour éviter les abus ; ils restent
+    consultables tant que la candidature existe.</p>
+
+  <h2 id="moderation">6. Signalements et modération</h2>
+  <p>Toute personne peut signaler une offre frauduleuse, discriminatoire ou trompeuse depuis sa page. L'administrateur de la
+    plateforme examine les signalements et peut retirer l'offre ; l'entreprise est alors informée du motif et ne peut pas la
+    republier tant que le retrait n'est pas levé.</p>
+
+  <h2 id="responsabilite">7. Responsabilité</h2>
+  <p>La plateforme fournit des outils de recrutement ; les décisions d'embauche appartiennent aux entreprises. L'éditeur
+    s'efforce d'assurer la disponibilité du service mais ne peut garantir une absence totale d'interruption. Il ne saurait
+    être tenu responsable du contenu publié par les utilisateurs, qu'il retire dès qu'il en a connaissance s'il est illicite.</p>
+
+  <h2 id="modifications">8. Modifications et droit applicable</h2>
+  <p>Ces conditions peuvent évoluer ; la date de mise à jour figure en haut de la page. Elles sont soumises au
+    {{ i.applicableLaw }}. Pour toute question : <a [href]="'mailto:' + i.contactEmail">{{ i.contactEmail }}</a>.
+    Voir aussi la <a routerLink="/confidentialite">politique de confidentialité</a> et les
+    <a routerLink="/mentions-legales">mentions légales</a>.</p>
+</article>

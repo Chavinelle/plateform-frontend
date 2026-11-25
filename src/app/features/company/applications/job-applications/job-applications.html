@@ -1,0 +1,204 @@
+<div class="page page-wide">
+  <p><a routerLink="/recruteur/offres">← Mes offres</a></p>
+
+  @if (notFound()) {
+    <p class="form-error" role="alert">Offre introuvable, ou vous n'êtes pas assigné(e) à son recrutement.</p>
+  } @else if (job(); as j) {
+    <div class="section-head">
+      <div>
+        <h1>Candidatures</h1>
+        <p class="muted">{{ j.title }}</p>
+      </div>
+      <div class="row-actions">
+        @if (canAddCandidate()) {
+          <a class="button-link" [routerLink]="['/recruteur/offres', j.id, 'candidatures', 'ajouter']">Ajouter un candidat</a>
+        }
+        <a class="button-link" [routerLink]="['/recruteur/offres', j.id, 'kanban']">Vue Kanban</a>
+        <button type="button" class="menu-trigger" [cdkMenuTriggerFor]="exportMenu" [attr.aria-busy]="exporting() !== null">
+          {{ exporting() !== null ? 'Export…' : 'Exporter' }}
+          <app-nav-icon name="chevron" [size]="16" />
+        </button>
+        <ng-template #exportMenu>
+          <div class="menu" cdkMenu aria-label="Exporter les candidatures filtrées">
+            <button type="button" class="menu-item" cdkMenuItem [cdkMenuItemDisabled]="exporting() !== null" (cdkMenuItemTriggered)="exportAs('CSV')">Format CSV</button>
+            <button type="button" class="menu-item" cdkMenuItem [cdkMenuItemDisabled]="exporting() !== null" (cdkMenuItemTriggered)="exportAs('XLSX')">Format Excel</button>
+          </div>
+        </ng-template>
+        <a class="button-link" [routerLink]="['/recruteur/offres', j.id]">Voir l'offre</a>
+        <button type="button" (click)="reload()" [disabled]="loading()">Actualiser</button>
+      </div>
+    </div>
+
+    <div class="filters">
+      <input type="search" placeholder="Nom, titre ou compétence…" (input)="onSearch($event)"
+             aria-label="Rechercher un candidat" />
+      <select (change)="onStage($event)" aria-label="Filtrer par étape">
+        <option value="">Toutes les étapes</option>
+        @for (s of stages(); track s.id) { <option [value]="s.id">{{ s.name }}</option> }
+      </select>
+      <select (change)="onStatus($event)" aria-label="Filtrer par statut">
+        <option value="">Tous les statuts</option>
+        @for (s of statuses; track s.value) { <option [value]="s.value">{{ s.label }}</option> }
+      </select>
+      <select (change)="onKnockout($event)" aria-label="Filtrer par questions éliminatoires">
+        <option value="">Questions éliminatoires : toutes</option>
+        <option value="false">Critères remplis</option>
+        <option value="true">Critère éliminatoire non rempli</option>
+      </select>
+      <select (change)="onMinRating($event)" aria-label="Filtrer par note minimale">
+        <option value="">Toutes les notes</option>
+        @for (n of [5, 4, 3, 2, 1]; track n) { <option [value]="n">{{ n }} étoile{{ n > 1 ? 's' : '' }}{{ n < 5 ? ' et plus' : '' }}</option> }
+      </select>
+      @if (tagOptions().length) {
+        <select (change)="onTag($event)" aria-label="Filtrer par étiquette">
+          <option value="">Toutes les étiquettes</option>
+          @for (t of tagOptions(); track t) { <option [value]="t">{{ t }}</option> }
+        </select>
+      }
+      <select (change)="onSort($event)" aria-label="Trier les candidatures">
+        @for (s of sorts; track s.value) { <option [value]="s.value">Tri : {{ s.label }}</option> }
+      </select>
+    </div>
+
+    @if (error()) { <p class="form-error" role="alert">{{ error() }}</p> }
+    <div role="status" aria-live="polite">
+      @if (bulkMessage()) {
+        <p class="form-info">{{ bulkMessage() }}</p>
+        @if (bulkFailures().length) {
+          <ul class="bulk-failures">
+            @for (f of bulkFailures(); track f.applicationId) {
+              <li>{{ f.candidateName ?? ('Candidature n° ' + f.applicationId) }} : {{ f.reason }}</li>
+            }
+          </ul>
+        }
+      }
+    </div>
+
+    @if (checkedItems().length > 0) {
+      <div class="compare-bar">
+        @if (canCompare()) {
+          <a class="button-link" [routerLink]="['/recruteur/offres', j.id, 'comparer']"
+             [queryParams]="{ ids: compareIds() }">Comparer ({{ checkedItems().length }})</a>
+        } @else {
+          <span class="muted">Cochez de 2 à 4 candidats pour les comparer côte à côte.</span>
+        }
+      </div>
+    }
+
+    @if (canManage() && checkedItems().length > 0) {
+      <app-bulk-actions [jobId]="j.id" [stages]="stages()" [selection]="checkedItems()"
+                        (done)="onBulkDone($event)" (messaged)="onBulkMessaged($event)" (cleared)="clearSelection()" />
+    }
+
+    <div class="applications-layout" [class.with-preview]="selected() !== null">
+      <div>
+        @if (loading() && !result()) {
+          <p>Chargement…</p>
+        } @else if (result(); as r) {
+          @if (r.content.length === 0) {
+            <p class="muted">
+              {{ hasFilters() ? 'Aucune candidature ne correspond à ces critères.' : 'Aucune candidature reçue pour cette offre.' }}
+            </p>
+          } @else {
+            <div class="table-wrap" [class.loading]="loading()">
+              <table class="table">
+                <caption class="sr-only">Candidatures pour « {{ j.title }} »</caption>
+                <thead>
+                  <tr>
+                    <th scope="col" class="check-col">
+                      <input type="checkbox" [checked]="allChecked()" [indeterminate]="someChecked()"
+                             [disabled]="selectable().length === 0" (change)="toggleAll($event)"
+                             aria-label="Sélectionner toutes les candidatures de la page" />
+                    </th>
+                    <th scope="col">Candidat</th><th scope="col">Étape</th><th scope="col">Statut</th>
+                    <th scope="col">Score</th><th scope="col">Reçue le</th><th scope="col">CV</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (a of r.content; track a.id) {
+                    <tr [class.selected]="selected()?.id === a.id" [class.checked]="checkedIds().has(a.id)">
+                      <td class="check-col">
+                        <input type="checkbox" [checked]="checkedIds().has(a.id)" [disabled]="a.status === 'RETIREE'"
+                               (change)="toggle(a, $event)" [attr.aria-label]="'Sélectionner ' + a.candidateName" />
+                      </td>
+                      <td>
+                        <a [routerLink]="['/recruteur/candidatures', a.id]"><strong>{{ a.candidateName }}</strong></a>
+                        @if (a.headline) { <div class="muted"><small>{{ a.headline }}</small></div> }
+                        @if (place(a)) { <div class="muted"><small>{{ place(a) }}</small></div> }
+                        <app-star-rating [value]="a.rating" [readonly]="true" />
+                        @if (a.tags.length > 0) {
+                          <ul class="chip-list compact" aria-label="Étiquettes">
+                            @for (t of a.tags; track t) { <li class="chip small tag">{{ t }}</li> }
+                          </ul>
+                        }
+                        @if (a.skills.length > 0) {
+                          <ul class="chip-list compact" aria-label="Compétences">
+                            @for (s of a.skills; track s) { <li class="chip small">{{ s }}</li> }
+                          </ul>
+                        }
+                      </td>
+                      <td>
+                        @if (a.stageName) {
+                          <span class="stage-dot" [style.background]="a.stageColor" aria-hidden="true"></span>
+                          {{ a.stageName }}
+                        } @else { — }
+                      </td>
+                      <td>
+                        <span class="badge app-status-{{ a.status }}">{{ statusLabel(a.status) }}</span>
+                        @if (a.knockoutFlagged) {
+                          <div><span class="badge knockout">Critère éliminatoire</span></div>
+                        }
+                        @if (a.source !== 'PLATEFORME') {
+                          <div><small class="muted">Source : {{ sourceLabel(a) }}</small></div>
+                        }
+                      </td>
+                      <td class="score-col">
+                        @if (a.scoreHidden) {
+                          <span class="muted" [attr.title]="hiddenHint">Masqué</span>
+                          <span class="sr-only"> : {{ hiddenHint }}</span>
+                        } @else if (a.score !== null) {
+                          <strong>{{ a.score | number: '1.0-1' }}</strong><span class="muted">/100</span>
+                        } @else { <span class="muted">—</span> }
+                      </td>
+                      <td>{{ a.appliedAt | date: 'd MMM y' }}</td>
+                      <td>
+                        @if (a.cv) {
+                          <button type="button" (click)="preview(a)"
+                                  [attr.aria-pressed]="selected()?.id === a.id" aria-controls="cv-preview"
+                                  [attr.aria-label]="'Aperçu du CV de ' + a.candidateName">
+                            {{ selected()?.id === a.id ? 'Masquer' : 'Aperçu' }}
+                          </button>
+                        } @else { <span class="muted">—</span> }
+                      </td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+
+            <div class="pager">
+              <button type="button" (click)="goTo(r.page - 1)" [disabled]="r.page === 0">Précédent</button>
+              <span>Page {{ r.page + 1 }} / {{ totalPages() }} · {{ r.totalElements }} candidature(s)</span>
+              <button type="button" (click)="goTo(r.page + 1)" [disabled]="r.page + 1 >= r.totalPages">Suivant</button>
+            </div>
+          }
+        }
+      </div>
+
+      @if (selected(); as s) {
+        <section id="cv-preview" class="card cv-preview" aria-labelledby="cv-preview-title">
+          <div class="section-head">
+            <h2 id="cv-preview-title" tabindex="-1" #previewHeading>CV de {{ s.candidateName }}</h2>
+            <button type="button" class="icon" (click)="closePreview()" aria-label="Fermer l'aperçu">✕</button>
+          </div>
+          @if (s.cv; as cv) {
+            <app-document-preview [applicationId]="s.id" [document]="cv" [label]="'CV de ' + s.candidateName" />
+          }
+          <a class="button-link" [routerLink]="['/recruteur/candidatures', s.id]">Ouvrir la fiche complète</a>
+        </section>
+      }
+    </div>
+  } @else {
+    <p>Chargement…</p>
+  }
+</div>

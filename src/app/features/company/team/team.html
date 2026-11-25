@@ -1,0 +1,8 @@
+ <div class="page">
+      <h1>Équipe</h1>
+      <app-members-section />
+      @if (isAdmin()) {
+        <app-invitations-section />
+      }
+      <app-departments-section />
+    </div>

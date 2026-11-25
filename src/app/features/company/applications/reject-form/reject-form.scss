@@ -1,0 +1,6 @@
+:host { display: block; }
+form { display: flex; flex-direction: column; gap: .75rem; }
+.field select { align-self: flex-start; max-width: 100%; }
+.link { align-self: flex-start; background: none; border: 0; padding: 0; text-decoration: underline; cursor: pointer; color: inherit; font-size: .85rem; }
+.status-banner { margin: 0; }
+button.primary.danger-fill { background: var(--danger-solid); border-color: var(--danger); }

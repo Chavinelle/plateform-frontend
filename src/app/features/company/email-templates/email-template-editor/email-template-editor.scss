@@ -1,0 +1,19 @@
+.editor { display: flex; flex-direction: column; gap: .9rem; }
+.layout { display: grid; grid-template-columns: minmax(0, 2fr) minmax(0, 1fr); gap: 1rem; }
+@media (max-width: 800px) { .layout { grid-template-columns: 1fr; } }
+.fields { display: flex; flex-direction: column; gap: .75rem; }
+textarea { width: 100%; font: inherit; line-height: 1.45; }
+.variables { border: 1px solid var(--border); border-radius: 6px; padding: .6rem .75rem; align-self: start; }
+.variables h3 { margin: 0 0 .5rem; font-size: 1rem; }
+.variables ul { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: .5rem; }
+.variables li { display: flex; flex-wrap: wrap; gap: .25rem .5rem; align-items: center; }
+.variables .desc { flex-basis: 100%; font-size: .85rem; color: var(--text); }
+.badge-warn { background: var(--warning-soft); color: var(--warning); }
+button.small { padding: .15rem .5rem; font-size: .85rem; }
+code { background: var(--surface-2); padding: 0 .25rem; border-radius: 3px; }
+.preview { border-top: 1px solid var(--border); padding-top: .6rem; }
+.preview h3 { margin: 0 0 .4rem; font-size: 1rem; }
+.preview pre { white-space: pre-wrap; font: inherit; background: var(--surface-2); border: 1px solid var(--border); border-radius: 6px; padding: .75rem; margin: 0; }
+.preview pre:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+.small { font-size: .85rem; }
+.confirm p { margin: 0 0 .5rem; }

@@ -1,0 +1,71 @@
+<div class="page">
+  <h1>Signalements</h1>
+
+  <div class="filters" role="group" aria-label="Filtrer les signalements">
+    <label class="check">
+      <input type="checkbox" [checked]="!open()" (change)="open.set(!$any($event.target).checked)" />
+      Afficher aussi les signalements déjà traités
+    </label>
+    @if (loading()) { <span class="muted" role="status">Chargement…</span> }
+  </div>
+
+  <p class="sr-only" role="status" aria-live="polite">{{ message() }}</p>
+  @if (message()) { <p class="form-info">{{ message() }}</p> }
+  @if (error()) { <p class="form-error" role="alert">{{ error() }}</p> }
+
+  <ul class="groups">
+    @for (g of groups(); track g.jobId) {
+      <li class="card group">
+        <div class="section-head">
+          <h2>{{ g.jobTitle }} <small class="muted">· {{ g.companyName }}</small></h2>
+          @if (g.moderatedAt) { <span class="badge moderated">Retirée le {{ g.moderatedAt | date: 'd MMM y' }}</span> }
+          @else if (g.openCount) { <span class="badge status-EN_ATTENTE">{{ g.openCount }} à traiter</span> }
+        </div>
+        @if (g.moderationReason) { <p class="muted">Motif du retrait : {{ g.moderationReason }}</p> }
+
+        <ul class="reports">
+          @for (r of g.reports; track r.id) {
+            <li>
+              <strong>{{ reasonLabels[r.reason] }}</strong>
+              <span class="muted"> · {{ r.createdAt | date: 'd MMM y, HH:mm' }} · {{ r.reporterKnown ? 'utilisateur connecté' : 'visiteur' }}
+                · {{ statusLabels[r.status] }}</span>
+              @if (r.comment) { <p class="comment">{{ r.comment }}</p> }
+            </li>
+          }
+        </ul>
+
+        @if (pending()?.jobId === g.jobId) {
+          <div class="decision" role="group" [attr.aria-label]="'Confirmer la décision pour ' + g.jobTitle">
+            @if (pending()!.action === 'RETIRER') {
+              <p>L’offre ne sera plus visible et l’entreprise ne pourra pas la republier. Un e-mail lui est envoyé avec le motif.</p>
+              <label [for]="'mod-reason-' + g.jobId">Motif du retrait (obligatoire)</label>
+              <textarea [id]="'mod-reason-' + g.jobId" rows="3" maxlength="1000" aria-required="true" [value]="reason()"
+                        (input)="reason.set($any($event.target).value)"></textarea>
+            } @else if (pending()!.action === 'CLASSER') {
+              <p>Les signalements à traiter seront classés sans suite ; l’offre reste en ligne.</p>
+            } @else {
+              <p>L’offre redeviendra visible si elle est publiée ; l’entreprise est prévenue.</p>
+            }
+            <div class="actions">
+              <button type="button" [class.danger]="pending()!.action === 'RETIRER'" (click)="confirm()" [disabled]="busy()">
+                {{ busy() ? 'Enregistrement…' : 'Confirmer' }}
+              </button>
+              <button type="button" (click)="pending.set(null)" [disabled]="busy()">Annuler</button>
+            </div>
+          </div>
+        } @else {
+          <div class="actions">
+            @if (g.moderatedAt) {
+              <button type="button" (click)="ask(g.jobId, 'RETABLIR')">Lever le retrait</button>
+            } @else {
+              @if (g.openCount) { <button type="button" (click)="ask(g.jobId, 'CLASSER')">Classer sans suite</button> }
+              <button type="button" class="danger" (click)="ask(g.jobId, 'RETIRER')">Retirer l’offre</button>
+            }
+          </div>
+        }
+      </li>
+    } @empty {
+      @if (!loading()) { <li class="muted">{{ open() ? 'Aucun signalement à traiter.' : 'Aucun signalement.' }}</li> }
+    }
+  </ul>
+</div>

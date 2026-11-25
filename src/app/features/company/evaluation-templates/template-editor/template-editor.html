@@ -1,0 +1,77 @@
+<form [formGroup]="form" (ngSubmit)="submit()" novalidate class="editor">
+  @if (template()?.used) {
+    <p class="status-banner">
+      Cette grille a déjà servi à des évaluations. Si vous modifiez ses critères, une nouvelle version sera créée
+      et l'ancienne archivée : les évaluations passées restent inchangées.
+    </p>
+  }
+
+  <div class="form-grid">
+    <div class="field">
+      <label for="tpl-name">Nom de la grille <span aria-hidden="true">*</span></label>
+      <input id="tpl-name" formControlName="name" required
+             [attr.aria-invalid]="invalid(form.controls.name)"
+             [attr.aria-describedby]="invalid(form.controls.name) ? 'tpl-name-error' : null" />
+      @if (invalid(form.controls.name)) {
+        <small id="tpl-name-error" class="field-error">Le nom est obligatoire (100 caractères maximum).</small>
+      }
+    </div>
+    <div class="field">
+      <label for="tpl-description">Description</label>
+      <input id="tpl-description" formControlName="description" />
+    </div>
+  </div>
+
+  <fieldset class="criteria" formArrayName="criteria">
+    <legend>Critères ({{ criteria.length }} / {{ maxCriteria }})</legend>
+    <p class="muted hint">
+      Chaque critère est noté de 1 à 5. Son poids fixe sa part dans le score global.
+    </p>
+
+    <ol class="criteria-list">
+      @for (c of criteria.controls; track c; let i = $index; let first = $first; let last = $last) {
+        <li class="criterion" [formGroupName]="i">
+          <div class="criterion-fields">
+            <div class="field label-field">
+              <label [for]="'crit-label-' + i">Critère {{ i + 1 }} <span aria-hidden="true">*</span></label>
+              <input #labelInput [id]="'crit-label-' + i" formControlName="label" required
+                     [attr.aria-invalid]="invalid(c.controls.label)" />
+            </div>
+            <div class="field weight-field">
+              <label [for]="'crit-weight-' + i">Poids</label>
+              <input [id]="'crit-weight-' + i" type="number" min="1" max="100" formControlName="weight" required
+                     [attr.aria-invalid]="invalid(c.controls.weight)"
+                     [attr.aria-describedby]="'crit-percent-' + i" />
+              <small [id]="'crit-percent-' + i" class="muted">soit {{ percents()[i] }} % du score</small>
+            </div>
+            <div class="field description-field">
+              <label [for]="'crit-description-' + i">Ce qui est évalué</label>
+              <input [id]="'crit-description-' + i" formControlName="description" />
+            </div>
+          </div>
+          <div class="percent-bar" aria-hidden="true"><span [style.width.%]="percents()[i]"></span></div>
+          <div class="row-actions">
+            <button type="button" (click)="move(i, -1)" [disabled]="first"
+                    [attr.aria-label]="'Monter le critère ' + (i + 1)">↑</button>
+            <button type="button" (click)="move(i, 1)" [disabled]="last"
+                    [attr.aria-label]="'Descendre le critère ' + (i + 1)">↓</button>
+            <button type="button" class="danger" (click)="removeCriterion(i)" [disabled]="criteria.length <= 1"
+                    [attr.aria-label]="'Supprimer le critère ' + (i + 1)">Supprimer</button>
+          </div>
+          @if (invalid(c.controls.label) || invalid(c.controls.weight)) {
+            <small class="field-error">Libellé obligatoire, poids entre 1 et 100.</small>
+          }
+        </li>
+      }
+    </ol>
+
+    <button type="button" (click)="addCriterion()" [disabled]="criteria.length >= maxCriteria">Ajouter un critère</button>
+  </fieldset>
+
+  @if (error()) { <p class="form-error" role="alert">{{ error() }}</p> }
+
+  <div class="actions">
+    <button type="submit" [disabled]="saving()">{{ saving() ? 'Enregistrement…' : 'Enregistrer la grille' }}</button>
+    <button type="button" (click)="cancelled.emit()" [disabled]="saving()">Annuler</button>
+  </div>
+</form>

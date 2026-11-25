@@ -1,0 +1,76 @@
+<section class="hero">
+  <p class="hero-badge"><app-nav-icon name="shield" [size]="16" /> Entreprises vérifiées avant publication</p>
+  <h1>Trouvez le poste <span class="accent">qui vous correspond</span></h1>
+  <p class="hero-lead">Des offres publiées par des entreprises dont l'inscription a été validée, et un suivi clair de chaque candidature.</p>
+  <form [formGroup]="form" (ngSubmit)="search()" class="hero-search" role="search">
+    <input formControlName="q" placeholder="Métier, compétence, entreprise…" aria-label="Mots-clés" />
+    <input formControlName="city" placeholder="Ville" aria-label="Ville" />
+    <button type="submit">
+      <app-nav-icon name="search" [size]="18" />
+      Rechercher
+    </button>
+  </form>
+</section>
+
+<div class="page page-wide">
+  <section aria-labelledby="latest-title">
+    <div class="section-head">
+      <div>
+        <p class="eyebrow">À la une</p>
+        <h2 id="latest-title">Dernières offres</h2>
+      </div>
+      <a class="button-link" routerLink="/offres">Toutes les offres <app-nav-icon name="arrow" [size]="16" /></a>
+    </div>
+
+    @if (loading()) {
+      <p>Chargement…</p>
+    } @else if (error()) {
+      <p class="form-error" role="alert">Impossible de charger les offres pour le moment.</p>
+    } @else if (jobs().length === 0) {
+      <p class="muted">Aucune offre n'est publiée pour le moment.</p>
+    } @else {
+      <div class="job-grid">
+        @for (j of jobs(); track j.id) { <app-job-card [job]="j" /> }
+      </div>
+    }
+  </section>
+
+  @if (!auth.user()) {
+    <section class="steps" aria-labelledby="steps-title">
+      <p class="eyebrow">Comment ça marche</p>
+      <h2 id="steps-title">Postuler en toute clarté</h2>
+      <ol>
+        <li>
+          <span class="step-icon" aria-hidden="true"><app-nav-icon name="user" /></span>
+          <h3>Créez votre profil</h3>
+          <p>Expériences, compétences et CV : renseignés une fois, réutilisés à chaque candidature.</p>
+        </li>
+        <li>
+          <span class="step-icon" aria-hidden="true"><app-nav-icon name="send" /></span>
+          <h3>Postulez en quelques clics</h3>
+          <p>Répondez aux questions de l'offre et joignez les documents demandés.</p>
+        </li>
+        <li>
+          <span class="step-icon" aria-hidden="true"><app-nav-icon name="check" /></span>
+          <h3>Suivez chaque étape</h3>
+          <p>Avancement, entretiens, tests et messages : tout est visible dans votre espace.</p>
+        </li>
+      </ol>
+    </section>
+
+    <section class="cta-row" aria-label="Créer un compte">
+      <div class="cta-card">
+        <span class="cta-icon" aria-hidden="true"><app-nav-icon name="briefcase" [size]="22" /></span>
+        <h2>Vous cherchez un emploi ?</h2>
+        <p>Créez votre profil, déposez vos CV et suivez vos candidatures.</p>
+        <a class="button-link primary" routerLink="/inscription">Créer mon compte candidat</a>
+      </div>
+      <div class="cta-card dark">
+        <span class="cta-icon" aria-hidden="true"><app-nav-icon name="building" [size]="22" /></span>
+        <h2>Vous recrutez ?</h2>
+        <p>Publiez vos offres et gérez vos candidatures sur un tableau de suivi.</p>
+        <a class="button-link" routerLink="/inscription">Inscrire mon entreprise</a>
+      </div>
+    </section>
+  }
+</div>

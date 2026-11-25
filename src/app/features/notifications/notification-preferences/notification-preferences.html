@@ -1,0 +1,55 @@
+<div class="page">
+  <p><a routerLink="/notifications">← Notifications</a></p>
+  <h1>Préférences de notification</h1>
+  <p class="muted">
+    Choisissez comment être prévenu(e) de chaque événement. Certains e-mails sont toujours envoyés,
+    car ils contiennent une information indispensable (créneau d'entretien avec son fichier d'agenda, lien d'un test).
+  </p>
+
+  <p class="sr-only" role="status" aria-live="polite">{{ message() }}</p>
+  @if (message()) { <p class="form-info">{{ message() }}</p> }
+  @if (error()) { <p class="form-error" role="alert">{{ error() }}</p> }
+
+  @if (loading()) {
+    <p>Chargement…</p>
+  } @else {
+    <form (submit)="$event.preventDefault(); save()">
+      <div class="table-wrap">
+        <table class="table prefs">
+          <caption class="sr-only">Préférences par type d'événement</caption>
+          <thead>
+            <tr><th scope="col">Événement</th><th scope="col">Dans l'application</th><th scope="col">Par e-mail</th></tr>
+          </thead>
+          <tbody>
+            @for (p of prefs(); track p.type) {
+              <tr>
+                <th scope="row">{{ p.label }}</th>
+                <td>
+                  <input type="checkbox" [checked]="p.inApp" [attr.aria-label]="'Dans l’application : ' + p.label"
+                         (change)="toggle(p.type, 'inApp', $any($event.target).checked)" />
+                </td>
+                <td>
+                  @switch (p.emailMode) {
+                    @case ('FACULTATIF') {
+                      <input type="checkbox" [checked]="p.email" [attr.aria-label]="'Par e-mail : ' + p.label"
+                             (change)="toggle(p.type, 'email', $any($event.target).checked)" />
+                    }
+                    @case ('TOUJOURS') {
+                      <input type="checkbox" checked disabled [attr.aria-label]="'Par e-mail : ' + p.label + ' (toujours envoyé)'"
+                             [attr.aria-describedby]="'always-' + p.type" />
+                      <small class="muted" [id]="'always-' + p.type">toujours envoyé</small>
+                    }
+                    @default { <span class="muted" aria-label="Pas d’e-mail pour cet événement">—</span> }
+                  }
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+      <div class="actions">
+        <button type="submit" [disabled]="saving() || !dirty()">{{ saving() ? 'Enregistrement…' : 'Enregistrer' }}</button>
+      </div>
+    </form>
+  }
+</div>

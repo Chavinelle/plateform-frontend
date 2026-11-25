@@ -1,0 +1,48 @@
+@if (compact()) {
+  <footer class="footer compact">
+    <p>© {{ year }} Recrutement</p>
+    <nav aria-label="Informations légales">
+      <ul class="legal-links">
+        <li><a routerLink="/conditions-utilisation">Conditions d'utilisation</a></li>
+        <li><a routerLink="/confidentialite">Confidentialité</a></li>
+        <li><a routerLink="/mentions-legales">Mentions légales</a></li>
+      </ul>
+    </nav>
+  </footer>
+} @else {
+  <footer class="footer">
+    <div class="inner">
+      <div class="about">
+        <a routerLink="/" class="brand" aria-label="Recrutement, accueil">
+          <span class="brand-mark" aria-hidden="true">R</span>
+          <span>Recrutement</span>
+        </a>
+        <p>Des offres d'entreprises vérifiées et un suivi clair de chaque candidature, de l'envoi à la réponse.</p>
+      </div>
+      <nav aria-labelledby="footer-candidates">
+        <h2 id="footer-candidates">Candidats</h2>
+        <ul>
+          <li><a routerLink="/offres">Offres d'emploi</a></li>
+          <li><a routerLink="/inscription">Créer un compte</a></li>
+          <li><a routerLink="/login">Connexion</a></li>
+        </ul>
+      </nav>
+      <nav aria-labelledby="footer-companies">
+        <h2 id="footer-companies">Entreprises</h2>
+        <ul>
+          <li><a routerLink="/inscription">Inscrire mon entreprise</a></li>
+          <li><a routerLink="/login">Espace recruteur</a></li>
+        </ul>
+      </nav>
+      <nav aria-labelledby="footer-legal">
+        <h2 id="footer-legal">Informations légales</h2>
+        <ul>
+          <li><a routerLink="/conditions-utilisation">Conditions d'utilisation</a></li>
+          <li><a routerLink="/confidentialite">Confidentialité</a></li>
+          <li><a routerLink="/mentions-legales">Mentions légales</a></li>
+        </ul>
+      </nav>
+    </div>
+    <p class="copyright">© {{ year }} Plateforme de recrutement. Tous droits réservés.</p>
+  </footer>
+}

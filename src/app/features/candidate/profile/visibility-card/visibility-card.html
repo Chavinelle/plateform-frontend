@@ -1,0 +1,21 @@
+ <section class="card">
+      <h2>Confidentialité</h2>
+      <p class="muted">Choisissez qui peut consulter votre profil. Par défaut, il est privé.</p>
+
+      <fieldset class="radio-list" [disabled]="saving()">
+        <legend class="sr-only">Visibilité du profil</legend>
+        @for (o of options; track o.value) {
+          <label class="radio-option">
+            <input type="radio" name="visibility" [value]="o.value"
+                   [checked]="current() === o.value" (change)="choose(o.value)" />
+            <span>
+              <strong>{{ o.label }}</strong><br />
+              <small class="muted">{{ o.description }}</small>
+            </span>
+          </label>
+        }
+      </fieldset>
+
+      @if (message()) { <p class="form-info" role="status">{{ message() }}</p> }
+      @if (error()) { <p class="form-error" role="alert">{{ error() }}</p> }
+    </section>

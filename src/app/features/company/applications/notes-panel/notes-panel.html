@@ -1,0 +1,52 @@
+<p class="muted"><small>Visibles uniquement par votre équipe, jamais par le candidat.</small></p>
+
+@if (error()) { <p class="form-error" role="alert">{{ error() }}</p> }
+
+@if (loading()) {
+  <p>Chargement…</p>
+} @else {
+  <ul class="notes">
+    @for (v of views(); track v.note.id) {
+      <li class="note">
+        <div class="note-head">
+          <strong>{{ v.note.authorName }}</strong>
+          <small class="muted">
+            {{ v.note.createdAt | date: 'd MMM y, HH:mm' }}@if (v.note.edited) { · modifiée }
+          </small>
+        </div>
+
+        @if (editingId() === v.note.id) {
+          <label class="sr-only" [for]="'edit-note-' + v.note.id">Modifier la note</label>
+          <app-mention-input [control]="editDraft" [people]="people()" [inputId]="'edit-note-' + v.note.id"
+                             [maxLength]="maxNote" [(mentions)]="editMentions" />
+          <div class="row-actions">
+            <button type="button" class="primary" (click)="saveEdit(v.note)" [disabled]="busy() || editDraft.invalid">Enregistrer</button>
+            <button type="button" (click)="cancelEdit()" [disabled]="busy()">Annuler</button>
+          </div>
+        } @else {
+          <p class="pre">@for (s of v.segments; track $index) {@if (s.mention) {<span class="mention">{{ s.text }}</span>} @else {{{ s.text }}}}</p>
+          @if (v.note.mentions.length) {
+            <small class="sr-only">Mentionne : {{ mentionNames(v.note) }}</small>
+          }
+          @if (v.note.mine) {
+            <div class="row-actions">
+              <button type="button" (click)="startEdit(v.note)" [disabled]="busy()">Modifier</button>
+              <button type="button" class="danger" (click)="remove(v.note)" [disabled]="busy()">Supprimer</button>
+            </div>
+          }
+        }
+      </li>
+    } @empty {
+      <li class="muted">Aucune note pour le moment.</li>
+    }
+  </ul>
+
+  <form class="note-form" (ngSubmit)="add()">
+    <label for="new-note">Ajouter une note</label>
+    <app-mention-input [control]="draft" [people]="people()" inputId="new-note" [maxLength]="maxNote"
+                       placeholder="Impressions, points à vérifier, @collègue…" [(mentions)]="draftMentions" />
+    <div class="actions">
+      <button type="submit" class="primary" [disabled]="busy() || draft.invalid">Ajouter</button>
+    </div>
+  </form>
+}

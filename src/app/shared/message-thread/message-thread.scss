@@ -1,0 +1,15 @@
+:host { display: flex; flex-direction: column; gap: .75rem; }
+.messages {
+  list-style: none; margin: 0; padding: .25rem; display: flex; flex-direction: column; gap: .5rem;
+  max-height: 26rem; overflow-y: auto; border: 1px solid var(--border); border-radius: 6px; background: var(--surface-2);
+}
+.messages:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+.message { max-width: 85%; align-self: flex-start; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: .45rem .65rem; }
+.message.mine { align-self: flex-end; background: var(--primary-soft); border-color: var(--primary-border); }
+.message.other-side:not(.mine) { background: var(--success-soft); border-color: var(--success-border); }
+.meta { display: flex; gap: .5rem; flex-wrap: wrap; font-size: .8rem; color: var(--text-muted); }
+.author { font-weight: 600; color: var(--text); }
+.body { white-space: pre-wrap; margin: .25rem 0 0; overflow-wrap: anywhere; }
+.read { display: block; text-align: right; font-size: .75rem; color: var(--text-muted); }
+.compose { display: flex; flex-direction: column; gap: .35rem; }
+.compose textarea { width: 100%; font: inherit; }

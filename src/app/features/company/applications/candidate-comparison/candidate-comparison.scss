@@ -1,0 +1,15 @@
+.table-wrap { overflow-x: auto; }
+.table-wrap:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+.comparison { min-width: 640px; }
+.comparison caption { text-align: left; font-weight: 600; margin-bottom: .5rem; }
+.comparison th[scope='col'] { text-align: left; vertical-align: bottom; min-width: 10rem; }
+.comparison th[scope='row'] { text-align: left; font-weight: 500; width: 13rem; }
+.comparison td { vertical-align: top; font-variant-numeric: tabular-nums; }
+.comparison tr.group th { background: var(--surface-2); text-align: left; font-weight: 700; }
+.block { display: block; }
+.best { background: var(--success-soft); }
+.best-mark { color: var(--success); margin-left: .25rem; }
+.hidden-value { color: var(--text-muted); font-style: italic; }
+.bar { display: block; width: 100%; max-width: 8rem; height: 6px; background: var(--surface-3); border-radius: 3px; overflow: hidden; margin-top: .25rem; }
+.bar span { display: block; height: 100%; background: var(--primary-solid); }
+.opinions { list-style: none; padding: 0; margin: 0; }

@@ -1,0 +1,12 @@
+:host { display: inline-block; }
+
+/* #767676 et #b45309: contraste ≥ 3:1 sur fond blanc (composant graphique, WCAG 1.4.11) */
+.stars { color: var(--text-muted); letter-spacing: .05rem; }
+.stars .on { color: var(--warning); }
+
+.rating { border: 0; padding: 0; margin: 0; display: inline-flex; align-items: center; gap: .1rem; }
+.rating label { font-size: 1.5rem; line-height: 1; color: var(--text-muted); cursor: pointer; padding: 0 .05rem; }
+.rating label.on { color: var(--warning); }
+.rating input:focus-visible + label { outline: 2px solid var(--primary); outline-offset: 2px; border-radius: 2px; }
+.rating:disabled label { cursor: not-allowed; opacity: .6; }
+.clear { margin-left: .6rem; font-size: .85rem; background: none; border: 0; padding: 0; text-decoration: underline; cursor: pointer; color: inherit; }

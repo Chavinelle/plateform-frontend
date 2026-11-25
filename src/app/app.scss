@@ -1,0 +1,14 @@
+// Mise en page avec barre latérale : la barre à gauche, le contenu (barre du haut, page, pied de page) à droite.
+.shell { display: flex; min-height: 100vh; min-height: 100dvh; }
+.shell-main { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.shell-main .content { flex: 1; }
+main:focus { outline: none; }        // cible du lien d'évitement : pas d'anneau sur toute la page
+
+// lien d'évitement : invisible jusqu'à ce qu'il reçoive le focus
+.skip-link {
+  position: absolute; left: .75rem; top: -3rem; z-index: 100;
+  padding: .6rem 1rem; border-radius: var(--radius-sm);
+  background: var(--primary-solid); color: var(--on-primary); font-weight: 600; text-decoration: none;
+  transition: top .15s;
+}
+.skip-link:focus { top: .75rem; }

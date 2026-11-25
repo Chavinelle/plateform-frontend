@@ -1,0 +1,40 @@
+<article class="job-card">
+      <div class="job-card-head">
+        @if (job().companyHasLogo) {
+          <img class="company-logo-sm" [src]="logoUrl()" [alt]="'Logo de ' + job().companyName" loading="lazy" />
+        } @else {
+          <div class="company-logo-sm placeholder" aria-hidden="true">{{ initials() }}</div>
+        }
+        <div>
+          <h3><a [routerLink]="['/offres', job().id]">{{ job().title }}</a></h3>
+          <a class="muted" [routerLink]="['/entreprises', job().companyId]">{{ job().companyName }}</a>
+        </div>
+        @if (fav.enabled()) {
+  <button type="button" class="heart" (click)="fav.toggle(job().id)"
+          [attr.aria-pressed]="fav.isSaved(job().id)"
+          [attr.aria-label]="fav.isSaved(job().id) ? 'Retirer des favoris' : 'Ajouter aux favoris'">
+    {{ fav.isSaved(job().id) ? '♥' : '♡' }}
+  </button>
+}
+      </div>
+
+      <p class="meta">
+        @if (place()) { <span class="badge">{{ place() }}</span> }
+        @if (job().contractType; as c) { <span class="badge">{{ contractLabels[c] }}</span> }
+        @if (job().experienceLevel; as e) { <span class="badge">{{ experienceLabels[e] }}</span> }
+        @if (job().remotePolicy !== 'SUR_SITE') { <span class="badge">{{ remoteLabels[job().remotePolicy] }}</span> }
+      </p>
+
+      @if (salary(); as s) { <p class="salary">{{ s }}</p> }
+      @if (job().excerpt) { <p class="excerpt">{{ job().excerpt }}</p> }
+
+      @if (job().skills.length) {
+        <ul class="chip-list">
+          @for (s of job().skills.slice(0, 4); track s) { <li class="chip small">{{ s }}</li> }
+          @if (job().skills.length > 4) { <li class="chip small">+{{ job().skills.length - 4 }}</li> }
+        </ul>
+      }
+
+      @if (fav.hasApplied(job().id)) { <span class="badge badge-ok">Déjà postulé</span> }
+      <p class="muted"><small>{{ published() }}</small></p>
+    </article>

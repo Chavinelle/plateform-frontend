@@ -1,0 +1,87 @@
+@let t = template();
+<form [formGroup]="form" (ngSubmit)="save()" novalidate class="editor">
+  <p class="muted">{{ t.description }}</p>
+
+  <div class="layout">
+    <div class="fields">
+      <div class="field">
+        <label for="tpl-subject">Objet <span aria-hidden="true">*</span></label>
+        <input id="tpl-subject" formControlName="subject" required
+               [attr.aria-invalid]="form.controls.subject.invalid && form.controls.subject.touched" />
+      </div>
+      <div class="field">
+        <label for="tpl-body">Texte <span aria-hidden="true">*</span></label>
+        <textarea #bodyArea id="tpl-body" formControlName="body" rows="16" required aria-describedby="tpl-body-hint"
+                  [attr.aria-invalid]="form.controls.body.invalid && form.controls.body.touched"></textarea>
+        <small id="tpl-body-hint" class="muted">
+          Les variables entre accolades sont remplacées pour chaque candidat.
+          @if (t.required.length) {
+            Obligatoire{{ t.required.length > 1 ? 's' : '' }} :
+            @for (r of t.required; track r; let last = $last) { <code>{{ '{' + r + '}' }}</code>{{ last ? '.' : ', ' }} }
+          }
+        </small>
+      </div>
+    </div>
+
+    <section class="variables" aria-labelledby="vars-title">
+      <h3 id="vars-title">Variables disponibles</h3>
+      <ul>
+        @for (v of t.variables; track v.name) {
+          <li>
+            <code>{{ '{' + v.name + '}' }}</code>
+            @if (isRequired(v.name)) { <span class="badge badge-warn">obligatoire</span> }
+            <span class="desc">{{ v.description }}</span>
+            @if (canEdit()) {
+              <button type="button" class="small" (click)="insert(v.name)"
+                      [attr.aria-label]="'Insérer la variable ' + v.name + ' dans le texte'">Insérer</button>
+            }
+          </li>
+        }
+      </ul>
+    </section>
+  </div>
+
+  <p class="sr-only" role="status" aria-live="polite">{{ message() }}</p>
+  @if (error()) { <p class="form-error" role="alert">{{ error() }}</p> }
+
+  @if (confirmReset()) {
+    <div class="status-banner confirm" role="group" aria-label="Confirmer le retour au texte par défaut">
+      <p>Votre texte personnalisé sera supprimé et le texte par défaut s'appliquera de nouveau.</p>
+      <div class="actions">
+        <button type="button" class="danger" (click)="reset()" [disabled]="busy() !== null">
+          {{ busy() === 'reset' ? 'Rétablissement…' : 'Rétablir le texte par défaut' }}
+        </button>
+        <button type="button" (click)="confirmReset.set(false)" [disabled]="busy() !== null">Retour</button>
+      </div>
+    </div>
+  } @else {
+    <div class="actions">
+      @if (canEdit()) {
+        <button type="submit" [disabled]="busy() !== null">{{ busy() === 'save' ? 'Enregistrement…' : 'Enregistrer' }}</button>
+      }
+      <button type="button" (click)="showPreview()" [disabled]="busy() !== null">
+        {{ busy() === 'preview' ? 'Aperçu…' : 'Aperçu' }}
+      </button>
+      @if (canEdit() && t.customized) {
+        <button type="button" class="danger" (click)="confirmReset.set(true)" [disabled]="busy() !== null">Rétablir le texte par défaut</button>
+      }
+      <button type="button" (click)="closed.emit()" [disabled]="busy() !== null">Fermer</button>
+    </div>
+  }
+
+  @if (preview(); as p) {
+    <section class="preview" aria-labelledby="preview-title">
+      <h3 id="preview-title">Aperçu (valeurs d'exemple)</h3>
+      <p><strong>Objet :</strong> {{ p.subject }}</p>
+      <pre tabindex="0" aria-label="Texte de l'e-mail en aperçu">{{ p.body }}</pre>
+      <p class="muted small">
+        @switch (t.type) {
+          @case ('ENTRETIEN_INVITATION') { Le fichier d'agenda (.ics) sera joint automatiquement. }
+          @case ('ENTRETIEN_REPORT') { Le fichier d'agenda (.ics) mis à jour sera joint automatiquement. }
+          @case ('ENTRETIEN_ANNULATION') { Le fichier d'agenda (.ics) d'annulation sera joint automatiquement. }
+          @case ('REJET') { Le recruteur pourra encore modifier ce message au moment du rejet. }
+        }
+      </p>
+    </section>
+  }
+</form>

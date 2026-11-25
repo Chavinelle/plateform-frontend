@@ -1,0 +1,14 @@
+:host { display: flex; flex-direction: column; gap: .75rem; }
+.attempts { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: .5rem; }
+.attempt { border: 1px solid var(--border); border-radius: 6px; padding: .5rem .65rem; display: flex; flex-direction: column; gap: .3rem; }
+.attempt-head { display: flex; gap: .5rem; align-items: center; flex-wrap: wrap; }
+.facts { margin: 0; font-size: .9rem; }
+.attempt button { align-self: flex-start; }
+.attempt-COMMENCE { background: var(--primary-soft); color: var(--primary); }
+.attempt-TERMINE, .attempt-CORRIGE { background: var(--success-soft); color: var(--success); }
+.attempt-EXPIRE { background: var(--surface-2); color: var(--text); }
+.send { display: flex; flex-direction: column; gap: .6rem; border-top: 1px solid var(--border); padding-top: .6rem; }
+.send h3 { margin: 0; font-size: 1rem; }
+.send textarea { width: 100%; font: inherit; }
+.confirm p { margin: 0 0 .5rem; }
+.score { margin: 0; }

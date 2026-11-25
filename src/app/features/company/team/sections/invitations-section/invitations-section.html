@@ -1,0 +1,58 @@
+ <section class="card">
+      <h2>Invitations</h2>
+      <p class="muted">
+        Le collaborateur reçoit un lien par e-mail (valable 7 jours) pour créer son compte avec le rôle choisi.
+      </p>
+
+      <form [formGroup]="form" (ngSubmit)="invite()" novalidate class="inline-form">
+        <input type="email" formControlName="email" placeholder="adresse e-mail du collaborateur"
+               aria-label="Adresse e-mail" autocomplete="off" />
+        <select formControlName="role" aria-label="Rôle">
+          @for (r of roles; track r) { <option [value]="r">{{ roleLabel(r) }}</option> }
+        </select>
+        <button type="submit" [disabled]="sending()">{{ sending() ? 'Envoi…' : 'Inviter' }}</button>
+      </form>
+      @if (form.controls.email.touched && form.controls.email.invalid) {
+        <small class="field-error">Une adresse e-mail valide est requise.</small>
+      }
+      @if (message()) { <p class="form-info" role="status">{{ message() }}</p> }
+      @if (error()) { <p class="form-error" role="alert">{{ error() }}</p> }
+
+      @if (loading()) {
+        <p>Chargement…</p>
+      } @else if (items().length === 0) {
+        <p class="muted">Aucune invitation pour le moment.</p>
+      } @else {
+        <div class="table-wrap">
+          <table class="table">
+            <thead>
+              <tr><th>E-mail</th><th>Rôle</th><th>Statut</th><th>Invité par</th><th></th></tr>
+            </thead>
+            <tbody>
+              @for (i of items(); track i.id) {
+                <tr>
+                  <td>{{ i.email }}</td>
+                  <td>{{ roleLabel(i.role) }}</td>
+                  <td>
+                    <span class="badge" [class.badge-ok]="i.status === 'ACCEPTEE'">{{ statusLabel(i.status) }}</span>
+                    @if (i.status === 'EN_ATTENTE') {
+                      <small class="muted">expire le {{ i.expiresAt | date: 'd MMM y' }}</small>
+                    }
+                  </td>
+                  <td>{{ i.invitedBy }}</td>
+                  <td class="item-actions">
+                    @if (i.status === 'EN_ATTENTE') {
+                      <button type="button" (click)="resend(i)">Renvoyer</button>
+                      <button type="button" class="danger" (click)="cancel(i)">Annuler</button>
+                    }
+                    @if (i.status === 'EXPIREE') {
+                      <button type="button" (click)="inviteAgain(i)">Inviter à nouveau</button>
+                    }
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+    </section>

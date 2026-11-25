@@ -1,0 +1,37 @@
+<form [formGroup]="form" (ngSubmit)="submit()" novalidate>
+  <div class="field">
+    <label for="move-stage">Déplacer vers l'étape</label>
+    <select id="move-stage" formControlName="stageId"
+            [attr.aria-invalid]="submitted() && form.controls.stageId.invalid"
+            [attr.aria-describedby]="submitted() && form.controls.stageId.invalid ? 'move-stage-error' : null">
+      <option [ngValue]="null" disabled>Choisir une étape…</option>
+      @for (s of options(); track s.id) { <option [ngValue]="s.id">{{ s.name }}</option> }
+    </select>
+    @if (submitted() && form.controls.stageId.invalid) {
+      <small id="move-stage-error" class="field-error">Choisissez une étape.</small>
+    }
+  </div>
+
+  @if (!isReject()) {
+    <div class="field">
+      <label for="move-reason">Motif (facultatif)</label>
+      <textarea id="move-reason" rows="3" formControlName="reason" [attr.maxlength]="maxReason"
+                aria-describedby="move-reason-help"></textarea>
+      <small id="move-reason-help" class="muted">Note interne, jamais visible par le candidat.</small>
+    </div>
+
+    @if (error()) { <p class="form-error" role="alert">{{ error() }}</p> }
+
+    <div class="actions">
+      <button type="submit" class="primary" [disabled]="busy()">
+        {{ busy() ? 'Enregistrement…' : 'Déplacer' }}
+      </button>
+    </div>
+  }
+</form>
+
+@if (isReject()) {
+  <app-reject-form [applicationId]="application().id" [busy]="busy()"
+                   (confirmed)="reject($event)" (cancelled)="cancelReject()" />
+  @if (error()) { <p class="form-error" role="alert">{{ error() }}</p> }
+}

@@ -1,0 +1,28 @@
+@if (tags().length) {
+  <ul class="chip-list" aria-label="Étiquettes">
+    @for (t of tags(); track t) {
+      <li class="chip">
+        {{ t }}
+        <button type="button" class="icon" (click)="remove(t)" [disabled]="disabled()"
+                [attr.aria-label]="'Retirer l\'étiquette ' + t">✕</button>
+      </li>
+    }
+  </ul>
+} @else {
+  <p class="muted">Aucune étiquette.</p>
+}
+
+@if (!full()) {
+  <div class="inline-form tag-form">
+    <label class="sr-only" [for]="id">Nouvelle étiquette</label>
+    <input type="text" [id]="id" [attr.list]="id + '-list'" placeholder="Ajouter une étiquette…"
+           [value]="draft()" (input)="onInput($event)" (keydown.enter)="add($event)"
+           [attr.maxlength]="maxLength" [disabled]="disabled()"
+           [attr.aria-describedby]="error() ? id + '-error' : null" />
+    <datalist [id]="id + '-list'">
+      @for (s of available(); track s) { <option [value]="s"></option> }
+    </datalist>
+    <button type="button" (click)="add()" [disabled]="disabled() || !draft().trim()">Ajouter</button>
+  </div>
+}
+@if (error()) { <small [id]="id + '-error'" class="field-error" role="alert">{{ error() }}</small> }

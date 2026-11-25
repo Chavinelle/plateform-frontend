@@ -1,0 +1,120 @@
+/*
+ * Jetons de design : toutes les couleurs de l'interface, en thème clair et en thème sombre.
+ * Les composants n'utilisent JAMAIS une couleur écrite en dur, seulement ces variables : le thème sombre en découle.
+ *
+ * Contrastes vérifiés (WCAG 2.1 AA) : textes ≥ 4,5:1 sur leurs fonds, contours de champs et anneau de focus ≥ 3:1,
+ * en clair comme en sombre. Couleur des graphiques validée avec l'outil de la charte dataviz sur les deux surfaces.
+ *
+ * Thème : celui du système par défaut ; data-theme="light" ou "dark" sur <html> force un choix (bouton du menu).
+ */
+
+@mixin light {
+  color-scheme: light;
+  --bg: #f6f7fb;                 /* fond de page */
+  --surface: #ffffff;            /* cartes, en-tête, champs */
+  --surface-2: #f1f4f9;          /* zones secondaires, survol, en-têtes de tableau */
+  --surface-3: #e7ecf3;          /* pistes de barres, avatars sans image */
+  --text: #111827;
+  --text-muted: #525c6e;
+  --border: #e4e8ef;             /* séparateurs décoratifs */
+  --border-strong: #c3ccd8;
+  --border-input: #848e9f;       /* contour des champs : 3,3:1 */
+  --primary: #1d4ed8;            /* liens, textes d'accent, focus */
+  --primary-solid: #1d4ed8;      /* fond des boutons principaux */
+  --primary-hover: #1e40af;
+  --on-primary: #ffffff;
+  --primary-soft: #eaf0fe;
+  --primary-border: #b8cbf7;
+  --danger: #b42318;
+  --danger-solid: #b42318;
+  --danger-soft: #fdeceb;
+  --danger-border: #f2b8b5;
+  --success: #147a3d;
+  --success-solid: #147a3d;
+  --success-soft: #e8f6ee;
+  --success-border: #a9dcbd;
+  --warning: #9a4a07;
+  --warning-solid: #b45309;
+  --warning-soft: #fdf3e2;
+  --warning-border: #f0c37a;
+  --tooltip-bg: #111827;
+  --tooltip-text: #ffffff;
+  --shadow-xs: 0 1px 2px rgb(16 24 40 / .05);
+  --shadow-sm: 0 1px 2px rgb(16 24 40 / .04), 0 1px 3px rgb(16 24 40 / .07);
+  --shadow-md: 0 6px 16px -4px rgb(16 24 40 / .10), 0 2px 4px -2px rgb(16 24 40 / .06);
+  --shadow-lg: 0 20px 40px -12px rgb(16 24 40 / .22);
+  /* marque : dégradé des aplats (logo, bandeaux) ; texte blanc dessus ≥ 6:1 */
+  --brand-gradient: linear-gradient(135deg, #1d4ed8 0%, #3730a3 100%);
+  --brand-soft-gradient: linear-gradient(135deg, #eef3ff 0%, #f3f0ff 100%);
+  --text-gradient: linear-gradient(90deg, #1d4ed8 0%, #4338ca 100%);   /* titres en dégradé : ≥ 6:1 sur le fond */
+  --scroll-shadow: rgb(0 0 0 / .18);
+  --chart-1: #2a78d6;
+  --chart-1-active: #1d5fb0;
+  --chart-grid: #e7e6e3;
+  --chart-axis: #c9c8c4;
+}
+
+@mixin dark {
+  color-scheme: dark;
+  --bg: #0e131b;
+  --surface: #151c27;
+  --surface-2: #1b2431;
+  --surface-3: #243042;
+  --text: #e7ebf1;
+  --text-muted: #a1acbc;
+  --border: #263142;
+  --border-strong: #3a475b;
+  --border-input: #6b778a;       /* 3,8:1 */
+  --primary: #8db0ff;
+  --primary-solid: #3563e9;
+  --primary-hover: #2f5fe0;     /* blanc dessus : 5,5:1 */
+  --on-primary: #ffffff;
+  --primary-soft: #1b2846;
+  --primary-border: #34508f;
+  --danger: #ff8a80;
+  --danger-solid: #d63a2f;
+  --danger-soft: #3a1c1c;
+  --danger-border: #7a3430;
+  --success: #5ad08b;
+  --success-solid: #18794a;
+  --success-soft: #14301f;
+  --success-border: #2f6a46;
+  --warning: #f5b454;
+  --warning-solid: #a85a0c;
+  --warning-soft: #352812;
+  --warning-border: #7a5520;
+  --tooltip-bg: #e7ebf1;
+  --tooltip-text: #0e131b;
+  --shadow-xs: 0 1px 2px rgb(0 0 0 / .35);
+  --shadow-sm: 0 1px 2px rgb(0 0 0 / .4);
+  --shadow-md: 0 4px 14px rgb(0 0 0 / .45);
+  --shadow-lg: 0 20px 40px -12px rgb(0 0 0 / .7);
+  --brand-gradient: linear-gradient(135deg, #2f5fe0 0%, #4338ca 100%);
+  --brand-soft-gradient: linear-gradient(135deg, #172341 0%, #1e1b3a 100%);
+  --text-gradient: linear-gradient(90deg, #8db0ff 0%, #b5a8ff 100%);   /* clair sur fond sombre : ≥ 8:1 */
+  --scroll-shadow: rgb(0 0 0 / .55);
+  --chart-1: #3987e5;            /* même teinte, pas adapté à la surface sombre (charte dataviz) */
+  --chart-1-active: #6aa6ef;
+  --chart-grid: #2b3546;
+  --chart-axis: #4a566a;
+}
+
+:root {
+  @include light;
+  --radius-sm: 8px;
+  --radius: 10px;
+  --radius-lg: 14px;
+  --radius-xl: 20px;
+  --font: 'Inter Variable', 'Segoe UI', system-ui, -apple-system, Roboto, 'Helvetica Neue', Arial, sans-serif;
+  --font-mono: ui-monospace, 'Cascadia Mono', Consolas, 'Liberation Mono', monospace;
+  --sidebar-width: 248px;
+  --header-height: 60px;
+}
+
+/* thème du système, sauf choix explicite du thème clair */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) { @include dark; }
+}
+
+/* choix explicite du thème sombre */
+:root[data-theme='dark'] { @include dark; }

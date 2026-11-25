@@ -1,0 +1,31 @@
+<div class="page page-wide">
+  <section class="welcome" aria-labelledby="welcome-title">
+    <div>
+      <p class="eyebrow">{{ title }}</p>
+      <h1 id="welcome-title">Bonjour {{ auth.user()?.firstName }}</h1>
+      <p class="lead">{{ intro() }}</p>
+    </div>
+    @if (primary(); as p) {
+      <a class="button-link primary cta" [routerLink]="p.path">
+        <app-nav-icon [name]="p.icon" [size]="18" />
+        {{ p.label }}
+      </a>
+    }
+  </section>
+
+  <h2 class="tiles-title">Accès rapides</h2>
+  <ul class="tiles">
+    @for (t of tiles(); track t.path) {
+      <li>
+        <a class="tile" [routerLink]="t.path">
+          <span class="tile-icon" aria-hidden="true"><app-nav-icon [name]="t.icon" [size]="22" /></span>
+          <span class="tile-body">
+            <span class="tile-label">{{ t.label }}</span>
+            <span class="tile-desc">{{ t.description }}</span>
+          </span>
+          <app-nav-icon class="tile-arrow" name="arrow" [size]="18" />
+        </a>
+      </li>
+    }
+  </ul>
+</div>

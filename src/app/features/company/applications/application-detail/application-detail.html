@@ -1,0 +1,292 @@
+<div class="page page-wide">
+  @if (loading()) {
+    <p>Chargement…</p>
+  } @else if (error()) {
+    <p><a routerLink="/recruteur/offres">← Mes offres</a></p>
+    <div class="card">
+      <h1>Candidature introuvable</h1>
+      <p class="form-error" role="alert">{{ error() }}</p>
+    </div>
+  } @else if (a(); as app) {
+    <p class="row-actions">
+      <a [routerLink]="['/recruteur/offres', app.jobId, 'candidatures']">← Candidatures pour « {{ app.jobTitle }} »</a>
+      <span aria-hidden="true">·</span>
+      <a [routerLink]="['/recruteur/offres', app.jobId, 'kanban']">Pipeline</a>
+    </p>
+
+    <!-- ===== En-tête ===== -->
+    <header class="card">
+      <div class="detail-head">
+        <div>
+          <h1>{{ fullName() }}</h1>
+          @if (app.candidate.headline) { <p class="headline">{{ app.candidate.headline }}</p> }
+          <p class="muted">
+            Candidature à <a [routerLink]="['/recruteur/offres', app.jobId]">{{ app.jobTitle }}</a>
+            · reçue le {{ app.appliedAt | date: 'd MMMM y, HH:mm' }}
+            @if (app.source !== 'PLATEFORME') { · source : {{ sourceLabel(app) }} }
+          </p>
+        </div>
+        <div class="application-status">
+          <span class="badge app-status-{{ app.status }}">{{ statusLabel(app) }}</span>
+          @if (app.stageName) {
+            <span>
+              <span class="stage-dot" [style.background]="app.stageColor" aria-hidden="true"></span>
+              Étape : <strong>{{ app.stageName }}</strong>
+            </span>
+          }
+          @if (app.knockoutFlagged) {
+            <span class="badge knockout">Critère éliminatoire non rempli</span>
+          }
+          <app-star-rating [value]="app.rating" [readonly]="true" />
+        </div>
+      </div>
+    </header>
+
+    <div class="detail-layout">
+      <!-- ===== Colonne principale : profil et candidature ===== -->
+      <div>
+        <section class="card" aria-labelledby="contact-title">
+          <h2 id="contact-title">Coordonnées</h2>
+          <dl class="contact">
+            <dt>E-mail</dt>
+            <dd><a [href]="'mailto:' + app.candidate.email">{{ app.candidate.email }}</a></dd>
+            @if (app.candidate.phone) {
+              <dt>Téléphone</dt>
+              <dd><a [href]="'tel:' + app.candidate.phone">{{ app.candidate.phone }}</a></dd>
+            }
+            @if (place()) { <dt>Localisation</dt><dd>{{ place() }}</dd> }
+          </dl>
+          @if (hasLinks()) {
+            <ul class="links">
+              @if (app.candidate.linkedinUrl) {
+                <li><a [href]="app.candidate.linkedinUrl" target="_blank" rel="noopener noreferrer">LinkedIn<span class="sr-only"> (nouvel onglet)</span></a></li>
+              }
+              @if (app.candidate.githubUrl) {
+                <li><a [href]="app.candidate.githubUrl" target="_blank" rel="noopener noreferrer">GitHub<span class="sr-only"> (nouvel onglet)</span></a></li>
+              }
+              @if (app.candidate.portfolioUrl) {
+                <li><a [href]="app.candidate.portfolioUrl" target="_blank" rel="noopener noreferrer">Portfolio<span class="sr-only"> (nouvel onglet)</span></a></li>
+              }
+            </ul>
+          }
+        </section>
+
+        @if (app.candidate.summary) {
+          <section class="card"><h2>Résumé</h2><p class="pre">{{ app.candidate.summary }}</p></section>
+        }
+
+        @if (app.coverLetter) {
+          <section class="card"><h2>Message du candidat</h2><p class="pre">{{ app.coverLetter }}</p></section>
+        }
+
+        @if (app.answers.length) {
+          <section class="card">
+            <h2>Réponses aux questions de présélection</h2>
+            <dl class="answers">
+              @for (x of app.answers; track $index) {
+                <dt>
+                  {{ x.question }}
+                  @if (x.knockoutFailed) { <span class="badge knockout">Éliminatoire</span> }
+                </dt>
+                <dd>
+                  @for (v of x.answers; track $index) { <div>{{ v }}</div> } @empty { <span class="muted">Sans réponse</span> }
+                </dd>
+              }
+            </dl>
+          </section>
+        }
+
+        <section class="card">
+          <h2>Expériences</h2>
+          <ul class="item-list">
+            @for (e of app.candidate.experiences; track e.id) {
+              <li class="item">
+                <div>
+                  <strong>{{ e.jobTitle }}</strong> — {{ e.companyName }}
+                  <div class="muted">
+                    {{ e.startDate | date: 'MMM y' }} –
+                    {{ e.currentJob ? 'aujourd\'hui' : (e.endDate ? (e.endDate | date: 'MMM y') : '—') }}
+                    @if (e.location) { · {{ e.location }} }
+                  </div>
+                  @if (e.description) { <p class="pre">{{ e.description }}</p> }
+                </div>
+              </li>
+            } @empty {
+              <li class="muted">Aucune expérience renseignée.</li>
+            }
+          </ul>
+        </section>
+
+        <section class="card">
+          <h2>Formations</h2>
+          <ul class="item-list">
+            @for (e of app.candidate.educations; track e.id) {
+              <li class="item">
+                <div>
+                  <strong>{{ e.degree }}</strong> — {{ e.institution }}
+                  <div class="muted">
+                    @if (e.fieldOfStudy) { {{ e.fieldOfStudy }} · }
+                    @if (e.startDate) { {{ e.startDate | date: 'y' }} – }{{ e.endDate ? (e.endDate | date: 'y') : '' }}
+                  </div>
+                  @if (e.description) { <p class="pre">{{ e.description }}</p> }
+                </div>
+              </li>
+            } @empty {
+              <li class="muted">Aucune formation renseignée.</li>
+            }
+          </ul>
+        </section>
+
+        <section class="card">
+          <h2>Compétences et langues</h2>
+          @if (app.candidate.skills.length) {
+            <ul class="chip-list" aria-label="Compétences">
+              @for (s of app.candidate.skills; track s.id) {
+                <li class="chip small">{{ s.name }} <small class="muted">· {{ skillLabel(s.level) }}</small></li>
+              }
+            </ul>
+          } @else {
+            <p class="muted">Aucune compétence renseignée.</p>
+          }
+          @if (app.candidate.languages.length) {
+            <ul class="chip-list" aria-label="Langues">
+              @for (l of app.candidate.languages; track l.id) {
+                <li class="chip small">{{ l.name }} <small class="muted">· {{ l.level }}</small></li>
+              }
+            </ul>
+          }
+        </section>
+
+        <section class="card" aria-labelledby="evaluations-title">
+          <h2 id="evaluations-title">Évaluations</h2>
+          @defer (on viewport; prefetch on idle) {
+            <app-evaluations-panel [applicationId]="app.id" [canStart]="app.status !== 'RETIREE'" />
+          } @placeholder { <p class="muted">Chargement…</p> }
+        </section>
+      </div>
+
+      <!-- ===== Colonne latérale : suivi, documents et historique ===== -->
+      <div>
+        <p class="sr-only" role="status" aria-live="polite">{{ message() }}</p>
+        @if (app.canManage && app.status !== 'RETIREE' && stages().length) {
+          <section class="card" aria-labelledby="move-title">
+            <h2 id="move-title">Faire avancer la candidature</h2>
+            <app-stage-mover [application]="app" [stages]="stages()" (moved)="onMoved($event)" />
+          </section>
+        }
+
+        @if (message()) { <p class="form-info">{{ message() }}</p> }
+
+        <section class="card" aria-labelledby="triage-title">
+          <h2 id="triage-title">Évaluation rapide</h2>
+          @if (app.canManage) {
+            <div class="field">
+              <span class="field-label">Note de l'équipe</span>
+              <app-star-rating [value]="app.rating" [disabled]="triageBusy()"
+                               [label]="'Note de ' + fullName()" (changed)="rate($event)" />
+            </div>
+            <div class="field">
+              <span class="field-label">Étiquettes</span>
+              <app-tag-editor [tags]="app.tags" [suggestions]="tagSuggestions()" [disabled]="triageBusy()"
+                              (changed)="updateTags($event)" />
+            </div>
+            @if (triageError()) { <p class="form-error" role="alert">{{ triageError() }}</p> }
+          } @else {
+            <p>Note : @if (app.rating !== null) { <app-star-rating [value]="app.rating" [readonly]="true" /> } @else { <span class="muted">non notée</span> }</p>
+            @if (app.tags.length) {
+              <ul class="chip-list" aria-label="Étiquettes">
+                @for (t of app.tags; track t) { <li class="chip small">{{ t }}</li> }
+              </ul>
+            }
+          }
+        </section>
+
+        @if (app.status === 'RETIREE') {
+          <p class="status-banner">Le candidat a retiré sa candidature{{ app.withdrawnAt ? ' le ' + (app.withdrawnAt | date: 'd MMM y') : '' }}.</p>
+        }
+
+        @if (app.canManage) {
+          <section class="card" aria-labelledby="pool-title">
+            <h2 id="pool-title">Vivier de talents</h2>
+            <app-talent-pool-add [applicationId]="app.id" />
+          </section>
+        }
+
+        <section class="card" aria-labelledby="interviews-title">
+          <h2 id="interviews-title">Entretiens</h2>
+          @defer (on viewport; prefetch on idle) {
+            <app-interviews-panel [applicationId]="app.id"
+                                  [canPlan]="app.canManage && app.status !== 'RETIREE' && app.status !== 'REJETEE'"
+                                  [canManage]="app.canManage" />
+          } @placeholder { <p class="muted">Chargement…</p> }
+        </section>
+
+        <section class="card" aria-labelledby="messages-title">
+          <h2 id="messages-title">Messages avec le candidat</h2>
+          @defer (on viewport; prefetch on idle) {
+            <app-message-thread side="company" [applicationId]="app.id" />
+          } @placeholder { <p class="muted">Chargement…</p> }
+        </section>
+
+        <section class="card" aria-labelledby="tests-title">
+          <h2 id="tests-title">Tests en ligne</h2>
+          @defer (on viewport; prefetch on idle) {
+            <app-tests-panel [applicationId]="app.id"
+                             [canSend]="app.canManage && app.status !== 'RETIREE' && app.status !== 'REJETEE'"
+                             [canManage]="app.canManage" />
+          } @placeholder { <p class="muted">Chargement…</p> }
+        </section>
+
+        <section class="card" aria-labelledby="docs-title">
+          <h2 id="docs-title">Documents</h2>
+          @if (app.documents.length) {
+            <div class="row-actions doc-tabs">
+              @for (d of app.documents; track d.id) {
+                <button type="button" (click)="selectDoc(d)" [attr.aria-pressed]="selectedDoc()?.id === d.id">
+                  {{ docLabel(d) }}
+                </button>
+              }
+            </div>
+            @if (selectedDoc(); as d) {
+              @defer (on viewport; prefetch on idle) {
+                <app-document-preview [applicationId]="app.id" [document]="d"
+                                      [label]="docLabel(d) + ' de ' + fullName()" />
+              } @placeholder { <p class="muted">Chargement…</p> }
+            }
+          } @else {
+            <p class="muted">Aucun document joint.</p>
+          }
+        </section>
+
+        <section class="card" aria-labelledby="notes-title">
+          <h2 id="notes-title">Notes internes</h2>
+          @defer (on viewport; prefetch on idle) {
+            <app-notes-panel [applicationId]="app.id" />
+          } @placeholder { <p class="muted">Chargement…</p> }
+        </section>
+
+        <section class="card">
+          <h2>Historique</h2>
+          <ol class="timeline">
+            @for (h of app.history; track $index; let last = $last) {
+              <li [class.current]="last">
+                <span class="timeline-date">{{ h.date | date: 'd MMM y, HH:mm' }}</span>
+                <span class="timeline-label">{{ historyLabel(h) }}</span>
+                @if (h.authorName) { <small class="muted">par {{ h.authorName }}</small> }
+                @if (h.reason) { <small class="pre">Motif interne : {{ h.reason }}</small> }
+                @if (h.candidateMessage) {
+                  <details class="sent-message">
+                    <summary>Message envoyé au candidat</summary>
+                    <p class="pre">{{ h.candidateMessage }}</p>
+                  </details>
+                }
+              </li>
+            } @empty {
+              <li>Aucun événement.</li>
+            }
+          </ol>
+        </section>
+      </div>
+    </div>
+  }
+</div>

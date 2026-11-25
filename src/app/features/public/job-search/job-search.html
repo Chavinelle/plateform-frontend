@@ -1,0 +1,129 @@
+ <div class="page page-wide">
+      <h1>Offres d'emploi</h1>
+
+      <div class="search-layout">
+        <aside>
+          <details class="filters-panel" open>
+            <summary>Filtres</summary>
+            <form [formGroup]="form" (ngSubmit)="apply(0)" class="filters-form" role="search">
+              <div class="field">
+                <label for="q">Mots-clés</label>
+                <input id="q" formControlName="q" placeholder="Intitulé, compétence, entreprise" />
+              </div>
+              <div class="field">
+                <label for="city">Ville</label>
+                <input id="city" formControlName="city" />
+              </div>
+              <div class="field">
+                <label for="country">Pays</label>
+                <select id="country" formControlName="country">
+                  <option value="">Tous</option>
+                  @for (c of filters().countries; track c) { <option [value]="c">{{ c }}</option> }
+                </select>
+              </div>
+              <div class="field">
+                <label for="sector">Secteur</label>
+                <select id="sector" formControlName="sector">
+                  <option value="">Tous</option>
+                  @for (s of filters().sectors; track s) { <option [value]="s">{{ s }}</option> }
+                </select>
+              </div>
+
+              <fieldset>
+                <legend>Type de contrat</legend>
+                @for (o of contractOptions; track o.value) {
+                  <label class="check">
+                    <input type="checkbox" [checked]="has('contractType', o.value)"
+                           (change)="toggle('contractType', o.value, $event)" /> {{ o.label }}
+                  </label>
+                }
+              </fieldset>
+
+              <fieldset>
+                <legend>Niveau d'expérience</legend>
+                @for (o of experienceOptions; track o.value) {
+                  <label class="check">
+                    <input type="checkbox" [checked]="has('experienceLevel', o.value)"
+                           (change)="toggle('experienceLevel', o.value, $event)" /> {{ o.label }}
+                  </label>
+                }
+              </fieldset>
+
+              <fieldset>
+                <legend>Télétravail</legend>
+                @for (o of remoteOptions; track o.value) {
+                  <label class="check">
+                    <input type="checkbox" [checked]="has('remotePolicy', o.value)"
+                           (change)="toggle('remotePolicy', o.value, $event)" /> {{ o.label }}
+                  </label>
+                }
+              </fieldset>
+
+              <div class="field">
+                <label for="salaryMin">Salaire minimum</label>
+                <div class="inline-form">
+                  <input id="salaryMin" type="number" min="0" step="any" formControlName="salaryMin" />
+                  <select formControlName="currency" aria-label="Devise">
+                    @for (c of currencies; track c) { <option [value]="c">{{ c }}</option> }
+                  </select>
+                </div>
+              </div>
+
+              <div class="field">
+                <label for="posted">Date de publication</label>
+                <select id="posted" formControlName="postedWithinDays">
+                  <option value="">Toutes les dates</option>
+                  <option value="1">Dernières 24 heures</option>
+                  <option value="7">7 derniers jours</option>
+                  <option value="30">30 derniers jours</option>
+                </select>
+              </div>
+
+              <div class="actions">
+                <button type="submit">Rechercher</button>
+                <button type="button" (click)="reset()">Effacer les filtres</button>
+              </div>
+            </form>
+          </details>
+        </aside>
+
+        <section aria-live="polite">
+          <div class="results-head">
+            @if (result(); as r) {
+              <strong>{{ r.totalElements }} offre(s)</strong>
+            }
+            <label class="check">
+              Trier par
+              <select [formControl]="form.controls.sort" aria-label="Tri">
+                <option value="RECENT">Plus récentes</option>
+                <option value="RELEVANCE">Pertinence</option>
+              </select>
+            </label>
+          </div>
+
+          @if (error()) { <p class="form-error" role="alert">{{ error() }}</p> }
+
+          @if (loading() && !result()) {
+            <p>Chargement…</p>
+          } @else if (result(); as r) {
+            @if (r.content.length === 0) {
+              <div class="card">
+                <p><strong>Aucune offre ne correspond à votre recherche.</strong></p>
+                <p class="muted">Essayez avec moins de filtres ou d'autres mots-clés.</p>
+                <button type="button" (click)="reset()">Effacer les filtres</button>
+              </div>
+            } @else {
+              <div class="job-grid" [class.loading]="loading()">
+                @for (j of r.content; track j.id) { <app-job-card [job]="j" /> }
+              </div>
+
+              <div class="pager">
+                <button type="button" (click)="apply(r.page - 1)" [disabled]="r.page === 0">Précédent</button>
+                <span>Page {{ r.page + 1 }} / {{ totalPages() }}</span>
+                <button type="button" (click)="apply(r.page + 1)" [disabled]="r.page + 1 >= r.totalPages">Suivant</button>
+              </div>
+            }
+          }
+        </section>
+      </div>
+    </div>

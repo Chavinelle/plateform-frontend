@@ -1,0 +1,15 @@
+<p class="muted"><small>{{ document().originalName }} ({{ size() }})</small></p>
+
+@if (loading()) {
+  <p role="status">Chargement du document…</p>
+} @else if (error()) {
+  <p class="form-error" role="alert">{{ error() }}</p>
+} @else if (url(); as u) {
+  <iframe class="doc-frame" [src]="u" [title]="label()"></iframe>
+} @else if (unsupported()) {
+  <p>L'aperçu n'est disponible que pour les documents au format PDF.</p>
+}
+
+<div class="actions">
+  <button type="button" (click)="download()" [disabled]="loading()">Télécharger</button>
+</div>

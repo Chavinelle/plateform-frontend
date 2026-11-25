@@ -1,0 +1,17 @@
+.legal { max-width: 52rem; margin: 0 auto; line-height: 1.6; }
+.legal h1 { margin-bottom: .25rem; }
+.legal h2 { font-size: 1.15rem; margin: 1.75rem 0 .5rem; }
+.legal h3 { font-size: 1rem; margin: 1rem 0 .35rem; }
+.legal p, .legal li { color: var(--text); }
+.legal ul { padding-left: 1.25rem; }
+.updated { color: var(--text-muted); font-size: .9rem; margin-top: 0; }
+.draft { border-left: 4px solid var(--warning-border); background: var(--warning-soft); padding: .6rem .8rem; border-radius: 4px; }
+.toc { background: var(--surface-2); border: 1px solid var(--border); border-radius: 6px; padding: .6rem 1rem; }
+.toc ol { margin: .25rem 0 0; }
+table { border-collapse: collapse; width: 100%; margin: .5rem 0; }
+th, td { border: 1px solid var(--border); padding: .4rem .6rem; text-align: left; vertical-align: top; }
+th[scope='col'] { background: var(--surface-2); }
+dl { display: grid; grid-template-columns: max-content 1fr; gap: .35rem 1rem; }
+dt { font-weight: 600; }
+dd { margin: 0; }
+@media (max-width: 600px) { dl { grid-template-columns: 1fr; } }

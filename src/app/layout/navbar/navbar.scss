@@ -1,0 +1,79 @@
+// En-tête collant sur une ligne : marque, liens, compte, puis outils (thème, cloche).
+// Sous 1100 px, liens et compte sont repliés derrière le bouton « Menu » (panneau sous la barre).
+:host { position: sticky; top: 0; z-index: 20; display: block; }
+
+.navbar {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 0 1.5rem;
+  min-height: 64px;
+  padding: .5rem clamp(1rem, 3vw, 2rem);
+  background: color-mix(in srgb, var(--surface) 90%, transparent);
+  backdrop-filter: saturate(160%) blur(10px);
+  border-bottom: 1px solid var(--border);
+}
+
+.brand {
+  display: inline-flex; align-items: center; gap: .6rem; min-height: 44px;
+  font-weight: 750; font-size: 1.1rem; letter-spacing: -.02em; color: var(--text); text-decoration: none;
+}
+.brand:hover { text-decoration: none; }
+
+nav { display: flex; align-items: center; gap: 1rem; min-width: 0; }
+.links { display: flex; align-items: center; gap: .15rem; flex-wrap: wrap; }
+.links a, .login {
+  padding: .45rem .7rem; border-radius: 8px; color: var(--text-muted); font-weight: 550; font-size: .9rem; text-decoration: none;
+  white-space: nowrap;
+}
+.links a:hover, .login:hover { color: var(--text); background: var(--surface-2); text-decoration: none; }
+.links a.active, .login.active { color: var(--primary); background: var(--primary-soft); }
+
+.account { display: flex; align-items: center; gap: .5rem; margin-left: auto; }
+.signup { min-height: 38px; }
+.user { display: inline-flex; align-items: center; gap: .5rem; color: var(--text); font-size: .88rem; font-weight: 550; white-space: nowrap; }
+.avatar-xs {
+  display: inline-grid; place-items: center; width: 30px; height: 30px; border-radius: 50%;
+  background: var(--primary-soft); color: var(--primary); font-size: .72rem; font-weight: 700;
+}
+.logout { min-height: 34px; padding: .3rem .8rem; font-size: .85rem; }
+
+.end { display: flex; align-items: center; gap: .25rem; }
+.menu-toggle { display: none; gap: .5rem; min-height: 44px; padding: 0 .9rem; }
+
+// trois traits dessinés en CSS (couleur du texte : visible dans tous les thèmes)
+.burger, .burger::before, .burger::after {
+  display: block; width: 18px; height: 2px; background: currentColor; border-radius: 1px;
+}
+.burger { position: relative; }
+.burger::before, .burger::after { content: ''; position: absolute; left: 0; }
+.burger::before { top: -6px; }
+.burger::after { top: 6px; }
+
+@media (max-width: 1099.98px) {
+  .navbar { grid-template-columns: minmax(0, 1fr) auto; }
+  .menu-toggle { display: inline-flex; }
+  .end { grid-column: 2; grid-row: 1; }
+
+  nav {
+    grid-column: 1 / -1; grid-row: 2;
+    display: none; flex-direction: column; align-items: stretch; gap: 0; padding: .25rem 0 .5rem;
+  }
+  nav.open { display: flex; }
+  .links, .account { flex-direction: column; align-items: stretch; gap: 0; margin: 0; }
+
+  // cibles tactiles d'au moins 44 px
+  .links a, .login, .logout {
+    display: flex; align-items: center; min-height: 44px; padding: 0 .6rem; border-radius: 0;
+    border-top: 1px solid var(--border);
+  }
+  .logout { justify-content: flex-start; background: none; border: 0; border-top: 1px solid var(--border); box-shadow: none; color: inherit; font-size: .9rem; }
+  .user { padding: .75rem .6rem; border-top: 1px solid var(--border); }
+  .signup { margin-top: .6rem; min-height: 44px; }
+}
+
+// très petits écrans : seul le logo reste, le lien garde son nom accessible (aria-label)
+@media (max-width: 419.98px) {
+  .brand-name { display: none; }
+  .menu-toggle { padding: 0 .7rem; }
+}

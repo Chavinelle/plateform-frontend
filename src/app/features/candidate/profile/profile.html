@@ -1,0 +1,160 @@
+ <div class="page">
+      <h1>Mon profil</h1>
+
+      @if (loading()) {
+        <p>Chargement…</p>
+      } @else if (loadError()) {
+        <p class="form-error" role="alert">{{ loadError() }}</p>
+      } @else {
+
+        <!-- Photo -->
+        <section class="card">
+          <h2>Photo</h2>
+          <div class="actions">
+            <div class="avatar">
+              @if (photoUrl()) {
+                <img [src]="photoUrl()" alt="Photo de profil" class="avatar-img" />
+              } @else {
+                <span>{{ initials() }}</span>
+              }
+            </div>
+            <div>
+              <label class="file-button">
+                {{ photoUrl() ? 'Changer la photo' : 'Ajouter une photo' }}
+                <input type="file" accept="image/jpeg,image/png" (change)="onPhotoSelected($event)" hidden />
+              </label>
+              @if (photoUrl()) {
+                <button type="button" (click)="removePhoto()">Supprimer</button>
+              }
+              <p><small>JPG ou PNG, 2 Mo maximum.</small></p>
+              @if (photoBusy()) { <p class="form-info">Envoi en cours…</p> }
+              @if (photoError()) { <p class="form-error" role="alert">{{ photoError() }}</p> }
+            </div>
+          </div>
+        </section>
+
+        <!-- Informations -->
+        <form [formGroup]="form" (ngSubmit)="save()" novalidate>
+
+          <section class="card">
+            <h2>Identité et contact</h2>
+            <div class="form-grid">
+              <div class="field">
+                <label for="firstName">Prénom *</label>
+                <input id="firstName" formControlName="firstName" autocomplete="given-name" />
+                @if (bad('firstName')) { <small class="field-error">Le prénom est obligatoire.</small> }
+              </div>
+              <div class="field">
+                <label for="lastName">Nom *</label>
+                <input id="lastName" formControlName="lastName" autocomplete="family-name" />
+                @if (bad('lastName')) { <small class="field-error">Le nom est obligatoire.</small> }
+              </div>
+              <div class="field">
+                <label for="email">E-mail</label>
+                <input id="email" [value]="profile()?.email ?? ''" disabled />
+              </div>
+              <div class="field">
+                <label for="phone">Téléphone</label>
+                <input id="phone" formControlName="phone" autocomplete="tel" />
+                @if (bad('phone')) { <small class="field-error">Numéro de téléphone invalide.</small> }
+              </div>
+              <div class="field">
+                <label for="city">Ville</label>
+                <input id="city" formControlName="city" autocomplete="address-level2" list="ref-VILLE" />
+                <app-ref-datalist kind="VILLE" />
+              </div>
+              <div class="field">
+                <label for="country">Pays</label>
+                <input id="country" formControlName="country" autocomplete="country-name" />
+              </div>
+              <div class="field">
+                <label for="birthDate">Date de naissance</label>
+                <input id="birthDate" type="date" formControlName="birthDate" [max]="today" />
+              </div>
+            </div>
+          </section>
+
+          <section class="card">
+            <h2>Présentation</h2>
+            <div class="form-grid">
+              <div class="field full">
+                <label for="headline">Titre professionnel</label>
+                <input id="headline" formControlName="headline" placeholder="Ex. Développeur Java / Angular" />
+                @if (bad('headline')) { <small class="field-error">150 caractères maximum.</small> }
+              </div>
+              <div class="field full">
+                <label for="summary">Résumé</label>
+                <textarea id="summary" rows="5" formControlName="summary"></textarea>
+                <small>{{ form.controls.summary.value.length }} / 3000</small>
+                @if (bad('summary')) { <small class="field-error">3000 caractères maximum.</small> }
+              </div>
+            </div>
+          </section>
+
+          <section class="card">
+            <h2>Liens</h2>
+            <div class="form-grid">
+              <div class="field">
+                <label for="linkedinUrl">LinkedIn</label>
+                <input id="linkedinUrl" type="url" formControlName="linkedinUrl" placeholder="https://" />
+                @if (bad('linkedinUrl')) { <small class="field-error">Lien invalide (https://…).</small> }
+              </div>
+              <div class="field">
+                <label for="githubUrl">GitHub</label>
+                <input id="githubUrl" type="url" formControlName="githubUrl" placeholder="https://" />
+                @if (bad('githubUrl')) { <small class="field-error">Lien invalide (https://…).</small> }
+              </div>
+              <div class="field">
+                <label for="portfolioUrl">Portfolio</label>
+                <input id="portfolioUrl" type="url" formControlName="portfolioUrl" placeholder="https://" />
+                @if (bad('portfolioUrl')) { <small class="field-error">Lien invalide (https://…).</small> }
+              </div>
+            </div>
+          </section>
+
+          <section class="card">
+            <h2>Préférences de recherche</h2>
+            <div class="form-grid">
+              <div class="field">
+                <label for="contract">Type de contrat souhaité</label>
+                <select id="contract" formControlName="desiredContractType">
+                  <option value="">— Indifférent —</option>
+                  @for (c of contractTypes; track c.value) {
+                    <option [value]="c.value">{{ c.label }}</option>
+                  }
+                </select>
+              </div>
+              <div class="field">
+                <label for="desiredLocation">Localisation souhaitée</label>
+                <input id="desiredLocation" formControlName="desiredLocation" />
+              </div>
+              <div class="field">
+                <label for="salary">Prétentions salariales</label>
+                <input id="salary" type="number" min="0" step="any" formControlName="expectedSalary" />
+                @if (bad('expectedSalary')) { <small class="field-error">Le montant doit être positif.</small> }
+              </div>
+              <div class="field">
+                <label><input type="checkbox" formControlName="mobile" /> Prêt à déménager</label>
+              </div>
+            </div>
+          </section>
+
+          @if (message()) { <p class="form-info" role="status">{{ message() }}</p> }
+          @if (error()) { <p class="form-error" role="alert">{{ error() }}</p> }
+
+          <div class="actions">
+            <button type="submit" [disabled]="saving()">{{ saving() ? 'Enregistrement…' : 'Enregistrer' }}</button>
+          </div>
+        </form>
+        <app-experiences-section />
+        <app-educations-section />
+        <app-skills-section />
+        <app-languages-section />
+        <app-documents-section />
+        @if (profile(); as p) {
+       <app-visibility-card [visibility]="p.visibility" />
+    }
+        <app-completion-card />
+        <app-delete-account />
+      }
+    </div>

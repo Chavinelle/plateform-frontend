@@ -1,0 +1,79 @@
+ <section class="card">
+      <div class="section-head">
+        <h2>Expériences professionnelles</h2>
+        @if (!formOpen()) {
+          <button type="button" (click)="startAdd()">+ Ajouter</button>
+        }
+      </div>
+
+      @if (formOpen()) {
+        <form [formGroup]="form" (ngSubmit)="save()" novalidate class="sub-form">
+          <div class="form-grid">
+            <div class="field">
+              <label for="xp-title">Poste *</label>
+              <input id="xp-title" formControlName="jobTitle" />
+              @if (bad('jobTitle')) { <small class="field-error">Le poste est obligatoire (150 caractères max).</small> }
+            </div>
+            <div class="field">
+              <label for="xp-company">Entreprise *</label>
+              <input id="xp-company" formControlName="companyName" />
+              @if (bad('companyName')) { <small class="field-error">L'entreprise est obligatoire (150 caractères max).</small> }
+            </div>
+            <div class="field">
+              <label for="xp-location">Lieu</label>
+              <input id="xp-location" formControlName="location" />
+            </div>
+            <div class="field">
+              <label for="xp-start">Date de début *</label>
+              <input id="xp-start" type="date" formControlName="startDate" [max]="today" />
+              @if (bad('startDate')) { <small class="field-error">La date de début est obligatoire.</small> }
+            </div>
+            <div class="field">
+              <label><input type="checkbox" formControlName="currentJob" /> Poste actuel</label>
+            </div>
+            <div class="field">
+              <label for="xp-end">Date de fin</label>
+              <input id="xp-end" type="date" formControlName="endDate" />
+            </div>
+            <div class="field full">
+              <label for="xp-desc">Description</label>
+              <textarea id="xp-desc" rows="4" formControlName="description"></textarea>
+              @if (bad('description')) { <small class="field-error">3000 caractères maximum.</small> }
+            </div>
+          </div>
+
+          @if (formError()) { <p class="form-error" role="alert">{{ formError() }}</p> }
+          <div class="actions">
+            <button type="submit" [disabled]="saving()">{{ saving() ? 'Enregistrement…' : 'Enregistrer' }}</button>
+            <button type="button" (click)="cancel()">Annuler</button>
+          </div>
+        </form>
+      }
+
+      @if (error()) { <p class="form-error" role="alert">{{ error() }}</p> }
+
+      @if (loading()) {
+        <p>Chargement…</p>
+      } @else if (items().length === 0 && !formOpen()) {
+        <p class="muted">Aucune expérience renseignée.</p>
+      }
+
+      <ul class="item-list">
+        @for (e of items(); track e.id) {
+          <li class="item">
+            <div>
+              <strong>{{ e.jobTitle }}</strong> · {{ e.companyName }}@if (e.location) { ({{ e.location }}) }
+              <div class="muted">
+                {{ e.startDate | date: 'MMMM y' }} –
+                @if (e.currentJob) { Poste actuel } @else { {{ e.endDate | date: 'MMMM y' }} }
+              </div>
+              @if (e.description) { <p class="pre">{{ e.description }}</p> }
+            </div>
+            <div class="item-actions">
+              <button type="button" (click)="startEdit(e)">Modifier</button>
+              <button type="button" class="danger" (click)="remove(e)">Supprimer</button>
+            </div>
+          </li>
+        }
+      </ul>
+    </section>

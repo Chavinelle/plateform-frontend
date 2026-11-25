@@ -1,0 +1,144 @@
+<div class="page">
+  <h1>Tableau de bord</h1>
+
+  @if (loading()) {
+    <p>Chargement…</p>
+  } @else if (error()) {
+    <p class="form-error" role="alert">{{ error() }}</p>
+  } @else if (data(); as d) {
+    <section aria-labelledby="kpi-title">
+      <h2 id="kpi-title" class="sr-only">En résumé</h2>
+      <ul class="kpis">
+        <li class="kpi">
+          <span class="kpi-label">Candidatures en cours</span>
+          <span class="kpi-value">{{ d.counts.active }}</span>
+          <span class="kpi-note">sur {{ d.counts.total }} au total</span>
+        </li>
+        <li class="kpi">
+          <span class="kpi-label">Entretiens à venir</span>
+          <span class="kpi-value">{{ d.upcomingInterviews.length }}</span>
+          <span class="kpi-note">dans les 60 prochains jours</span>
+        </li>
+        <li class="kpi">
+          <span class="kpi-label">Tests à passer</span>
+          <span class="kpi-value">{{ d.pendingTests.length }}</span>
+        </li>
+        <li class="kpi">
+          <span class="kpi-label">Messages non lus</span>
+          <span class="kpi-value">{{ d.unreadMessages }}</span>
+        </li>
+        <li class="kpi">
+          <span class="kpi-label">Profil complété</span>
+          <span class="kpi-value">{{ d.profileCompletion }} <small>%</small></span>
+          <span class="progress" role="progressbar" aria-label="Complétude du profil"
+                aria-valuemin="0" aria-valuemax="100" [attr.aria-valuenow]="d.profileCompletion">
+            <span [style.width.%]="d.profileCompletion"></span>
+          </span>
+          @if (d.profileCompletion < 100) { <a class="kpi-note" routerLink="/candidat/profil">Compléter mon profil</a> }
+        </li>
+      </ul>
+      @if (d.counts.hired || d.counts.notRetained || d.counts.withdrawn) {
+        <p class="muted outcome">
+          {{ d.counts.hired }} retenue{{ d.counts.hired > 1 ? 's' : '' }} ·
+          {{ d.counts.notRetained }} non retenue{{ d.counts.notRetained > 1 ? 's' : '' }} ·
+          {{ d.counts.withdrawn }} retirée{{ d.counts.withdrawn > 1 ? 's' : '' }}
+        </p>
+      }
+    </section>
+
+    <div class="grid">
+      <section class="card" aria-labelledby="itv-title">
+        <h2 id="itv-title">Prochains entretiens</h2>
+        <ul class="list">
+          @for (i of d.upcomingInterviews; track i.interviewId) {
+            <li>
+              <a [routerLink]="['/candidat/candidatures', i.applicationId]">{{ i.jobTitle }}</a> · {{ i.companyName }}
+              <span class="block">{{ i.startsAt | date: 'EEEE d MMMM, HH:mm' }} · {{ typeLabels[i.type] }} · {{ i.durationMinutes }} min</span>
+              @if (i.needsAnswer) { <span class="badge badge-warn">Réponse attendue</span> }
+            </li>
+          } @empty {
+            <li class="muted">Aucun entretien prévu.</li>
+          }
+        </ul>
+        <a routerLink="/candidat/entretiens" class="more">Voir mon agenda</a>
+      </section>
+
+      <section class="card" aria-labelledby="tests-title">
+        <h2 id="tests-title">Tests à passer</h2>
+        <ul class="list">
+          @for (t of d.pendingTests; track $index) {
+            <li>
+              <strong>{{ t.testTitle }}</strong> · {{ t.jobTitle }} ({{ t.companyName }})
+              @if (t.status === 'COMMENCE') {
+                <span class="block"><span class="badge badge-warn">En cours</span> à terminer avant {{ t.mustFinishBy | date: 'HH:mm' }}</span>
+              } @else {
+                <span class="block">À commencer avant le {{ t.deadline | date: 'd MMMM, HH:mm' }}</span>
+              }
+            </li>
+          } @empty {
+            <li class="muted">Aucun test en attente.</li>
+          }
+        </ul>
+        @if (d.pendingTests.length) {
+          <p class="muted small">Le lien personnel de chaque test se trouve dans l'e-mail reçu.</p>
+        }
+      </section>
+
+      <section class="card" aria-labelledby="msg-title">
+        <h2 id="msg-title">Messages non lus</h2>
+        <ul class="list">
+          @for (m of d.unreadThreads; track m.applicationId) {
+            <li>
+              <a [routerLink]="['/candidat/candidatures', m.applicationId]">{{ m.companyName }}</a> · {{ m.jobTitle }}
+              <span class="badge">{{ m.count }} nouveau{{ m.count > 1 ? 'x' : '' }}</span>
+            </li>
+          } @empty {
+            <li class="muted">Aucun message non lu.</li>
+          }
+        </ul>
+      </section>
+
+      <section class="card" aria-labelledby="act-title">
+        <h2 id="act-title">Dernières évolutions</h2>
+        <ul class="list">
+          @for (a of d.recentActivity; track $index) {
+            <li>
+              <span class="block">{{ a.label }}</span>
+              <a [routerLink]="['/candidat/candidatures', a.applicationId]">{{ a.jobTitle }}</a> · {{ a.companyName }}
+              <span class="muted small"> · {{ a.at | date: 'd MMM y' }}</span>
+            </li>
+          } @empty {
+            <li class="muted">Aucune candidature pour le moment. <a routerLink="/offres">Voir les offres</a></li>
+          }
+        </ul>
+        <a routerLink="/candidat/candidatures" class="more">Toutes mes candidatures</a>
+      </section>
+
+      <section class="card" aria-labelledby="pool-title">
+        <h2 id="pool-title">Viviers de talents</h2>
+        <p class="muted small">Entreprises qui conservent votre profil pour vous proposer d'autres postes.</p>
+        <p class="sr-only" role="status" aria-live="polite">{{ poolMessage() }}</p>
+        @if (poolMessage()) { <p class="form-info">{{ poolMessage() }}</p> }
+        <ul class="list">
+          @for (p of myPools(); track p.entryId) {
+            <li>
+              <strong>{{ p.companyName }}</strong>
+              <span class="block muted small">depuis le {{ p.addedAt | date: 'd MMM y' }} · jusqu'au {{ p.expiresAt | date: 'd MMM y' }} au plus tard</span>
+              @if (confirmLeave() === p.entryId) {
+                <span class="actions">
+                  <button type="button" class="danger" (click)="leave(p)">Confirmer le retrait</button>
+                  <button type="button" (click)="confirmLeave.set(null)">Annuler</button>
+                </span>
+              } @else {
+                <button type="button" (click)="confirmLeave.set(p.entryId)"
+                        [attr.aria-label]="'Me retirer du vivier de ' + p.companyName">Me retirer</button>
+              }
+            </li>
+          } @empty {
+            <li class="muted">Aucune entreprise ne conserve votre profil.</li>
+          }
+        </ul>
+      </section>
+    </div>
+  }
+</div>

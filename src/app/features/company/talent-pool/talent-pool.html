@@ -1,0 +1,91 @@
+<div class="page page-wide">
+  <h1>Vivier de talents</h1>
+  <p class="muted">
+    Les candidats ajoutés depuis leur fiche candidature. Chacun est prévenu, peut se retirer à tout moment,
+    et n'est conservé que 24 mois sans nouvelle activité.
+  </p>
+
+  <p class="sr-only" role="status" aria-live="polite">{{ message() }}</p>
+  @if (message()) { <p class="form-info">{{ message() }}</p> }
+  @if (error()) { <p class="form-error" role="alert">{{ error() }}</p> }
+
+  <div class="layout">
+    <aside class="card side" aria-labelledby="lists-title">
+      <h2 id="lists-title">Listes</h2>
+      <ul class="list-nav">
+        <li>
+          <button type="button" class="link" [class.current]="listId() === null" [attr.aria-current]="listId() === null ? 'true' : null"
+                  (click)="setList('')">Tout le vivier</button>
+        </li>
+        @for (l of lists(); track l.id) {
+          <li>
+            <button type="button" class="link" [class.current]="listId() === l.id" [attr.aria-current]="listId() === l.id ? 'true' : null"
+                    (click)="setList('' + l.id)">{{ l.name }}</button>
+            <span class="muted small">{{ l.size }}</span>
+            @if (canManage()) {
+              <button type="button" class="icon" (click)="deleteList(l)" [attr.aria-label]="'Supprimer la liste ' + l.name">✕</button>
+            }
+          </li>
+        }
+      </ul>
+      @if (canManage()) {
+        <form class="new-list" (submit)="$event.preventDefault(); createList()">
+          <label for="new-list">Nouvelle liste</label>
+          <input id="new-list" maxlength="100" [value]="newList()" (input)="newList.set($any($event.target).value)" placeholder="Ex. Profils Java à relancer" />
+          <button type="submit" [disabled]="!newList().trim()">Créer</button>
+        </form>
+      }
+    </aside>
+
+    <section aria-labelledby="results-title">
+      <h2 id="results-title" class="sr-only">Candidats</h2>
+      <div class="filters" role="group" aria-label="Rechercher dans le vivier">
+        <div class="field">
+          <label for="tp-q">Nom ou titre</label>
+          <input id="tp-q" type="search" [value]="q()" (input)="set('q', $any($event.target).value)" />
+        </div>
+        <div class="field">
+          <label for="tp-skill">Compétence</label>
+          <input id="tp-skill" type="search" list="ref-COMPETENCE" [value]="skill()" (input)="set('skill', $any($event.target).value)" />
+          <app-ref-datalist kind="COMPETENCE" />
+        </div>
+        <div class="field">
+          <label for="tp-city">Ville</label>
+          <input id="tp-city" type="search" list="ref-VILLE" [value]="city()" (input)="set('city', $any($event.target).value)" />
+          <app-ref-datalist kind="VILLE" />
+        </div>
+        @if (tagOptions().length) {
+          <div class="field">
+            <label for="tp-tag">Étiquette</label>
+            <select id="tp-tag" (change)="set('tag', $any($event.target).value)">
+              <option value="">Toutes</option>
+              @for (t of tagOptions(); track t) { <option [value]="t">{{ t }}</option> }
+            </select>
+          </div>
+        }
+        @if (loading()) { <span class="muted" role="status">Recherche…</span> }
+      </div>
+
+      @if (result(); as r) {
+        <p class="muted count">{{ r.totalElements }} candidat{{ r.totalElements > 1 ? 's' : '' }}</p>
+        <div class="cards">
+          @for (t of r.content; track t.entryId) {
+            <app-talent-card [item]="t" [lists]="lists()" [jobs]="jobs()" [canManage]="canManage()"
+                             (changed)="onChanged($event)" (removed)="onRemoved($event)" (info)="message.set($event)" />
+          } @empty {
+            <p class="muted">
+              Aucun candidat {{ q() || skill() || city() || tag() || listId() ? 'ne correspond à ces critères' : 'dans le vivier : ajoutez-en depuis une fiche candidature' }}.
+            </p>
+          }
+        </div>
+        @if (r.totalPages > 1) {
+          <div class="pager">
+            <button type="button" (click)="page.set(r.page - 1)" [disabled]="r.page === 0">Précédent</button>
+            <span>Page {{ r.page + 1 }} / {{ r.totalPages }}</span>
+            <button type="button" (click)="page.set(r.page + 1)" [disabled]="r.page + 1 >= r.totalPages">Suivant</button>
+          </div>
+        }
+      }
+    </section>
+  </div>
+</div>

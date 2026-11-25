@@ -1,0 +1,50 @@
+ <div class="auth-card">
+      <h1>Rejoindre une entreprise</h1>
+
+      @if (loading()) {
+        <p>Vérification de l'invitation…</p>
+      } @else if (invalid()) {
+        <p class="form-error" role="alert">{{ invalid() }}</p>
+        <p>Demandez à l'administrateur de votre entreprise de vous envoyer une nouvelle invitation.</p>
+        <p><a routerLink="/login">Aller à la connexion</a></p>
+      } @else if (preview(); as p) {
+
+        @if (auth.user(); as current) {
+          <p class="status-banner" role="status">
+            Vous êtes connecté en tant que {{ current.email }}. Pour accepter cette invitation avec un nouveau compte,
+            déconnectez-vous d'abord.
+            <button type="button" (click)="logout()">Se déconnecter</button>
+          </p>
+        }
+
+        <p>
+          <strong>{{ p.companyName }}</strong> vous invite à rejoindre son équipe en tant que
+          <strong>{{ roleLabel(p.role) }}</strong>.
+        </p>
+
+        <form [formGroup]="form" (ngSubmit)="submit()" novalidate>
+          <label for="email">E-mail</label>
+          <input id="email" [value]="p.email" disabled />
+
+          <label for="firstName">Prénom</label>
+          <input id="firstName" formControlName="firstName" autocomplete="given-name" />
+          @if (bad('firstName')) { <small class="field-error">Le prénom est obligatoire.</small> }
+
+          <label for="lastName">Nom</label>
+          <input id="lastName" formControlName="lastName" autocomplete="family-name" />
+          @if (bad('lastName')) { <small class="field-error">Le nom est obligatoire.</small> }
+
+          <label for="password">Mot de passe</label>
+          <input id="password" type="password" formControlName="password" autocomplete="new-password"
+                 aria-describedby="password-rules" [attr.aria-invalid]="bad('password')" />
+          <app-password-rules rulesId="password-rules" [value]="form.controls.password.value" />
+          @if (bad('password')) { <small class="field-error">Le mot de passe ne respecte pas encore ces règles.</small> }
+
+          @if (error()) { <p class="form-error" role="alert">{{ error() }}</p> }
+
+          <button type="submit" [disabled]="submitting() || !!auth.user()">
+            {{ submitting() ? 'Création…' : 'Créer mon compte' }}
+          </button>
+        </form>
+      }
+    </div>

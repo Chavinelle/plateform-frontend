@@ -1,0 +1,39 @@
+:host { display: block; }
+
+.toolbar { display: flex; justify-content: space-between; align-items: center; gap: .75rem; flex-wrap: wrap; }
+.period { margin: 0; font-size: 1.2rem; }
+.summary { margin: .5rem 0 1rem; }
+button[aria-pressed='true'] { background: var(--primary-solid); color: var(--on-primary); border-color: var(--primary); }
+
+// ---- mois ----
+.month { width: 100%; border-collapse: collapse; table-layout: fixed; min-width: 640px; }
+.month th { padding: .4rem; font-weight: 600; text-transform: capitalize; border-bottom: 1px solid var(--border); }
+.month abbr { text-decoration: none; }
+.month td { vertical-align: top; height: 6.5rem; padding: .25rem; border: 1px solid var(--border); }
+.month td.outside { background: var(--surface-2); }
+.month td.outside .day-number { color: var(--text-muted); }
+.month td.today { background: var(--primary-soft); }
+.day-number { border: 0; background: none; padding: .1rem .35rem; border-radius: 4px; cursor: pointer; font-weight: 600; }
+.today .day-number { background: var(--primary-solid); color: var(--on-primary); }
+
+// ---- semaine et jour ----
+.days { display: flex; flex-direction: column; gap: .75rem; }
+.days.week { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: .5rem; }
+@media (max-width: 900px) {
+  .days.week { grid-template-columns: 1fr; }
+}
+.day { border: 1px solid var(--border); border-radius: 6px; padding: .5rem; min-height: 6rem; }
+.day.today { border-color: var(--primary); background: var(--primary-soft); }
+.day-title { margin: 0 0 .5rem; font-size: .95rem; }
+.day-title::first-letter { text-transform: uppercase; }
+.empty { margin: 0; font-size: .85rem; }
+
+// ---- entretiens ----
+.events { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: .4rem; }
+.event { display: flex; flex-direction: column; gap: .1rem; border-left: 3px solid var(--primary); padding-left: .5rem; }
+.event-title { font-weight: 600; }
+.time { font-variant-numeric: tabular-nums; font-weight: 600; }
+.events.compact { margin-top: .25rem; font-size: .8rem; gap: .2rem; }
+.events.compact a { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.cancelled, .cancelled a { text-decoration: line-through; color: var(--text-muted); }
+.event.cancelled { border-left-color: var(--border-strong); }

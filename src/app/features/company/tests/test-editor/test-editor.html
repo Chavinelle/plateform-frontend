@@ -1,0 +1,114 @@
+<form [formGroup]="form" (ngSubmit)="submit()" novalidate class="editor">
+  <div class="form-grid">
+    <div class="field">
+      <label for="test-title">Titre du test <span aria-hidden="true">*</span></label>
+      <input id="test-title" formControlName="title" required
+             [attr.aria-invalid]="invalid(form.controls.title)"
+             [attr.aria-describedby]="invalid(form.controls.title) ? 'test-title-error' : null" />
+      @if (invalid(form.controls.title)) {
+        <small id="test-title-error" class="field-error">Le titre est obligatoire (150 caractères maximum).</small>
+      }
+    </div>
+    <div class="field">
+      <label for="test-duration">Durée (minutes) <span aria-hidden="true">*</span></label>
+      <input id="test-duration" type="number" min="5" max="240" formControlName="durationMinutes" required
+             [attr.aria-invalid]="invalid(form.controls.durationMinutes)"
+             aria-describedby="test-duration-hint" />
+      <small id="test-duration-hint" [class]="invalid(form.controls.durationMinutes) ? 'field-error' : 'muted'">
+        Entre 5 et 240 minutes. Le minuteur démarre quand le candidat commence le test.
+      </small>
+    </div>
+  </div>
+  <div class="field">
+    <label for="test-instructions">Consignes pour le candidat</label>
+    <textarea id="test-instructions" formControlName="instructions" rows="3"></textarea>
+  </div>
+
+  <section class="selected" aria-labelledby="selected-title">
+    <h4 id="selected-title" #selectedHeading tabindex="-1">
+      Questions du test : {{ selected().length }} / {{ maxQuestions }} · {{ totalPoints() }} points
+    </h4>
+    <ol class="selected-list">
+      @for (q of selected(); track q.id; let i = $index; let first = $first; let last = $last) {
+        <li class="selected-item">
+          <div class="selected-text">
+            <span class="position" aria-hidden="true">{{ i + 1 }}.</span>
+            <span>
+              {{ excerpt(q.statement) }}
+              <small class="muted block">
+                {{ typeLabels[q.type] }} · {{ q.points }} pt{{ q.points > 1 ? 's' : '' }}
+                @if (q.archived) { · archivée }
+              </small>
+            </span>
+          </div>
+          <div class="row-actions">
+            <button type="button" (click)="move(i, -1)" [disabled]="first"
+                    [attr.aria-label]="'Monter la question ' + (i + 1)">↑</button>
+            <button type="button" (click)="move(i, 1)" [disabled]="last"
+                    [attr.aria-label]="'Descendre la question ' + (i + 1)">↓</button>
+            <button type="button" class="danger" (click)="remove(i)"
+                    [attr.aria-label]="'Retirer la question ' + (i + 1) + ' du test'">Retirer</button>
+          </div>
+        </li>
+      } @empty {
+        <li class="muted">Aucune question : ajoutez-en depuis la banque ci-dessous.</li>
+      }
+    </ol>
+  </section>
+
+  <section class="picker" aria-labelledby="picker-title">
+    <h4 id="picker-title">Ajouter depuis la banque</h4>
+    <div class="filters" role="group" aria-label="Rechercher dans la banque">
+      <div class="field">
+        <label for="picker-search">Rechercher</label>
+        <input id="picker-search" type="search" [value]="search()" (input)="search.set($any($event.target).value)" />
+      </div>
+      <div class="field">
+        <label for="picker-category">Catégorie</label>
+        <select id="picker-category" (change)="setCategory($any($event.target).value)">
+          <option value="">Toutes</option>
+          @for (c of bankCategories(); track c) { <option [value]="c">{{ c }}</option> }
+        </select>
+      </div>
+      <div class="field">
+        <label for="picker-type">Type</label>
+        <select id="picker-type" (change)="setType($any($event.target).value)">
+          <option value="">Tous</option>
+          @for (t of types; track t.value) { <option [value]="t.value">{{ t.label }}</option> }
+        </select>
+      </div>
+    </div>
+
+    @if (bankLoading()) {
+      <p>Chargement de la banque…</p>
+    } @else {
+      <ul class="available">
+        @for (q of available(); track q.id) {
+          <li class="available-item">
+            <span>
+              {{ excerpt(q.statement) }}
+              <small class="muted block">
+                {{ typeLabels[q.type] }} · {{ q.points }} pt{{ q.points > 1 ? 's' : '' }}
+                @if (q.category) { · {{ q.category }} }
+              </small>
+            </span>
+            <button type="button" (click)="add(q)" [disabled]="selected().length >= maxQuestions"
+                    [attr.aria-label]="'Ajouter au test : ' + excerpt(q.statement)">Ajouter</button>
+          </li>
+        } @empty {
+          <li class="muted">
+            {{ bank().length ? 'Aucune autre question ne correspond.' : 'La banque est vide : créez d’abord des questions dans l’onglet « Banque de questions ».' }}
+          </li>
+        }
+      </ul>
+    }
+  </section>
+
+  <p class="sr-only" role="status" aria-live="polite">{{ announce() }}</p>
+  @if (error()) { <p class="form-error" role="alert">{{ error() }}</p> }
+
+  <div class="actions">
+    <button type="submit" [disabled]="saving()">{{ saving() ? 'Enregistrement…' : 'Enregistrer le test' }}</button>
+    <button type="button" (click)="cancelled.emit()" [disabled]="saving()">Annuler</button>
+  </div>
+</form>

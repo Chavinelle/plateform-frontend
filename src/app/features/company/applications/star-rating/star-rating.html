@@ -1,0 +1,21 @@
+@if (readonly()) {
+  @if (value() !== null) {
+    <span class="stars" role="img" [attr.aria-label]="summary()">
+      @for (s of stars; track s) { <span aria-hidden="true" [class.on]="s <= (value() ?? 0)">★</span> }
+    </span>
+  }
+} @else {
+  <fieldset class="rating" [disabled]="disabled()">
+    <legend class="sr-only">{{ label() }}</legend>
+    @for (s of stars; track s) {
+      <input type="radio" class="sr-only" [id]="name + '-' + s" [name]="name" [value]="s"
+             [checked]="value() === s" (change)="select(s)" />
+      <label [for]="name + '-' + s" [class.on]="s <= (value() ?? 0)">
+        <span aria-hidden="true">★</span><span class="sr-only">{{ s }} étoile{{ s > 1 ? 's' : '' }}</span>
+      </label>
+    }
+    @if (value() !== null) {
+      <button type="button" class="link clear" (click)="clear()">Retirer la note</button>
+    }
+  </fieldset>
+}

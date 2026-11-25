@@ -1,0 +1,90 @@
+<div class="page">
+  <div class="section-head">
+    <h1>Grilles d'évaluation</h1>
+    @if (canEdit() && editing() === null) {
+      <button type="button" (click)="openEditor('new')">Nouvelle grille</button>
+    }
+  </div>
+  <p class="muted">
+    Les évaluateurs notent chaque critère de 1 à 5 ; le score global est la moyenne pondérée, ramenée sur 100.
+    @if (!canEdit()) { Seuls l'administrateur et les recruteurs peuvent modifier les grilles. }
+  </p>
+
+  <p class="sr-only" role="status" aria-live="polite">{{ message() }}</p>
+  @if (message()) { <p class="form-info">{{ message() }}</p> }
+  @if (error()) { <p class="form-error" role="alert">{{ error() }}</p> }
+
+  @if (editing() !== null) {
+    <section class="card" aria-labelledby="editor-title">
+      <h2 id="editor-title" #editorHeading tabindex="-1">
+        {{ editingTemplate() ? 'Modifier « ' + editingTemplate()!.name + ' »' : 'Nouvelle grille' }}
+      </h2>
+      <app-template-editor [template]="editingTemplate()" (saved)="onSaved($event)" (cancelled)="closeEditor()" />
+    </section>
+  }
+
+  <label class="check archived-toggle">
+    <input type="checkbox" [checked]="showArchived()" (change)="toggleArchived($any($event.target).checked)" />
+    Afficher les grilles archivées
+  </label>
+
+  @if (loading()) {
+    <p>Chargement…</p>
+  } @else {
+    <ul class="templates">
+      @for (t of templates(); track t.id) {
+        <li class="card template" [class.archived]="t.archived">
+          <div class="template-head">
+            <h2>{{ t.name }}</h2>
+            @if (t.defaultTemplate) { <span class="badge badge-ok">Par défaut</span> }
+            @if (t.archived) { <span class="badge">Archivée</span> }
+            @if (t.used) { <span class="badge">Utilisée</span> }
+          </div>
+          @if (t.description) { <p class="muted">{{ t.description }}</p> }
+
+          <div class="table-wrap" tabindex="0" role="region" [attr.aria-label]="'Critères de la grille ' + t.name">
+            <table class="table criteria-table">
+              <caption class="sr-only">Critères de la grille {{ t.name }}</caption>
+              <thead>
+                <tr><th scope="col">Critère</th><th scope="col">Poids</th><th scope="col">Part du score</th></tr>
+              </thead>
+              <tbody>
+                @for (c of t.criteria; track c.id) {
+                  <tr>
+                    <th scope="row">
+                      {{ c.label }}
+                      @if (c.description) { <small class="muted block">{{ c.description }}</small> }
+                    </th>
+                    <td>{{ c.weight }}</td>
+                    <td>
+                      <span class="percent">{{ c.percent }} %</span>
+                      <span class="percent-bar" aria-hidden="true"><span [style.width.%]="c.percent"></span></span>
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+
+          @if (canEdit()) {
+            <div class="row-actions">
+              @if (!t.archived) {
+                <button type="button" (click)="openEditor(t)" [disabled]="busyId() === t.id">Modifier</button>
+                @if (!t.defaultTemplate) {
+                  <button type="button" (click)="makeDefault(t)" [disabled]="busyId() === t.id">Définir par défaut</button>
+                  <button type="button" class="danger" (click)="remove(t)" [disabled]="busyId() === t.id">
+                    {{ t.used ? 'Archiver' : 'Supprimer' }}
+                  </button>
+                }
+              } @else {
+                <button type="button" (click)="restore(t)" [disabled]="busyId() === t.id">Restaurer</button>
+              }
+            </div>
+          }
+        </li>
+      } @empty {
+        <li class="muted">Aucune grille.</li>
+      }
+    </ul>
+  }
+</div>

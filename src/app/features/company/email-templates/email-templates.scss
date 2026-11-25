@@ -1,0 +1,9 @@
+.templates { list-style: none; padding: 0; margin: 1rem 0 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(18rem, 1fr)); gap: .75rem; }
+.template { margin: 0; display: flex; flex-direction: column; gap: .35rem; }
+.template.current { border-color: var(--primary); }
+.template button { align-self: flex-start; margin-top: auto; }
+.head { display: flex; gap: .5rem; align-items: center; flex-wrap: wrap; }
+.head h2 { margin: 0; font-size: 1.05rem; }
+.template p { margin: 0; }
+.subject { font-size: .9rem; overflow-wrap: anywhere; }
+.small { font-size: .85rem; }

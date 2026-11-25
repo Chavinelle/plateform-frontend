@@ -1,0 +1,113 @@
+ <div class="page">
+      <p><a routerLink="/candidat/candidatures">← Mes candidatures</a></p>
+
+      @if (loading()) {
+        <p>Chargement…</p>
+      } @else if (notFound()) {
+        <div class="card">
+          <h1>Candidature introuvable</h1>
+          <a class="button-link" routerLink="/candidat/candidatures">Retour à mes candidatures</a>
+        </div>
+      } @else if (a(); as app) {
+
+        <header class="card">
+          <div class="job-card-head">
+            @if (app.companyHasLogo) {
+              <img class="company-logo-sm" [src]="logoUrl()" [alt]="'Logo de ' + app.companyName" />
+            } @else {
+              <div class="company-logo-sm placeholder" aria-hidden="true">{{ initials() }}</div>
+            }
+            <div>
+              <h1>{{ app.jobTitle }}</h1>
+              <a [routerLink]="['/entreprises', app.companyId]">{{ app.companyName }}</a>
+            </div>
+          </div>
+
+          <div class="application-status">
+            <span class="badge app-status-{{ app.status }}">{{ statusLabel() }}</span>
+            @if (app.stageName) { <span>Étape actuelle : <strong>{{ app.stageName }}</strong></span> }
+          </div>
+          <p class="muted">Postulé le {{ app.appliedAt | date: 'd MMMM y, HH:mm' }}</p>
+
+          <div class="actions">
+            @if (app.jobAvailable) {
+              <a class="button-link" [routerLink]="['/offres', app.jobId]">Voir l'offre</a>
+            } @else {
+              <small class="muted">Cette offre n'est plus en ligne.</small>
+            }
+            @if (app.canWithdraw) {
+          <button type="button" class="danger" (click)="withdraw(app)" [disabled]="busy()">
+            Retirer ma candidature
+          </button>
+}
+       @if (withdrawError()) { <p class="form-error" role="alert">{{ withdrawError() }}</p> }
+          </div>
+        </header>
+
+        <section class="card" aria-labelledby="interviews-title">
+          <h2 id="interviews-title">Vos entretiens</h2>
+          <app-my-interviews [applicationId]="app.id" />
+        </section>
+
+        <section class="card" aria-labelledby="messages-title">
+          <h2 id="messages-title">Messages avec l'entreprise</h2>
+          <app-message-thread side="candidate" [applicationId]="app.id" />
+        </section>
+
+        <section class="card">
+          <h2>Suivi de la candidature</h2>
+          <ol class="timeline">
+            @for (h of app.history; track $index; let last = $last) {
+              <li [class.current]="last">
+                <span class="timeline-date">{{ h.date | date: 'd MMM y, HH:mm' }}</span>
+                <span class="timeline-label">{{ h.label }}</span>
+                @if (h.message) {
+                  <details class="sent-message">
+                    <summary>Message de l'entreprise</summary>
+                    <p class="pre">{{ h.message }}</p>
+                  </details>
+                }
+              </li>
+            } @empty {
+              <li>Aucun événement pour le moment.</li>
+            }
+          </ol>
+        </section>
+
+        @if (app.coverLetter) {
+          <section class="card"><h2>Votre message</h2><p class="pre">{{ app.coverLetter }}</p></section>
+        }
+
+        @if (app.answers.length) {
+          <section class="card">
+            <h2>Vos réponses</h2>
+            <dl class="answers">
+              @for (x of app.answers; track $index) {
+                <dt>{{ x.question }}</dt>
+                <dd>
+                  @for (v of x.answers; track $index) { <div>{{ v }}</div> }
+                </dd>
+              }
+            </dl>
+          </section>
+        }
+
+        <section class="card">
+          <h2>Documents envoyés</h2>
+          <p class="muted">Ce sont les copies jointes à votre candidature, indépendantes de votre profil.</p>
+          @if (docError()) { <p class="form-error" role="alert">{{ docError() }}</p> }
+          <ul class="item-list">
+            @for (d of app.documents; track d.id) {
+              <li class="item">
+                <span>
+                  <span class="badge">{{ d.kind === 'CV' ? 'CV' : 'Lettre' }}</span>
+                  {{ d.originalName }}
+                  <small class="muted">({{ size(d.sizeBytes) }})</small>
+                </span>
+                <button type="button" (click)="download(app.id, d)">Télécharger</button>
+              </li>
+            }
+          </ul>
+        </section>
+      }
+    </div>

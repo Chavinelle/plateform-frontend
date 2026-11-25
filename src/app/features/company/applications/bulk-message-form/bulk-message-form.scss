@@ -1,0 +1,7 @@
+.bulk-message { display: flex; flex-direction: column; gap: .75rem; }
+textarea { width: 100%; font: inherit; }
+.variables { display: flex; gap: .4rem; flex-wrap: wrap; }
+button.small { padding: .15rem .5rem; font-size: .85rem; font-family: ui-monospace, Consolas, monospace; }
+.preview h3 { margin: 0 0 .35rem; font-size: 1rem; }
+.preview pre { white-space: pre-wrap; font: inherit; background: var(--surface-2); border: 1px solid var(--border); border-radius: 6px; padding: .6rem; margin: 0; }
+.preview pre:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }

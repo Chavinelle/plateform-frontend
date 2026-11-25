@@ -1,0 +1,32 @@
+<div class="bulk-bar" role="region" aria-label="Actions sur la sélection">
+  <strong>{{ count() }} sélectionnée{{ count() > 1 ? 's' : '' }}</strong>
+
+  <select (change)="onTarget($event)" aria-label="Étape de destination" [disabled]="busy()">
+    <option value="" [selected]="targetId() === null">Déplacer vers…</option>
+    @for (s of stages(); track s.id) { <option [value]="s.id" [selected]="targetId() === s.id">{{ s.name }}</option> }
+  </select>
+  <button type="button" class="primary" (click)="apply()" [disabled]="busy() || targetId() === null">
+    {{ busy() ? 'Traitement…' : (target()?.kind === 'REJET' ? 'Rejeter…' : 'Appliquer') }}
+  </button>
+  <button #messageButton type="button" (click)="openMessage()" [disabled]="busy()">Envoyer un message…</button>
+  <button type="button" class="link" (click)="cleared.emit()" [disabled]="busy()">Tout désélectionner</button>
+
+  @if (error()) { <span class="form-error" role="alert">{{ error() }}</span> }
+</div>
+
+<dialog #messageDialog class="reject-dialog" aria-labelledby="bulk-message-title" (cancel)="closeMessage()">
+  @if (writing()) {
+    <h2 id="bulk-message-title">Message à {{ count() }} candidat{{ count() > 1 ? 's' : '' }}</h2>
+    <app-bulk-message-form [jobId]="jobId()" [selection]="selection()"
+                           (sent)="onMessaged($event)" (cancelled)="closeMessage()" />
+  }
+</dialog>
+
+<dialog #rejectDialog class="reject-dialog" aria-labelledby="bulk-reject-title" (cancel)="closeDialog()">
+  @if (rejecting()) {
+    <h2 id="bulk-reject-title">Rejeter {{ count() }} candidature{{ count() > 1 ? 's' : '' }}</h2>
+    <p class="muted">Le même motif sera enregistré pour chacune ; le message est personnalisé avec le prénom de chaque candidat.</p>
+    <app-reject-form [jobId]="jobId()" [recipientCount]="count()" [busy]="busy()"
+                     (confirmed)="reject($event)" (cancelled)="closeDialog()" />
+  }
+</dialog>

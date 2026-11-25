@@ -1,0 +1,118 @@
+<div class="page page-wide">
+  <h1>Tableau de bord</h1>
+
+  <div class="filters" role="group" aria-label="Filtres du tableau de bord">
+    <div class="field">
+      <label for="dash-period">Période</label>
+      <select id="dash-period" (change)="setPreset($any($event.target).value)">
+        @for (p of presets; track p.value) { <option [value]="p.value" [selected]="preset() === p.value">{{ p.label }}</option> }
+      </select>
+    </div>
+    @if (preset() === 'custom') {
+      <div class="field">
+        <label for="dash-from">Du</label>
+        <input id="dash-from" type="date" [value]="customFrom()" (change)="customFrom.set($any($event.target).value)" />
+      </div>
+      <div class="field">
+        <label for="dash-to">Au</label>
+        <input id="dash-to" type="date" [value]="customTo()" (change)="customTo.set($any($event.target).value)" />
+      </div>
+    }
+    <div class="field">
+      <label for="dash-job">Offre</label>
+      <select id="dash-job" (change)="setJob($any($event.target).value)">
+        <option value="" [selected]="jobId() === null">Toutes les offres</option>
+        @for (j of jobs(); track j.id) { <option [value]="j.id" [selected]="jobId() === j.id">{{ j.title }}</option> }
+      </select>
+    </div>
+    @if (loading()) { <span class="muted" role="status">Mise à jour…</span> }
+    <div class="row-actions exports">
+      <button type="button" (click)="exportAs('XLSX')" [disabled]="exporting() !== null"
+              aria-label="Exporter le rapport au format Excel (filtres actuels)">
+        {{ exporting() === 'XLSX' ? 'Export…' : 'Exporter Excel' }}
+      </button>
+      <button type="button" (click)="exportAs('PDF')" [disabled]="exporting() !== null"
+              aria-label="Exporter le rapport au format PDF (filtres actuels)">
+        {{ exporting() === 'PDF' ? 'Export…' : 'Exporter PDF' }}
+      </button>
+    </div>
+  </div>
+  <p class="sr-only" role="status" aria-live="polite">{{ exportMessage() }}</p>
+
+  @if (error()) { <p class="form-error" role="alert">{{ error() }}</p> }
+
+  @if (stats(); as s) {
+    <section aria-labelledby="kpi-title">
+      <h2 id="kpi-title" class="sr-only">Indicateurs clés</h2>
+      <ul class="kpis">
+        <li class="kpi">
+          <span class="kpi-label">Candidatures reçues</span>
+          <span class="kpi-value">{{ s.totals.applications }}</span>
+        </li>
+        <li class="kpi">
+          <span class="kpi-label">À traiter ou en cours</span>
+          <span class="kpi-value">{{ s.totals.inProgress }}</span>
+          <span class="kpi-note">parmi les reçues</span>
+        </li>
+        <li class="kpi">
+          <span class="kpi-label">Embauchées</span>
+          <span class="kpi-value">{{ s.totals.hired }}</span>
+          <span class="kpi-note">{{ s.totals.rejected }} rejetée{{ s.totals.rejected > 1 ? 's' : '' }}, {{ s.totals.withdrawn }} retirée{{ s.totals.withdrawn > 1 ? 's' : '' }}</span>
+        </li>
+        <li class="kpi">
+          <span class="kpi-label">Délai moyen d'embauche</span>
+          @if (s.timeToHire.averageDays !== null) {
+            <span class="kpi-value">{{ s.timeToHire.averageDays | number: '1.0-1' }} <small>j</small></span>
+            <span class="kpi-note">médiane {{ s.timeToHire.medianDays | number: '1.0-1' }} j · {{ s.timeToHire.hires }} embauche{{ s.timeToHire.hires > 1 ? 's' : '' }}</span>
+          } @else {
+            <span class="kpi-value muted">—</span>
+            <span class="kpi-note">aucune embauche sur la période</span>
+          }
+        </li>
+        @if (!s.period.jobId) {
+          <li class="kpi">
+            <span class="kpi-label">Offres publiées</span>
+            <span class="kpi-value">{{ s.totals.publishedJobs }}</span>
+            <span class="kpi-note">en ce moment</span>
+          </li>
+        }
+      </ul>
+    </section>
+
+    <div class="charts">
+      <section class="card chart wide">
+        <app-column-chart [title]="'Candidatures reçues ' + granularityLabel()" [items]="timeline()" />
+      </section>
+      <section class="card chart">
+        <app-bar-list title="Candidatures par source" [items]="sources()" labelHeader="Source" valueHeader="Candidatures" />
+      </section>
+      @if (s.period.jobId) {
+        <section class="card chart">
+          <app-bar-list [title]="'Candidatures par étape – ' + s.period.jobTitle" [items]="byStage()"
+                        labelHeader="Étape" valueHeader="Actuellement" />
+        </section>
+      } @else {
+        <section class="card chart">
+          <app-bar-list title="Candidatures par offre" [items]="byJob()" labelHeader="Offre" valueHeader="Candidatures" />
+        </section>
+      }
+      <section class="card chart" [class.wide]="!s.period.jobId">
+        <app-funnel-chart title="Entonnoir de recrutement" [steps]="funnel()" />
+      </section>
+      @if (s.period.jobId) {
+        <section class="card chart">
+          <app-funnel-chart [title]="'Étapes du pipeline – ' + s.period.jobTitle" [steps]="stageFunnel()" />
+        </section>
+      }
+    </div>
+    <p class="muted small">
+      Les candidatures comptées sont celles reçues sur la période ; le délai d'embauche porte sur les embauches
+      prononcées sur la période. Dans l'entonnoir, une candidature compte à une étape si elle l'a atteinte ou est allée plus loin
+      (une embauche sans entretien compte aussi à l'étape « entretien ») ; « examen » signifie passée au-delà
+      de l'étape d'arrivée.
+      Les évaluations n'entrent pas dans ces indicateurs.
+    </p>
+  } @else if (loading()) {
+    <p>Chargement…</p>
+  }
+</div>

@@ -1,0 +1,145 @@
+<div class="page page-wide">
+  @if (jobId(); as id) {
+    <p><a [routerLink]="['/recruteur/offres', id, 'candidatures']">← Candidatures de l'offre</a></p>
+  }
+  <h1>Comparer les candidats</h1>
+
+  @if (loading()) {
+    <p>Chargement…</p>
+  } @else if (data(); as d) {
+    <p class="muted">{{ d.jobTitle }} · {{ d.candidates.length }} candidats</p>
+    @if (anyHidden()) {
+      <p class="status-banner">
+        Évaluation indépendante : les scores et avis des candidats marqués « Masqué » s'afficheront
+        quand vous aurez soumis votre propre évaluation de ces candidats.
+      </p>
+    }
+
+    <div class="table-wrap" role="region" aria-labelledby="comparison-caption" tabindex="0">
+      <table class="table comparison">
+        <caption id="comparison-caption">Comparaison des candidats pour « {{ d.jobTitle }} »
+          <span class="sr-only">. La meilleure valeur de chaque ligne est signalée.</span></caption>
+        <thead>
+          <tr>
+            <td class="corner"></td>
+            @for (c of d.candidates; track c.applicationId) {
+              <th scope="col">
+                <a [routerLink]="['/recruteur/candidatures', c.applicationId]">{{ c.candidateName }}</a>
+                @if (c.headline) { <small class="muted block">{{ c.headline }}</small> }
+              </th>
+            }
+          </tr>
+        </thead>
+        <tbody>
+          <tr class="group"><th scope="rowgroup" [attr.colspan]="d.candidates.length + 1">Suivi</th></tr>
+          <tr>
+            <th scope="row">Étape</th>
+            @for (c of d.candidates; track c.applicationId) {
+              <td>{{ c.stageName ?? '—' }} <small class="muted block">{{ statusLabels[c.status] }}</small></td>
+            }
+          </tr>
+          <tr>
+            <th scope="row">Note rapide</th>
+            @for (c of d.candidates; track c.applicationId) {
+              <td>{{ c.rating !== null ? c.rating + ' / 5' : '—' }}</td>
+            }
+          </tr>
+          <tr>
+            <th scope="row">Entretiens réalisés</th>
+            @for (c of d.candidates; track c.applicationId) { <td>{{ c.interviewsDone }}</td> }
+          </tr>
+          <tr>
+            <th scope="row">Candidature reçue</th>
+            @for (c of d.candidates; track c.applicationId) { <td>{{ c.appliedAt | date: 'd MMM y' }}</td> }
+          </tr>
+          <tr>
+            <th scope="row">Étiquettes</th>
+            @for (c of d.candidates; track c.applicationId) {
+              <td>
+                @if (c.tags.length) {
+                  <ul class="chip-list compact" [attr.aria-label]="'Étiquettes de ' + c.candidateName">
+                    @for (t of c.tags; track t) { <li class="chip small tag">{{ t }}</li> }
+                  </ul>
+                } @else { — }
+              </td>
+            }
+          </tr>
+
+          <tr class="group"><th scope="rowgroup" [attr.colspan]="d.candidates.length + 1">Évaluations</th></tr>
+          <tr>
+            <th scope="row">Score global <small class="muted block">sur 100</small></th>
+            @for (c of d.candidates; track c.applicationId; let i = $index) {
+              <td [class.best]="bestScore().has(i)">
+                @if (!c.evaluationsVisible) {
+                  <span class="hidden-value">Masqué</span>
+                  <small class="muted block">{{ c.submittedCount }} soumise{{ c.submittedCount > 1 ? 's' : '' }} ·
+                    <a [routerLink]="['/recruteur/candidatures', c.applicationId]">évaluer d'abord</a></small>
+                } @else if (c.globalScore !== null) {
+                  <strong>{{ c.globalScore | number: '1.0-1' }}</strong>
+                  @if (bestScore().has(i)) { <span class="best-mark" aria-hidden="true">★</span><span class="sr-only"> (meilleur)</span> }
+                  <small class="muted block">{{ c.submittedCount }} évaluation{{ c.submittedCount > 1 ? 's' : '' }}</small>
+                } @else { <span class="muted">Aucune évaluation</span> }
+              </td>
+            }
+          </tr>
+          @for (label of d.criteria; track label; let r = $index) {
+            <tr>
+              <th scope="row">{{ label }} <small class="muted block">moyenne sur 5</small></th>
+              @for (c of d.candidates; track c.applicationId; let i = $index) {
+                <td [class.best]="bestCriteria()[r].has(i)">
+                  @if (!c.evaluationsVisible) {
+                    <span class="hidden-value">Masqué</span>
+                  } @else if (c.criteriaAverages[r] !== null) {
+                    {{ c.criteriaAverages[r] | number: '1.0-1' }}
+                    @if (bestCriteria()[r].has(i)) { <span class="best-mark" aria-hidden="true">★</span><span class="sr-only"> (meilleur)</span> }
+                    <span class="bar" aria-hidden="true"><span [style.width.%]="(c.criteriaAverages[r] ?? 0) * 20"></span></span>
+                  } @else { <span class="muted">—</span> }
+                </td>
+              }
+            </tr>
+          }
+          <tr>
+            <th scope="row">Avis</th>
+            @for (c of d.candidates; track c.applicationId) {
+              <td>
+                @if (!c.evaluationsVisible) {
+                  <span class="hidden-value">Masqué</span>
+                } @else if (c.submittedCount) {
+                  <ul class="opinions">
+                    @for (o of opinions; track o) {
+                      @if (opinionCount(c, o)) { <li>{{ opinionLabels[o] }} : {{ opinionCount(c, o) }}</li> }
+                    }
+                  </ul>
+                } @else { <span class="muted">—</span> }
+              </td>
+            }
+          </tr>
+
+          <tr class="group"><th scope="rowgroup" [attr.colspan]="d.candidates.length + 1">Tests en ligne</th></tr>
+          @for (row of testRows(); track row.testId) {
+            <tr>
+              <th scope="row">{{ row.title }}</th>
+              @for (c of d.candidates; track c.applicationId; let i = $index) {
+                @let t = testOf(c, row.testId);
+                <td [class.best]="bestTests().get(row.testId)?.has(i)">
+                  @if (!t) {
+                    <span class="muted">Non envoyé</span>
+                  } @else if (t.scorePercent !== null) {
+                    <strong>{{ t.scorePercent | number: '1.0-1' }} %</strong>
+                    @if (bestTests().get(row.testId)?.has(i)) { <span class="best-mark" aria-hidden="true">★</span><span class="sr-only"> (meilleur)</span> }
+                  } @else {
+                    {{ attemptLabels[t.status] }}
+                  }
+                </td>
+              }
+            </tr>
+          } @empty {
+            <tr><td [attr.colspan]="d.candidates.length + 1" class="muted">Aucun test envoyé à ces candidats.</td></tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  } @else if (error()) {
+    <p class="form-error" role="alert">{{ error() }}</p>
+  }
+</div>

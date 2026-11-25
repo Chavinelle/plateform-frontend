@@ -1,0 +1,180 @@
+ <div class="page">
+      @if (loading()) {
+        <p>Chargement…</p>
+      } @else if (notFound()) {
+        <div class="card">
+          <h1>Cette offre n'est plus disponible</h1>
+          <p class="muted">Elle a peut-être été clôturée ou retirée par l'entreprise.</p>
+          <a class="button-link" routerLink="/offres">Voir les autres offres</a>
+        </div>
+      } @else if (done(); as s) {
+
+        <!-- Confirmation -->
+        <div class="card">
+          <h1>Candidature envoyée ✅</h1>
+          <p>
+            Votre candidature pour <strong>{{ s.jobTitle }}</strong> chez <strong>{{ s.companyName }}</strong>
+            a bien été transmise.
+          </p>
+          <ul class="summary-list">
+            <li>Statut : {{ statusLabel(s) }}</li>
+            <li>Étape : {{ s.stageName }}</li>
+            <li>Envoyée le {{ s.appliedAt | date: 'd MMMM y, HH:mm' }}</li>
+          </ul>
+          <div class="actions">
+            <a class="button-link primary" routerLink="/candidat/candidatures">Suivre mes candidatures</a>
+            <a class="button-link" routerLink="/offres">Voir d'autres offres</a>
+          </div>
+        </div>
+
+      } @else if (data(); as f) {
+        <p><a [routerLink]="['/offres', f.jobId]">← Retour à l'offre</a></p>
+        <h1>Postuler : {{ f.jobTitle }}</h1>
+        <p class="muted">
+          {{ f.companyName }}
+          @if (f.deadline) { · candidatures jusqu'au {{ f.deadline | date: 'd MMMM y' }} }
+        </p>
+
+        @if (f.alreadyApplied) {
+          <div class="status-banner" role="status">
+            Vous avez déjà postulé à cette offre.
+            <a routerLink="/candidat/candidatures">Voir mes candidatures</a>
+          </div>
+        } @else {
+
+          @if (error()) { <p class="form-error" role="alert">{{ error() }}</p> }
+
+          <!-- CV -->
+          <section class="card">
+            <h2>Votre CV *</h2>
+            @if (cvs().length === 0) {
+              <p class="status-banner">
+                Votre profil ne contient pas encore de CV. Ajoutez-en un pour postuler (PDF ou DOCX, 5 Mo maximum).
+              </p>
+            } @else {
+              <ul class="doc-options">
+                @for (d of cvs(); track d.id) {
+                  <li>
+                    <label class="check">
+                      <input type="radio" name="cv" [checked]="cvId() === d.id" (change)="cvId.set(d.id)" />
+                      {{ d.originalName }}
+                      @if (d.defaultDocument) { <span class="badge badge-ok">par défaut</span> }
+                    </label>
+                  </li>
+                }
+              </ul>
+            }
+            <label class="file-button">
+              {{ cvs().length === 0 ? 'Ajouter mon CV' : 'Ajouter un autre CV' }}
+              <input type="file" accept=".pdf,.docx" (change)="onUpload($event, 'CV')" hidden />
+            </label>
+            @if (docError()) { <p class="form-error" role="alert">{{ docError() }}</p> }
+            @if (uploading()) { <p class="form-info">Envoi en cours…</p> }
+            @if (cvError()) { <p class="field-error">{{ cvError() }}</p> }
+          </section>
+
+          <!-- Lettre -->
+          <section class="card">
+            <h2>Lettre de motivation <small class="muted">(facultatif)</small></h2>
+            <div class="field">
+              <label for="letter">Votre message</label>
+              <textarea id="letter" rows="6" maxlength="5000" [value]="coverLetter()"
+                        (input)="coverLetter.set(val($event))"></textarea>
+              <small class="muted">{{ coverLetter().length }} / {{ maxLetter }}</small>
+            </div>
+
+            @if (letters().length) {
+              <p><strong>Ou joindre un document</strong></p>
+              <ul class="doc-options">
+                <li>
+                  <label class="check">
+                    <input type="radio" name="letter" [checked]="letterId() === null" (change)="letterId.set(null)" />
+                    Aucun document
+                  </label>
+                </li>
+                @for (d of letters(); track d.id) {
+                  <li>
+                    <label class="check">
+                      <input type="radio" name="letter" [checked]="letterId() === d.id" (change)="letterId.set(d.id)" />
+                      {{ d.originalName }}
+                    </label>
+                  </li>
+                }
+              </ul>
+            }
+            <label class="file-button">
+              Ajouter une lettre (PDF ou DOCX)
+              <input type="file" accept=".pdf,.docx" (change)="onUpload($event, 'LETTRE_MOTIVATION')" hidden />
+            </label>
+          </section>
+
+          <!-- Questions -->
+          @if (f.questions.length) {
+            <section class="card">
+              <h2>Questions de l'entreprise</h2>
+              @for (q of f.questions; track q.id; let i = $index) {
+                <fieldset class="question-field">
+                  <legend>
+                    {{ i + 1 }}. {{ q.label }}
+                    @if (q.required) { <span aria-hidden="true">*</span> }
+                  </legend>
+
+                  @switch (q.type) {
+                    @case ('TEXTE') {
+                      <textarea rows="4" [maxLength]="maxAnswer" [value]="textOf(q.id)"
+                                (input)="setText(q.id, val($event))"></textarea>
+                      <small class="muted">{{ textOf(q.id).length }} / {{ maxAnswer }}</small>
+                    }
+                    @case ('OUI_NON') {
+                      <label class="check">
+                        <input type="radio" [name]="'q' + q.id" [checked]="textOf(q.id) === 'OUI'"
+                               (change)="setText(q.id, 'OUI')" /> Oui
+                      </label>
+                      <label class="check">
+                        <input type="radio" [name]="'q' + q.id" [checked]="textOf(q.id) === 'NON'"
+                               (change)="setText(q.id, 'NON')" /> Non
+                      </label>
+                    }
+                    @case ('CHOIX_UNIQUE') {
+                      @for (o of q.options; track o.id) {
+                        <label class="check">
+                          <input type="radio" [name]="'q' + q.id" [checked]="hasOption(q.id, o.id)"
+                                 (change)="pickOne(q.id, o.id)" /> {{ o.label }}
+                        </label>
+                      }
+                    }
+                    @case ('CHOIX_MULTIPLE') {
+                      @for (o of q.options; track o.id) {
+                        <label class="check">
+                          <input type="checkbox" [checked]="hasOption(q.id, o.id)"
+                                 (change)="toggleOption(q.id, o.id, chk($event))" /> {{ o.label }}
+                        </label>
+                      }
+                    }
+                  }
+
+                  @if (questionErrors()[q.id]) { <small class="field-error">{{ questionErrors()[q.id] }}</small> }
+                </fieldset>
+              }
+            </section>
+          }
+
+          <!-- Consentement et envoi -->
+          <section class="card">
+            <label class="check consent">
+              <input type="checkbox" [checked]="consent()" (change)="consent.set(chk($event))" />
+              J'accepte que mes données (profil, CV, lettre et réponses) soient transmises à
+              {{ f.companyName }} pour le traitement de ma candidature. *
+            </label>
+            @if (consentError()) { <p class="field-error">{{ consentError() }}</p> }
+
+            <div class="actions">
+              <button type="button" class="primary" (click)="submit()" [disabled]="submitting() || uploading()">
+                {{ submitting() ? 'Envoi…' : 'Envoyer ma candidature' }}
+              </button>
+              <a class="button-link" [routerLink]="['/offres', f.jobId]">Annuler</a>
+            </div>
+          </section>
+        }
+      }
+    </div>

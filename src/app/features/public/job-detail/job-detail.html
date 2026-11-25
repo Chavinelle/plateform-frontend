@@ -1,0 +1,104 @@
+<div class="page">
+  <p><a routerLink="/offres">← Retour aux offres</a></p>
+
+  @if (loading()) {
+    <p>Chargement…</p>
+  } @else if (notFound()) {
+    <div class="card">
+      <h1>Cette offre n'est plus disponible</h1>
+      <p class="muted">Elle a peut-être été clôturée ou retirée par l'entreprise.</p>
+      <a class="button-link" routerLink="/offres">Voir les autres offres</a>
+    </div>
+  } @else if (job(); as j) {
+
+    <header class="card">
+      <div class="job-card-head">
+        @if (j.company.hasLogo) {
+          <img class="company-logo-sm" [src]="logoUrl()" [alt]="'Logo de ' + j.company.name" />
+        } @else {
+          <div class="company-logo-sm placeholder" aria-hidden="true">{{ initials() }}</div>
+        }
+        <div>
+          <h1>{{ j.title }}</h1>
+          <a [routerLink]="['/entreprises', j.company.id]">{{ j.company.name }}</a>
+          @if (j.company.sector) { <span class="muted"> · {{ j.company.sector }}</span> }
+        </div>
+      </div>
+
+      <p class="meta">
+        @if (place()) { <span class="badge">{{ place() }}</span> }
+        @if (j.contractType; as c) { <span class="badge">{{ contractLabels[c] }}</span> }
+        @if (j.experienceLevel; as e) { <span class="badge">{{ experienceLabels[e] }}</span> }
+        <span class="badge">{{ remoteLabels[j.remotePolicy] }}</span>
+        <span class="badge">{{ j.positionsCount }} poste(s)</span>
+      </p>
+      @if (salary(); as s) { <p class="salary">{{ s }}</p> }
+      <p class="muted">
+        Publiée : {{ published() }}
+        @if (j.deadline) { · Candidatures jusqu'au {{ j.deadline | date: 'd MMMM y' }} }
+      </p>
+
+      <div class="actions">
+        @if (canApply()) {
+          @if (fav.hasApplied(j.id)) {
+            <span class="badge badge-ok">Vous avez déjà postulé</span>
+            <a routerLink="/candidat/candidatures">Suivre ma candidature</a>
+          } @else {
+            <a class="button-link primary" [routerLink]="['/offres', j.id, 'postuler']">Postuler</a>
+          }
+          <button type="button" (click)="fav.toggle(j.id)" [attr.aria-pressed]="fav.isSaved(j.id)">
+            {{ fav.isSaved(j.id) ? '♥ Dans mes favoris' : '♡ Ajouter aux favoris' }}
+          </button>
+        } @else if (isCompany()) {
+          <p class="muted">Vous êtes connecté avec un compte entreprise : seuls les candidats peuvent postuler.</p>
+        } @else if (!auth.user()) {
+          <a class="button-link primary" routerLink="/login" [queryParams]="{ returnUrl: '/offres/' + j.id }">
+            Connectez-vous pour postuler
+          </a>
+          <a routerLink="/inscription">Créer un compte candidat</a>
+        }
+      </div>
+    </header>
+
+    @if (j.description) {
+      <section class="card"><h2>Description du poste</h2><p class="pre">{{ j.description }}</p></section>
+    }
+    @if (j.missions) {
+      <section class="card"><h2>Missions</h2><p class="pre">{{ j.missions }}</p></section>
+    }
+    @if (j.requiredProfile) {
+      <section class="card"><h2>Profil recherché</h2><p class="pre">{{ j.requiredProfile }}</p></section>
+    }
+    @if (j.skills.length) {
+      <section class="card">
+        <h2>Compétences</h2>
+        <ul class="chip-list">
+          @for (s of j.skills; track s) { <li class="chip">{{ s }}</li> }
+        </ul>
+      </section>
+    }
+    @if (j.benefits) {
+      <section class="card"><h2>Avantages</h2><p class="pre">{{ j.benefits }}</p></section>
+    }
+    @if (j.questionsCount > 0) {
+      <p class="muted">
+        Cette offre comporte {{ j.questionsCount }} question(s) de présélection à remplir au moment de postuler.
+      </p>
+    }
+
+    <section class="card">
+      <h2>Partager cette offre</h2>
+      <div class="actions">
+        <button type="button" (click)="copyLink()">Copier le lien</button>
+        <a class="button-link" [href]="linkedinUrl()" target="_blank" rel="noopener noreferrer">LinkedIn</a>
+        <a class="button-link" [href]="facebookUrl()" target="_blank" rel="noopener noreferrer">Facebook</a>
+        <a class="button-link" [href]="xUrl()" target="_blank" rel="noopener noreferrer">X</a>
+      </div>
+      @if (copied()) { <p class="form-info" role="status">Lien copié.</p> }
+    </section>
+
+    <section class="card report-card">
+      <app-report-job [jobId]="j.id" />
+    </section>
+  }
+</div>

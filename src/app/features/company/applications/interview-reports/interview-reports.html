@@ -1,0 +1,72 @@
+@if (loading()) {
+  <p class="muted">Chargement des comptes rendus…</p>
+} @else if (error()) {
+  <p class="form-error" role="alert">{{ error() }}</p>
+} @else if (data(); as d) {
+  <p class="sr-only" role="status" aria-live="polite">{{ message() }}</p>
+  @if (message()) { <p class="form-info">{{ message() }}</p> }
+
+  @if (d.hiddenCount > 0) {
+    <p class="status-banner rg10">
+      {{ d.hiddenCount }} compte{{ d.hiddenCount > 1 ? 's' : '' }} rendu{{ d.hiddenCount > 1 ? 's' : '' }} de vos collègues
+      {{ d.hiddenCount > 1 ? 'seront visibles' : 'sera visible' }} après l'envoi du vôtre (évaluation indépendante).
+    </p>
+  }
+
+  @if (d.mine && !editing()) {
+    <article class="report mine" aria-label="Votre compte rendu">
+      <div class="report-head">
+        <strong>Vous</strong>
+        <span class="badge opinion-{{ d.mine.opinion }}">{{ opinionLabels[d.mine.opinion] }}</span>
+        <span class="muted">{{ d.mine.updatedAt | date: 'd MMM y, HH:mm' }}</span>
+      </div>
+      <p class="pre">{{ d.mine.content }}</p>
+      @if (d.canWrite) { <button type="button" (click)="edit()">Modifier mon compte rendu</button> }
+    </article>
+  }
+
+  @for (r of d.others; track r.id) {
+    <article class="report" [attr.aria-label]="'Compte rendu de ' + r.authorName">
+      <div class="report-head">
+        <strong>{{ r.authorName }}</strong>
+        <span class="badge opinion-{{ r.opinion }}">{{ opinionLabels[r.opinion] }}</span>
+        <span class="muted">{{ r.updatedAt | date: 'd MMM y, HH:mm' }}</span>
+      </div>
+      <p class="pre">{{ r.content }}</p>
+    </article>
+  }
+
+  @if (!d.mine && !d.others.length && !d.hiddenCount && !d.canWrite) {
+    <p class="muted">Aucun compte rendu pour le moment.</p>
+  }
+
+  @if (showForm()) {
+    <form class="report-form" [formGroup]="form" (ngSubmit)="submit()" novalidate
+          [attr.aria-labelledby]="'report-title-' + interviewId()">
+      <h4 [id]="'report-title-' + interviewId()">{{ d.mine ? 'Modifier mon compte rendu' : 'Mon compte rendu' }}</h4>
+      <fieldset class="radio-list">
+        <legend>Avis <span aria-hidden="true">*</span></legend>
+        @for (o of opinions; track o.value) {
+          <label class="check">
+            <input type="radio" formControlName="opinion" [value]="o.value" />
+            {{ o.label }}
+          </label>
+        }
+      </fieldset>
+      <div class="field">
+        <label [for]="'report-content-' + interviewId()">Compte rendu <span aria-hidden="true">*</span></label>
+        <textarea [id]="'report-content-' + interviewId()" formControlName="content" rows="5" required
+                  [attr.aria-describedby]="'report-hint-' + interviewId()"></textarea>
+        <small [id]="'report-hint-' + interviewId()" class="muted">
+          Points forts, points de vigilance, recommandation. Jamais visible par le candidat.
+          ({{ form.controls.content.value.length }} / {{ maxReport }})
+        </small>
+      </div>
+      @if (formError()) { <p class="form-error" role="alert">{{ formError() }}</p> }
+      <div class="actions">
+        <button type="submit" [disabled]="saving()">{{ saving() ? 'Enregistrement…' : 'Enregistrer' }}</button>
+        @if (d.mine) { <button type="button" (click)="cancelEdit()" [disabled]="saving()">Annuler</button> }
+      </div>
+    </form>
+  }
+}

@@ -1,0 +1,108 @@
+<section class="card">
+      <h2>Questions de présélection</h2>
+      <p class="muted">
+        Ces questions sont posées au candidat quand il postule. Il ne voit jamais quelles réponses sont éliminatoires.
+        @if (readonly()) {
+          Elles ne peuvent plus être modifiées une fois l'offre publiée.
+        }
+      </p>
+
+      @if (loading()) { <p>Chargement…</p> }
+
+      @for (q of items(); track $index; let i = $index) {
+        <div class="card question">
+          <div class="section-head">
+            <strong>Question {{ i + 1 }}</strong>
+            @if (!readonly()) {
+              <div class="row-actions">
+                <button type="button" (click)="move(i, -1)" [disabled]="i === 0" aria-label="Monter">↑</button>
+                <button type="button" (click)="move(i, 1)" [disabled]="i === items().length - 1" aria-label="Descendre">↓</button>
+                <button type="button" class="danger" (click)="remove(i)">Supprimer</button>
+              </div>
+            }
+          </div>
+
+          <div class="form-grid">
+            <div class="field full">
+              <label [attr.for]="'q-label-' + i">Intitulé *</label>
+              <input [id]="'q-label-' + i" [value]="q.label" (input)="setLabel(i, val($event))"
+                     maxlength="500" [disabled]="readonly()" />
+            </div>
+
+            <div class="field">
+              <label [attr.for]="'q-type-' + i">Type de réponse</label>
+              <select [id]="'q-type-' + i" (change)="setType(i, val($event))" [disabled]="readonly()">
+                @for (t of types; track t.value) {
+                  <option [value]="t.value" [selected]="t.value === q.type">{{ t.label }}</option>
+                }
+              </select>
+            </div>
+
+            <div class="field">
+              <label class="check">
+                <input type="checkbox" [checked]="q.required || q.knockout"
+                       (change)="setRequired(i, chk($event))" [disabled]="readonly() || q.knockout" />
+                Réponse obligatoire
+              </label>
+              @if (canKnockout(q)) {
+                <label class="check">
+                  <input type="checkbox" [checked]="q.knockout" (change)="setKnockout(i, chk($event))"
+                         [disabled]="readonly()" />
+                  Question éliminatoire
+                </label>
+              }
+            </div>
+
+            @if (q.type === 'OUI_NON' && q.knockout) {
+              <div class="field">
+                <label [attr.for]="'q-exp-' + i">Réponse attendue</label>
+                <select [id]="'q-exp-' + i" (change)="setExpected(i, val($event))" [disabled]="readonly()">
+                  <option value="OUI" [selected]="q.expectedAnswer === 'OUI'">Oui</option>
+                  <option value="NON" [selected]="q.expectedAnswer === 'NON'">Non</option>
+                </select>
+              </div>
+            }
+          </div>
+
+          @if (isChoice(q.type)) {
+            <div class="options">
+              <strong>Options de réponse</strong>
+              @for (o of q.options; track $index; let j = $index) {
+                <div class="inline-form">
+                  <input [value]="o.label" (input)="setOptionLabel(i, j, val($event))" maxlength="255"
+                         [disabled]="readonly()" [attr.aria-label]="'Option ' + (j + 1)" />
+                  @if (q.knockout) {
+                    <label class="check">
+                      <input type="checkbox" [checked]="o.accepted"
+                             (change)="setOptionAccepted(i, j, chk($event))" [disabled]="readonly()" />
+                      Réponse acceptée
+                    </label>
+                  }
+                  @if (!readonly() && q.options.length > 2) {
+                   <button type="button" class="icon" (click)="removeOption(i, j)"
+        [attr.aria-label]="'Retirer l\'option ' + (j + 1)">×</button>
+                  }
+                </div>
+              }
+              @if (!readonly() && q.options.length < maxOptions) {
+                <button type="button" (click)="addOption(i)">+ Ajouter une option</button>
+              }
+            </div>
+          }
+        </div>
+      } @empty {
+        @if (!loading()) { <p class="muted">Aucune question pour cette offre.</p> }
+      }
+
+      @if (message()) { <p class="form-info" role="status">{{ message() }}</p> }
+      @if (error()) { <p class="form-error" role="alert">{{ error() }}</p> }
+
+      @if (!readonly()) {
+        <div class="actions">
+          <button type="button" (click)="add()" [disabled]="items().length >= maxQuestions">+ Ajouter une question</button>
+          <button type="button" (click)="save()" [disabled]="saving()">
+            {{ saving() ? 'Enregistrement…' : 'Enregistrer les questions' }}
+          </button>
+        </div>
+      }
+    </section>

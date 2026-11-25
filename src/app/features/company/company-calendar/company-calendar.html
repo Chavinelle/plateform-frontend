@@ -1,0 +1,22 @@
+<div class="page page-wide">
+  <div class="section-head">
+    <h1>Agenda des entretiens</h1>
+    @if (!isManager()) {
+      <div class="field member-filter">
+        <label for="member">Entretiens de</label>
+        <select id="member" (change)="onMemberChange($any($event.target).value)">
+          <option value="ALL" [selected]="member() === 'ALL'">Toute l'équipe</option>
+          @for (m of members(); track m.id) {
+            <option [value]="m.id" [selected]="member() === m.id">{{ m.name }}</option>
+          }
+        </select>
+      </div>
+    } @else {
+      <p class="muted">Vos entretiens</p>
+    }
+  </div>
+
+  @if (error()) { <p class="form-error" role="alert">{{ error() }}</p> }
+
+  <app-agenda-calendar [events]="events()" [loading]="loading()" [(view)]="view" [(anchor)]="anchor" />
+</div>

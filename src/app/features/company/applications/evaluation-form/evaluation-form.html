@@ -1,0 +1,75 @@
+@let e = evaluation();
+<form [formGroup]="form" (ngSubmit)="save()" novalidate class="evaluation-form"
+      [attr.aria-labelledby]="'eval-title-' + e.id">
+  <h4 [id]="'eval-title-' + e.id">
+    Mon évaluation (brouillon) — grille « {{ e.templateName }} »
+    @if (e.interviewStartsAt) { <small class="muted">· entretien du {{ e.interviewStartsAt | date: 'd MMM y' }}</small> }
+  </h4>
+  <p class="muted hint">Notez chaque critère de 1 (insuffisant) à 5 (excellent). Le brouillon n'est visible que par vous.</p>
+
+  <ol class="criteria" formArrayName="scores">
+    @for (s of e.scores; track s.id; let i = $index) {
+      <li [formGroupName]="i">
+        <fieldset class="criterion">
+          <legend>{{ s.label }} <small class="muted">({{ s.percent }} % du score)</small></legend>
+          <div class="notes">
+            @for (n of notes; track n) {
+              <label class="note">
+                <input type="radio" formControlName="score" [value]="n" />
+                <span>{{ n }}</span>
+                <span class="sr-only"> sur 5, {{ noteLabels[n] }}</span>
+              </label>
+            }
+          </div>
+          <label class="sr-only" [for]="'eval-' + e.id + '-comment-' + i">Commentaire sur {{ s.label }}</label>
+          <input [id]="'eval-' + e.id + '-comment-' + i" formControlName="comment" placeholder="Commentaire (facultatif)" />
+        </fieldset>
+      </li>
+    }
+  </ol>
+
+  <fieldset class="opinion">
+    <legend>Avis final</legend>
+    @for (o of opinions; track o.value) {
+      <label class="check">
+        <input type="radio" formControlName="opinion" [value]="o.value" /> {{ o.label }}
+      </label>
+    }
+  </fieldset>
+
+  <div class="field">
+    <label [for]="'eval-' + e.id + '-general'">Commentaire général</label>
+    <textarea [id]="'eval-' + e.id + '-general'" formControlName="comment" rows="3"></textarea>
+  </div>
+
+  <p class="preview" aria-live="polite">
+    @if (preview() !== null) {
+      Score de cette évaluation : <strong>{{ preview() }}/100</strong>
+    } @else {
+      <span class="muted">Le score s'affichera quand tous les critères seront notés.</span>
+    }
+  </p>
+
+  <p class="sr-only" role="status" aria-live="polite">{{ message() }}</p>
+  @if (message()) { <p class="form-info">{{ message() }}</p> }
+  @if (error()) { <p class="form-error" role="alert">{{ error() }}</p> }
+
+  @if (confirmSubmit()) {
+    <div class="status-banner confirm" role="group" aria-label="Confirmer la soumission">
+      <p>La soumission est définitive : vous ne pourrez plus modifier cette évaluation.
+         Vous verrez ensuite les évaluations de vos collègues.</p>
+      <div class="actions">
+        <button type="button" (click)="submit()" [disabled]="busy() !== null">
+          {{ busy() === 'submit' ? 'Soumission…' : 'Confirmer la soumission' }}
+        </button>
+        <button type="button" (click)="confirmSubmit.set(false)" [disabled]="busy() !== null">Retour</button>
+      </div>
+    </div>
+  } @else {
+    <div class="actions">
+      <button type="submit" [disabled]="busy() !== null">{{ busy() === 'save' ? 'Enregistrement…' : 'Enregistrer le brouillon' }}</button>
+      <button type="button" (click)="askSubmit()" [disabled]="busy() !== null">Soumettre</button>
+      <button type="button" class="danger" (click)="remove()" [disabled]="busy() !== null">Supprimer le brouillon</button>
+    </div>
+  }
+</form>

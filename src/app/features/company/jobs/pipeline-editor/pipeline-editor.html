@@ -1,0 +1,53 @@
+<section class="card">
+      <h2>Étapes du processus de recrutement</h2>
+      <p class="muted">
+        Les trois étapes marquées « fixe » restent à leur place (la première et les deux dernières) : vous pouvez
+        les renommer et changer leur couleur. Les autres peuvent être ajoutées, déplacées et supprimées.
+      </p>
+
+      @if (loading()) { <p>Chargement…</p> }
+
+      <ol class="stage-list">
+        @for (s of items(); track $index; let i = $index) {
+          <li class="stage">
+            <input
+  type="color"
+  [value]="s.color"
+  (input)="setColor(i, val($event))"
+  [disabled]="readonly()"
+  [attr.aria-label]="'Couleur de l\'étape ' + (i + 1)"
+/>
+
+<input
+  class="stage-name"
+  [value]="s.name"
+  (input)="setName(i, val($event))"
+  maxlength="100"
+  [disabled]="readonly()"
+  [attr.aria-label]="'Nom de l\'étape ' + (i + 1)"
+/>
+            @if (s.locked) {
+              <span class="badge">{{ kindLabel(s.kind) }}</span>
+            } @else if (!readonly()) {
+              <div class="row-actions">
+                <button type="button" (click)="move(i, -1)" [disabled]="!canMove(i, -1)" aria-label="Monter">↑</button>
+                <button type="button" (click)="move(i, 1)" [disabled]="!canMove(i, 1)" aria-label="Descendre">↓</button>
+                <button type="button" class="danger" (click)="remove(i)">Supprimer</button>
+              </div>
+            }
+          </li>
+        }
+      </ol>
+
+      @if (message()) { <p class="form-info" role="status">{{ message() }}</p> }
+      @if (error()) { <p class="form-error" role="alert">{{ error() }}</p> }
+
+      @if (!readonly()) {
+        <div class="actions">
+          <button type="button" (click)="add()" [disabled]="items().length >= maxStages">+ Ajouter une étape</button>
+          <button type="button" (click)="save()" [disabled]="saving()">
+            {{ saving() ? 'Enregistrement…' : 'Enregistrer le pipeline' }}
+          </button>
+        </div>
+      }
+    </section>

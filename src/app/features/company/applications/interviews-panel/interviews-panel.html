@@ -1,0 +1,181 @@
+@if (loading()) {
+  <p>Chargement…</p>
+} @else if (error()) {
+  <p class="form-error" role="alert">{{ error() }}</p>
+} @else {
+  <p class="sr-only" role="status" aria-live="polite">{{ message() }}</p>
+  @if (message()) { <p class="form-info">{{ message() }}</p> }
+
+  @for (g of groups(); track g.title) {
+    <h3 class="list-title">{{ g.title }}</h3>
+    <ul class="interviews">
+      @for (i of g.items; track i.id) {
+        <li class="interview" [class.done]="g.done">
+          <div class="interview-head">
+            <strong>{{ i.startsAt | date: 'EEEE d MMMM y, HH:mm' }}</strong>
+            <span class="badge status-{{ i.status }}">{{ statusLabels[i.status] }}</span>
+          </div>
+          <span class="muted">{{ typeLabels[i.type] }} · {{ durationLabel(i.durationMinutes) }}</span>
+          @if (i.meetingUrl) {
+            <a [href]="i.meetingUrl" target="_blank" rel="noopener noreferrer">Lien de la visio<span class="sr-only"> (nouvel onglet)</span></a>
+          }
+          @if (i.location) { <span>{{ i.location }}</span> }
+          <span class="muted">Avec {{ names(i) }}</span>
+          @if (i.candidateResponse; as r) {
+            <span>Réponse du candidat : <strong>{{ responseLabels[r] }}</strong>
+              @if (i.respondedAt) { <span class="muted">(le {{ i.respondedAt | date: 'd MMM, HH:mm' }})</span> }
+            </span>
+            @if (i.candidateProposedAt) {
+              <span>Créneau proposé : {{ i.candidateProposedAt | date: 'EEEE d MMMM y, HH:mm' }}</span>
+            }
+            @if (i.candidateComment) { <p class="pre candidate-comment">« {{ i.candidateComment }} »</p> }
+          }
+          @if (i.status === 'ANNULE' && i.cancelReason) {
+            <span class="muted">Motif interne : {{ i.cancelReason }}</span>
+          }
+
+          @if (canClose(i)) {
+            <div class="close-actions" role="group" [attr.aria-label]="'Issue de l’entretien du ' + (i.startsAt | date: 'd MMMM, HH:mm')">
+              <span>L'entretien a-t-il eu lieu ?</span>
+              <button type="button" (click)="setOutcome(i, 'REALISE')" [disabled]="closing() === i.id">Oui, réalisé</button>
+              <button type="button" (click)="setOutcome(i, 'ABSENT')" [disabled]="closing() === i.id">Candidat absent</button>
+            </div>
+          }
+          @if (i.status === 'REALISE') {
+            <div class="reports" [attr.aria-labelledby]="'reports-title-' + i.id" role="region">
+              <h4 [id]="'reports-title-' + i.id">Comptes rendus</h4>
+              <app-interview-reports [applicationId]="applicationId()" [interviewId]="i.id" />
+            </div>
+          }
+
+          @if (canPlan() && isActive(i)) {
+            @if (cancellingId() === i.id) {
+              <form class="cancel-form" (ngSubmit)="confirmCancel(i)" novalidate [attr.aria-labelledby]="'cancel-title-' + i.id">
+                <h4 [id]="'cancel-title-' + i.id">Annuler cet entretien</h4>
+                <div class="field">
+                  <label [for]="'cancel-reason-' + i.id">Motif (interne) <span aria-hidden="true">*</span></label>
+                  <textarea #cancelField [id]="'cancel-reason-' + i.id" [formControl]="cancelReason" rows="2" required
+                            [attr.aria-describedby]="'cancel-reason-hint-' + i.id"></textarea>
+                  <small [id]="'cancel-reason-hint-' + i.id" class="muted">Jamais communiqué au candidat.</small>
+                </div>
+                <div class="field">
+                  <label [for]="'cancel-message-' + i.id">Message au candidat (facultatif)</label>
+                  <textarea [id]="'cancel-message-' + i.id" [formControl]="cancelMessage" rows="2"></textarea>
+                </div>
+                @if (cancelError()) { <p class="form-error" role="alert">{{ cancelError() }}</p> }
+                <div class="actions">
+                  <button type="submit" class="danger" [disabled]="saving()">
+                    {{ saving() ? 'Annulation…' : "Confirmer l'annulation" }}
+                  </button>
+                  <button type="button" (click)="closeCancel()" [disabled]="saving()">Retour</button>
+                </div>
+              </form>
+            } @else if (editing()?.id !== i.id) {
+              <div class="row-actions">
+                <button type="button" (click)="openForm(i)">Reporter</button>
+                <button type="button" class="danger" (click)="openCancel(i)">Annuler l'entretien</button>
+              </div>
+            }
+          }
+        </li>
+      }
+    </ul>
+  }
+  @if (!interviews().length) {
+    <p class="muted">Aucun entretien planifié.</p>
+  }
+
+  @if (canPlan()) {
+    @if (formOpen()) {
+      <form class="interview-form" [formGroup]="form" (ngSubmit)="submit()" novalidate aria-labelledby="plan-title">
+        @if (editing(); as e) {
+          <h3 id="plan-title">Reporter l'entretien du {{ e.startsAt | date: 'd MMMM y, HH:mm' }}</h3>
+          <p class="muted">Le candidat devra confirmer le nouveau créneau. Tout le monde reçoit l'agenda mis à jour.</p>
+          @if (e.candidateProposedAt) {
+            <p>
+              Le candidat propose le {{ e.candidateProposedAt | date: 'EEEE d MMMM y, HH:mm' }}.
+              <button type="button" (click)="useProposedSlot()">Utiliser ce créneau</button>
+            </p>
+          }
+        } @else {
+          <h3 id="plan-title">Planifier un entretien</h3>
+        }
+
+        <div class="field">
+          <label for="itv-type">Type</label>
+          <select #firstField id="itv-type" formControlName="type">
+            @for (t of types; track t.value) { <option [value]="t.value">{{ t.label }}</option> }
+          </select>
+        </div>
+
+        <div class="field">
+          <label for="itv-start">{{ editing() ? 'Nouvelle date et heure' : 'Date et heure' }} <span aria-hidden="true">*</span></label>
+          <input id="itv-start" type="datetime-local" formControlName="startsAt" [min]="minStart()" required
+                 [attr.aria-invalid]="invalid('startsAt')"
+                 [attr.aria-describedby]="invalid('startsAt') ? 'itv-start-error' : null" />
+          @if (invalid('startsAt')) {
+            <small id="itv-start-error" class="field-error">Indiquez la date et l'heure.</small>
+          }
+        </div>
+
+        <div class="field">
+          <label for="itv-duration">Durée</label>
+          <select id="itv-duration" formControlName="durationMinutes">
+            @for (d of durations; track d.value) { <option [ngValue]="d.value">{{ d.label }}</option> }
+          </select>
+        </div>
+
+        @if (type() === 'VISIO') {
+          <div class="field">
+            <label for="itv-url">Lien de la visioconférence <span aria-hidden="true">*</span></label>
+            <input id="itv-url" type="url" formControlName="meetingUrl" placeholder="https://…" required
+                   [attr.aria-invalid]="invalid('meetingUrl')"
+                   [attr.aria-describedby]="invalid('meetingUrl') ? 'itv-url-error' : null" />
+            @if (invalid('meetingUrl')) {
+              <small id="itv-url-error" class="field-error">Le lien doit commencer par https://</small>
+            }
+          </div>
+        } @else {
+          <div class="field">
+            <label for="itv-location">
+              @if (type() === 'PRESENTIEL') { Lieu <span aria-hidden="true">*</span> } @else { Numéro à appeler (facultatif) }
+            </label>
+            <input id="itv-location" formControlName="location" [required]="type() === 'PRESENTIEL'" />
+          </div>
+        }
+
+        <fieldset class="participants">
+          <legend>Participants <span aria-hidden="true">*</span></legend>
+          @for (p of people(); track p.id) {
+            <label class="check">
+              <input type="checkbox" [checked]="participantIds().has(p.id)"
+                     (change)="toggleParticipant(p.id, $any($event.target).checked)" />
+              {{ p.name }}
+            </label>
+          } @empty {
+            <p class="muted">Aucun membre disponible.</p>
+          }
+        </fieldset>
+
+        <div class="field">
+          <label for="itv-message">Consignes pour le candidat</label>
+          <textarea id="itv-message" formControlName="candidateMessage" rows="3"
+                    aria-describedby="itv-message-hint"></textarea>
+          <small id="itv-message-hint" class="muted">Jointes à l'invitation envoyée au candidat.</small>
+        </div>
+
+        @if (formError()) { <p class="form-error" role="alert">{{ formError() }}</p> }
+
+        <div class="actions">
+          <button type="submit" [disabled]="saving()">
+            {{ saving() ? 'Enregistrement…' : (editing() ? 'Reporter' : 'Planifier') }}
+          </button>
+          <button type="button" (click)="closeForm()" [disabled]="saving()">Annuler</button>
+        </div>
+      </form>
+    } @else {
+      <button #openButton type="button" (click)="openForm()">Planifier un entretien</button>
+    }
+  }
+}
+

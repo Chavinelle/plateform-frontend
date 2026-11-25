@@ -1,0 +1,14 @@
+:host { display: flex; flex-direction: column; gap: .5rem; margin-top: .5rem; }
+.rg10 { margin: 0; font-size: .9rem; }
+.report { border: 1px solid var(--border); border-radius: 6px; padding: .5rem .75rem; }
+.report.mine { border-color: var(--primary-border); background: var(--surface-2); }
+.report .pre { margin: .35rem 0; }
+.report-head { display: flex; gap: .5rem; align-items: baseline; flex-wrap: wrap; }
+.report-form { display: flex; flex-direction: column; gap: .5rem; border-top: 1px solid var(--border); padding-top: .5rem; }
+.report-form h4 { margin: 0; font-size: .95rem; }
+.report-form legend { font-weight: 600; }
+.radio-list .check { display: inline-flex; margin-right: 1rem; }
+.opinion-TRES_FAVORABLE { border-color: var(--success); color: var(--success); }
+.opinion-FAVORABLE { border-color: var(--success); color: var(--success); }
+.opinion-DEFAVORABLE { border-color: var(--warning); color: var(--warning); }
+.opinion-TRES_DEFAVORABLE { border-color: var(--danger); color: var(--danger); }

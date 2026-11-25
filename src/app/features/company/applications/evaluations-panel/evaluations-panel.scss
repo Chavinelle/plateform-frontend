@@ -1,0 +1,8 @@
+:host { display: flex; flex-direction: column; gap: .75rem; }
+.summary p { margin: 0; }
+.global strong { font-size: 1.15rem; font-variant-numeric: tabular-nums; }
+.rg10 { font-size: .9rem; }
+.start { display: flex; flex-direction: column; gap: .5rem; border-top: 1px solid var(--border); padding-top: .6rem; }
+.start h4, .others-title { margin: 0; font-size: 1rem; }
+.start-fields { display: flex; gap: .75rem; flex-wrap: wrap; }
+.start button { align-self: flex-start; }

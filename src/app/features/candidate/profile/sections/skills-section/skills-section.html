@@ -1,0 +1,36 @@
+ <section class="card">
+      <h2>Compétences</h2>
+
+      <form [formGroup]="form" (ngSubmit)="add()" novalidate class="inline-form">
+        <input formControlName="name" placeholder="Ex. Java, Spring Boot, Angular" aria-label="Compétence" list="ref-COMPETENCE" autocomplete="off" />
+        <app-ref-datalist kind="COMPETENCE" />
+        <select formControlName="level" aria-label="Niveau">
+          @for (l of levels; track l.value) { <option [value]="l.value">{{ l.label }}</option> }
+        </select>
+        <button type="submit" [disabled]="saving()">Ajouter</button>
+      </form>
+      @if (form.controls.name.touched && form.controls.name.invalid) {
+        <small class="field-error">Le nom de la compétence est obligatoire (100 caractères max).</small>
+      }
+      @if (error()) { <p class="form-error" role="alert">{{ error() }}</p> }
+
+      @if (loading()) {
+        <p>Chargement…</p>
+      } @else if (items().length === 0) {
+        <p class="muted">Aucune compétence renseignée.</p>
+      }
+
+      <ul class="chip-list">
+        @for (s of items(); track s.id) {
+          <li class="chip">
+            <span>{{ s.name }}</span>
+            <select (change)="changeLevel(s, $event)" [attr.aria-label]="'Niveau de ' + s.name">
+              @for (l of levels; track l.value) {
+                <option [value]="l.value" [selected]="l.value === s.level">{{ l.label }}</option>
+              }
+            </select>
+            <button type="button" class="icon" (click)="remove(s)" [attr.aria-label]="'Supprimer ' + s.name">×</button>
+          </li>
+        }
+      </ul>
+    </section>

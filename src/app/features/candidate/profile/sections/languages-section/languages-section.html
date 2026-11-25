@@ -1,0 +1,35 @@
+<section class="card">
+      <h2>Langues</h2>
+
+      <form [formGroup]="form" (ngSubmit)="add()" novalidate class="inline-form">
+        <input formControlName="name" placeholder="Ex. Français, Anglais" aria-label="Langue" />
+        <select formControlName="level" aria-label="Niveau">
+          @for (l of levels; track l) { <option [value]="l">{{ label(l) }}</option> }
+        </select>
+        <button type="submit" [disabled]="saving()">Ajouter</button>
+      </form>
+      @if (form.controls.name.touched && form.controls.name.invalid) {
+        <small class="field-error">La langue est obligatoire (80 caractères max).</small>
+      }
+      @if (error()) { <p class="form-error" role="alert">{{ error() }}</p> }
+
+      @if (loading()) {
+        <p>Chargement…</p>
+      } @else if (items().length === 0) {
+        <p class="muted">Aucune langue renseignée.</p>
+      }
+
+      <ul class="chip-list">
+        @for (l of items(); track l.id) {
+          <li class="chip">
+            <span>{{ l.name }}</span>
+            <select (change)="changeLevel(l, $event)" [attr.aria-label]="'Niveau en ' + l.name">
+              @for (lv of levels; track lv) {
+                <option [value]="lv" [selected]="lv === l.level">{{ label(lv) }}</option>
+              }
+            </select>
+            <button type="button" class="icon" (click)="remove(l)" [attr.aria-label]="'Supprimer ' + l.name">×</button>
+          </li>
+        }
+      </ul>
+    </section>

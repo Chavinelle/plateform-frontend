@@ -1,0 +1,51 @@
+// Rôles de couleur des graphiques (série unique validée : contraste >= 3:1 sur la surface).
+:host {
+  --viz-series: var(--chart-1);
+  --viz-series-active: var(--chart-1-active);
+  --viz-grid: var(--chart-grid);
+  --viz-axis: var(--chart-axis);
+  --viz-text: var(--text);
+  --viz-text-secondary: var(--text-muted);
+  display: block;
+}
+
+.viz { margin: 0; display: flex; flex-direction: column; gap: .5rem; }
+.viz-head { display: flex; justify-content: space-between; align-items: baseline; gap: .75rem; flex-wrap: wrap; }
+.viz-title { font-weight: 600; color: var(--viz-text); }
+.link { background: none; border: 0; padding: 0; color: var(--primary); text-decoration: underline; cursor: pointer; font-size: .85rem; }
+.empty { margin: .25rem 0; }
+
+// ---- barres horizontales ----
+.bars { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 2px; }
+.bar-row { display: grid; grid-template-columns: minmax(6rem, 38%) 1fr; gap: .6rem; align-items: center; min-height: 1.75rem; }
+.bar-label { color: var(--viz-text-secondary); font-size: .88rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.bar-track { display: flex; align-items: center; gap: .4rem; min-width: 0; }
+.bar { display: block; height: 16px; background: var(--viz-series); border-radius: 0 4px 4px 0; flex: 0 1 auto; min-width: 2px; }
+.bar-row:hover .bar { background: var(--viz-series-active); }
+.bar-value { color: var(--viz-text); font-size: .88rem; font-variant-numeric: tabular-nums; white-space: nowrap; flex: none; }
+.note { color: var(--viz-text-secondary); }
+
+// ---- colonnes ----
+.plot { position: relative; }
+svg { display: block; width: 100%; height: auto; overflow: visible; }
+.grid { stroke: var(--viz-grid); stroke-width: 1; }
+.axis { stroke: var(--viz-axis); stroke-width: 1; }
+.tick { fill: var(--viz-text-secondary); font-size: 12px; font-variant-numeric: tabular-nums; }
+.col { fill: var(--viz-series); pointer-events: none; }
+.col.active { fill: var(--viz-series-active); }
+.hit { fill: transparent; }
+.tooltip {
+  position: absolute; top: 0; transform: translateX(-50%); pointer-events: none; white-space: nowrap;
+  background: var(--tooltip-bg); color: var(--tooltip-text); font-size: .8rem; padding: .3rem .5rem; border-radius: 4px; box-shadow: 0 2px 8px rgba(0, 0, 0, .2);
+}
+
+// ---- tableaux de données ----
+.table-scroll { max-height: 18rem; overflow-y: auto; }
+.table-scroll:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+.data-table { font-size: .9rem; }
+.data-table th[scope='row'] { text-align: left; font-weight: 500; }
+.data-table td { font-variant-numeric: tabular-nums; }
+
+@media (forced-colors: active) {
+  .bar, .col { forced-color-adjust: none; background: CanvasText; fill: CanvasText; }
+}

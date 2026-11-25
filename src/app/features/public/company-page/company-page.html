@@ -1,0 +1,62 @@
+<div class="page">
+      <p><a routerLink="/offres">← Retour aux offres</a></p>
+
+      @if (loading()) {
+        <p>Chargement…</p>
+      } @else if (notFound()) {
+        <div class="card">
+          <h1>Entreprise introuvable</h1>
+          <a class="button-link" routerLink="/offres">Voir les offres</a>
+        </div>
+      } @else if (company(); as c) {
+
+        <section class="card">
+          <div class="company-banner">
+            @if (c.hasBanner) { <img [src]="bannerUrl()" [alt]="'Bannière de ' + c.name" /> }
+          </div>
+          <div class="company-head">
+            @if (c.hasLogo) {
+              <img class="company-logo-lg" [src]="logoUrl()" [alt]="'Logo de ' + c.name" />
+            } @else {
+              <div class="company-logo-lg placeholder" aria-hidden="true">{{ initials() }}</div>
+            }
+            <div>
+              <h1>{{ c.name }}</h1>
+              <p class="muted">{{ details() }}</p>
+            </div>
+          </div>
+
+          <p class="actions">
+            @if (c.website) { <a [href]="c.website" target="_blank" rel="noopener noreferrer">Site web</a> }
+            @if (c.linkedinUrl) { <a [href]="c.linkedinUrl" target="_blank" rel="noopener noreferrer">LinkedIn</a> }
+            @if (c.facebookUrl) { <a [href]="c.facebookUrl" target="_blank" rel="noopener noreferrer">Facebook</a> }
+            @if (c.xUrl) { <a [href]="c.xUrl" target="_blank" rel="noopener noreferrer">X</a> }
+          </p>
+        </section>
+
+        @if (c.description) {
+          <section class="card"><h2>À propos</h2><p class="pre">{{ c.description }}</p></section>
+        }
+        @if (c.coreValues) {
+          <section class="card"><h2>Nos valeurs</h2><p class="pre">{{ c.coreValues }}</p></section>
+        }
+
+        <section>
+          <h2>Offres en cours ({{ c.activeJobsCount }})</h2>
+          @if (jobs(); as page) {
+            @if (page.content.length === 0) {
+              <p class="muted">Cette entreprise n'a pas d'offre en cours.</p>
+            } @else {
+              <div class="job-grid">
+                @for (j of page.content; track j.id) { <app-job-card [job]="j" /> }
+              </div>
+              <div class="pager">
+                <button type="button" (click)="goTo(page.page - 1)" [disabled]="page.page === 0">Précédent</button>
+                <span>Page {{ page.page + 1 }} / {{ page.totalPages || 1 }}</span>
+                <button type="button" (click)="goTo(page.page + 1)" [disabled]="page.page + 1 >= page.totalPages">Suivant</button>
+              </div>
+            }
+          }
+        </section>
+      }
+    </div>

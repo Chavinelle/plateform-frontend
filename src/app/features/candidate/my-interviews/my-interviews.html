@@ -1,0 +1,83 @@
+@if (loading()) {
+  <p>Chargement…</p>
+} @else if (error()) {
+  <p class="form-error" role="alert">{{ error() }}</p>
+} @else if (interviews().length) {
+  <p class="sr-only" role="status" aria-live="polite">{{ message() }}</p>
+  @if (message()) { <p class="form-info">{{ message() }}</p> }
+  @if (actionError()) { <p class="form-error" role="alert">{{ actionError() }}</p> }
+
+  <ul class="interviews">
+    @for (i of interviews(); track i.id) {
+      <li class="interview" [class.inactive]="!i.canRespond">
+        <div class="interview-head">
+          <strong class="when">{{ i.startsAt | date: 'EEEE d MMMM y, HH:mm' }}</strong>
+          <span class="badge status-{{ i.status }}">{{ statusLabels[i.status] }}</span>
+        </div>
+        <span>{{ typeLabels[i.type] }} · {{ i.durationMinutes }} min</span>
+        @if (i.meetingUrl) {
+          <a [href]="i.meetingUrl" target="_blank" rel="noopener noreferrer">Rejoindre la visioconférence<span class="sr-only"> (nouvel onglet)</span></a>
+        }
+        @if (i.location) {
+          <span>{{ i.type === 'TELEPHONE' ? 'Téléphone' : 'Lieu' }} : {{ i.location }}</span>
+        }
+        @if (i.candidateMessage) {
+          <p class="pre instructions"><strong>Consignes :</strong> {{ i.candidateMessage }}</p>
+        }
+        @if (i.candidateResponse; as r) {
+          <span class="muted">
+            Votre réponse : {{ responseLabels[r] }}
+            @if (i.candidateProposedAt) { ({{ i.candidateProposedAt | date: 'd MMM y, HH:mm' }}) }
+          </span>
+        }
+
+        @if (i.canRespond) {
+          @if (answering()?.id === i.id) {
+            <form class="answer-form" (ngSubmit)="submitAnswer(i)" novalidate
+                  [attr.aria-labelledby]="'answer-title-' + i.id">
+              <h3 #formHeading tabindex="-1" [id]="'answer-title-' + i.id">
+                {{ answering()?.mode === 'REFUSE' ? "Décliner l'entretien" : 'Proposer un autre créneau' }}
+              </h3>
+              @if (answering()?.mode === 'REFUSE') {
+                <p class="muted">L'entretien sera annulé. Ce choix est définitif.</p>
+              } @else {
+                <div class="field">
+                  <label [for]="'proposed-' + i.id">Créneau proposé <span aria-hidden="true">*</span></label>
+                  <input [id]="'proposed-' + i.id" type="datetime-local" [formControl]="proposedAt"
+                         [min]="minProposed()" required />
+                </div>
+              }
+              <div class="field">
+                <label [for]="'comment-' + i.id">Commentaire (facultatif)</label>
+                <textarea [id]="'comment-' + i.id" [formControl]="comment" rows="3"></textarea>
+              </div>
+              @if (formError()) { <p class="form-error" role="alert">{{ formError() }}</p> }
+              <div class="actions">
+                <button type="submit" [class.danger]="answering()?.mode === 'REFUSE'" [disabled]="busyId() === i.id">
+                  {{ busyId() === i.id ? 'Envoi…' : (answering()?.mode === 'REFUSE' ? 'Confirmer le refus' : 'Envoyer') }}
+                </button>
+                <button type="button" (click)="cancelAnswer()" [disabled]="busyId() === i.id">Annuler</button>
+              </div>
+            </form>
+          } @else {
+            <div class="row-actions">
+              @if (i.status !== 'CONFIRME') {
+                <button type="button" (click)="accept(i)" [disabled]="busyId() === i.id">
+                  {{ busyId() === i.id ? 'Envoi…' : 'Je confirme ma présence' }}
+                </button>
+              }
+              <button type="button" (click)="open(i, 'AUTRE_CRENEAU')" [disabled]="busyId() === i.id">
+                Proposer un autre créneau
+              </button>
+              <button type="button" class="danger" (click)="open(i, 'REFUSE')" [disabled]="busyId() === i.id">
+                Décliner
+              </button>
+            </div>
+          }
+        }
+      </li>
+    }
+  </ul>
+} @else {
+  <p class="muted">Aucun entretien pour le moment.</p>
+}

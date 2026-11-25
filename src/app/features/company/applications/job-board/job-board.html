@@ -1,0 +1,82 @@
+<div class="page page-full">
+  <p><a routerLink="/recruteur/offres">← Mes offres</a></p>
+
+  @if (loading()) {
+    <p>Chargement…</p>
+  } @else if (loadError() && !board()) {
+    <p class="form-error" role="alert">{{ loadError() }}</p>
+  } @else if (board(); as b) {
+    <div class="section-head">
+      <div>
+        <h1>Pipeline</h1>
+        <p class="muted">{{ b.jobTitle }} · {{ b.total }} candidature(s)</p>
+      </div>
+      <div class="row-actions">
+        <a class="button-link" [routerLink]="['/recruteur/offres', b.jobId, 'candidatures']">Vue liste</a>
+        <button type="button" (click)="reload()">Actualiser</button>
+      </div>
+    </div>
+
+    <div class="filters">
+      <input type="search" placeholder="Filtrer par nom, titre, compétence ou étiquette…" (input)="onFilter($event)"
+             aria-label="Filtrer les candidats du tableau" />
+    </div>
+
+    @if (b.truncated) {
+      <p class="status-banner">Seules les {{ b.cards.length }} candidatures les plus récentes sont affichées. Utilisez la vue liste pour les autres.</p>
+    }
+    @if (!b.canManage) {
+      <p class="muted">Consultation seule : les déplacements sont réservés aux recruteurs.</p>
+    }
+    @if (error()) { <p class="form-error" role="alert">{{ error() }}</p> }
+    <p class="sr-only" role="status" aria-live="polite">{{ announce() }}</p>
+
+    <div class="board" cdkDropListGroup>
+      @for (col of columns(); track col.stage.id) {
+        <section class="column" [attr.aria-labelledby]="'col-' + col.stage.id">
+          <header class="column-head" [style.border-top-color]="col.stage.color">
+            <h2 [id]="'col-' + col.stage.id">{{ col.stage.name }}</h2>
+            <span class="count" [attr.aria-label]="col.cards.length + ' candidature(s)'">{{ col.cards.length }}</span>
+          </header>
+
+          <ul class="cards" cdkDropList [cdkDropListData]="col.stage.id"
+              [cdkDropListDisabled]="!b.canManage" (cdkDropListDropped)="onDrop($event)">
+            @for (c of col.cards; track c.id) {
+              <li class="board-card" cdkDrag [cdkDragData]="c" [cdkDragDisabled]="!canDrag(c)"
+                  [class.withdrawn]="c.status === 'RETIREE'" [class.busy]="busyIds().has(c.id)">
+                <a [routerLink]="['/recruteur/candidatures', c.id]"><strong>{{ c.candidateName }}</strong></a>
+                @if (c.headline) { <small class="muted">{{ c.headline }}</small> }
+                <small class="muted">Reçue le {{ c.appliedAt | date: 'd MMM y' }}</small>
+                <app-star-rating [value]="c.rating" [readonly]="true" />
+                @if (c.tags.length) {
+                  <ul class="card-tags" aria-label="Étiquettes">
+                    @for (t of c.tags; track t) { <li>{{ t }}</li> }
+                  </ul>
+                }
+                @if (c.knockoutFlagged) { <span class="badge knockout">Critère éliminatoire</span> }
+                @if (c.status === 'RETIREE') { <span class="badge app-status-RETIREE">Retirée</span> }
+
+                @if (canDrag(c)) {
+                  <select class="move-select" (change)="onSelectStage(c, $event)"
+                          [attr.aria-label]="'Déplacer ' + c.candidateName + ' vers une autre étape'">
+                    <option value="">Déplacer vers…</option>
+                    @for (s of otherStages(c); track s.id) { <option [value]="s.id">{{ s.name }}</option> }
+                  </select>
+                }
+              </li>
+            } @empty {
+              <li class="empty muted">Aucun candidat</li>
+            }
+          </ul>
+        </section>
+      }
+    </div>
+  }
+
+  <dialog #rejectDialog class="reject-dialog" aria-labelledby="reject-title" (cancel)="closeReject()">
+    @if (pendingReject(); as p) {
+      <h2 id="reject-title">Rejeter la candidature de {{ p.card.candidateName }}</h2>
+      <app-reject-form [applicationId]="p.card.id" (confirmed)="confirmReject($event)" (cancelled)="closeReject()" />
+    }
+  </dialog>
+</div>

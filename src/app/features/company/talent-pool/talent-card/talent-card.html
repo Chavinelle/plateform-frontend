@@ -1,0 +1,99 @@
+@let t = item();
+<article class="card talent" [attr.aria-labelledby]="'talent-' + t.entryId">
+  <div class="head">
+    <h2 [id]="'talent-' + t.entryId">{{ t.candidateName }}</h2>
+    @if (t.city) { <span class="muted">· {{ t.city }}</span> }
+  </div>
+  @if (t.headline) { <p class="headline">{{ t.headline }}</p> }
+
+  @if (t.skills.length) {
+    <ul class="chip-list compact" [attr.aria-label]="'Compétences de ' + t.candidateName">
+      @for (s of t.skills; track s) { <li class="chip small">{{ s }}</li> }
+    </ul>
+  }
+  @if (t.tags.length) {
+    <ul class="chip-list compact" [attr.aria-label]="'Étiquettes de ' + t.candidateName">
+      @for (g of t.tags; track g) { <li class="chip small tag">{{ g }}</li> }
+    </ul>
+  }
+  @if (t.note) { <p class="note"><span class="sr-only">Note interne : </span>{{ t.note }}</p> }
+
+  <p class="muted small">
+    Ajouté le {{ t.addedAt | date: 'd MMM y' }}{{ t.addedByName ? ' par ' + t.addedByName : '' }}
+    · conservé jusqu'au {{ t.expiresAt | date: 'd MMM y' }} sans nouvelle activité
+  </p>
+
+  @if (t.lists.length) {
+    <ul class="lists" [attr.aria-label]="'Listes de ' + t.candidateName">
+      @for (l of t.lists; track l.id) {
+        <li>
+          {{ l.name }}
+          @if (canManage()) {
+            <button type="button" class="icon" (click)="removeFromList(l.id)" [disabled]="busy()"
+                    [attr.aria-label]="'Retirer ' + t.candidateName + ' de la liste ' + l.name">✕</button>
+          }
+        </li>
+      }
+    </ul>
+  }
+
+  @if (error()) { <p class="form-error" role="alert">{{ error() }}</p> }
+
+  @if (canManage()) {
+    @switch (mode()) {
+      @case ('edit') {
+        <form class="panel" (submit)="$event.preventDefault(); save()">
+          <label [for]="'note-' + t.entryId">Note interne (jamais montrée au candidat)</label>
+          <textarea [id]="'note-' + t.entryId" rows="3" maxlength="2000" [value]="note()" (input)="note.set($any($event.target).value)"></textarea>
+          <label [for]="'tags-' + t.entryId">Étiquettes (séparées par des virgules, 10 au plus)</label>
+          <input [id]="'tags-' + t.entryId" [value]="tags()" (input)="tags.set($any($event.target).value)" />
+          <div class="actions">
+            <button type="submit" [disabled]="busy()">Enregistrer</button>
+            <button type="button" (click)="mode.set(null)" [disabled]="busy()">Annuler</button>
+          </div>
+        </form>
+      }
+      @case ('propose') {
+        <div class="panel" role="group" [attr.aria-label]="'Proposer ' + t.candidateName + ' pour une offre'">
+          @if (jobs().length) {
+            <label [for]="'job-' + t.entryId">Offre publiée</label>
+            <select [id]="'job-' + t.entryId" (change)="jobId.set(+$any($event.target).value)">
+              @for (j of jobs(); track j.id) { <option [value]="j.id">{{ j.title }}</option> }
+            </select>
+            <p class="muted small">Une candidature est créée (source « Vivier ») ; le candidat est prévenu et peut la retirer.</p>
+            <div class="actions">
+              <button type="button" (click)="propose()" [disabled]="busy()">Proposer</button>
+              <button type="button" (click)="mode.set(null)" [disabled]="busy()">Annuler</button>
+            </div>
+          } @else {
+            <p class="muted">Aucune offre publiée pour le moment.</p>
+            <button type="button" (click)="mode.set(null)">Fermer</button>
+          }
+        </div>
+      }
+      @case ('remove') {
+        <div class="panel status-banner" role="group" [attr.aria-label]="'Confirmer le retrait de ' + t.candidateName">
+          <p>{{ t.candidateName }} sera retiré(e) du vivier et de toutes les listes.</p>
+          <div class="actions">
+            <button type="button" class="danger" (click)="remove()" [disabled]="busy()">Retirer du vivier</button>
+            <button type="button" (click)="mode.set(null)" [disabled]="busy()">Annuler</button>
+          </div>
+        </div>
+      }
+      @default {
+        <div class="actions">
+          <button type="button" (click)="open('propose')">Proposer pour une offre</button>
+          <button type="button" (click)="open('edit')">Note et étiquettes</button>
+          @if (otherLists().length) {
+            <label class="sr-only" [for]="'addlist-' + t.entryId">Ajouter {{ t.candidateName }} à une liste</label>
+            <select [id]="'addlist-' + t.entryId" (change)="addToList($any($event.target).value); $any($event.target).value = ''" [disabled]="busy()">
+              <option value="">Ajouter à une liste…</option>
+              @for (l of otherLists(); track l.id) { <option [value]="l.id">{{ l.name }}</option> }
+            </select>
+          }
+          <button type="button" class="danger" (click)="open('remove')">Retirer</button>
+        </div>
+      }
+    }
+  }
+</article>

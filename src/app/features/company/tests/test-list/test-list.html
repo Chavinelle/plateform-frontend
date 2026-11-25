@@ -1,0 +1,88 @@
+<div class="section-head">
+  <h2>Tests</h2>
+  @if (canEdit() && editing() === null) {
+    <button type="button" (click)="openEditor('new')">Nouveau test</button>
+  }
+</div>
+@if (!canEdit()) {
+  <p class="muted">Seuls l'administrateur et les recruteurs peuvent modifier les tests.</p>
+}
+
+<p class="sr-only" role="status" aria-live="polite">{{ message() }}</p>
+@if (message()) { <p class="form-info">{{ message() }}</p> }
+@if (error()) { <p class="form-error" role="alert">{{ error() }}</p> }
+
+@if (editing() !== null) {
+  <section class="card" aria-labelledby="test-editor-title">
+    <h3 id="test-editor-title" #editorHeading tabindex="-1">
+      {{ editingTest() ? 'Modifier « ' + editingTest()!.title + ' »' : 'Nouveau test' }}
+    </h3>
+    <app-test-editor [test]="editingTest()" (saved)="onSaved($event)" (cancelled)="closeEditor()" />
+  </section>
+}
+
+<label class="check archived-toggle">
+  <input type="checkbox" [checked]="showArchived()" (change)="showArchived.set($any($event.target).checked)" />
+  Afficher les tests archivés
+</label>
+
+@if (loading()) {
+  <p>Chargement…</p>
+} @else {
+  <ul class="tests">
+    @for (t of tests(); track t.id) {
+      <li class="card test" [class.archived]="t.archived">
+        <div class="test-head">
+          <h3>{{ t.title }}</h3>
+          @if (t.locked) { <span class="badge badge-warn">Envoyé</span> }
+          @if (t.archived) { <span class="badge">Archivé</span> }
+        </div>
+        <p class="facts">
+          {{ t.durationMinutes }} min · {{ t.questionCount }} question{{ t.questionCount > 1 ? 's' : '' }}
+          · {{ t.totalPoints }} points
+        </p>
+        @if (t.instructions) { <p class="instructions muted">{{ t.instructions }}</p> }
+
+        <button type="button" class="link" (click)="toggle(t.id)"
+                [attr.aria-expanded]="expanded().has(t.id)" [attr.aria-controls]="'test-questions-' + t.id">
+          {{ expanded().has(t.id) ? 'Masquer les questions' : 'Voir les questions' }}
+        </button>
+        @if (expanded().has(t.id)) {
+          <ol class="test-questions" [id]="'test-questions-' + t.id">
+            @for (q of t.questions; track q.id) {
+              <li>
+                {{ q.statement }}
+                <small class="muted block">
+                  {{ typeLabels[q.type] }} · {{ q.points }} pt{{ q.points > 1 ? 's' : '' }}
+                  @if (q.archived) { · question archivée }
+                </small>
+              </li>
+            }
+          </ol>
+        }
+
+        @if (t.locked && !t.archived) {
+          <p class="muted small">Ce test a déjà été envoyé à un candidat : dupliquez-le pour le modifier.</p>
+        }
+
+        @if (canEdit()) {
+          <div class="row-actions">
+            @if (!t.archived) {
+              @if (!t.locked) {
+                <button type="button" (click)="openEditor(t)" [disabled]="busyId() === t.id">Modifier</button>
+              }
+              <button type="button" (click)="duplicate(t)" [disabled]="busyId() === t.id">Dupliquer</button>
+              <button type="button" class="danger" (click)="remove(t)" [disabled]="busyId() === t.id">
+                {{ t.locked ? 'Archiver' : 'Supprimer' }}
+              </button>
+            } @else {
+              <button type="button" (click)="restore(t)" [disabled]="busyId() === t.id">Restaurer</button>
+            }
+          </div>
+        }
+      </li>
+    } @empty {
+      <li class="muted">Aucun test pour le moment.</li>
+    }
+  </ul>
+}

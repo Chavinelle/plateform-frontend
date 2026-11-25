@@ -1,0 +1,143 @@
+<div class="page take-test">
+  <p class="sr-only" role="status" aria-live="polite">{{ announce() }}</p>
+
+  @if (loading()) {
+    <p>Chargement…</p>
+  } @else if (view(); as v) {
+    @switch (v.status) {
+      @case ('ENVOYE') {
+        <h1>{{ v.title }}</h1>
+        <p class="muted">{{ v.companyName }} · poste « {{ v.jobTitle }} »</p>
+        <section class="card intro" aria-labelledby="intro-title">
+          <h2 id="intro-title">Bonjour {{ v.candidateFirstName }},</h2>
+          <ul class="facts">
+            <li><strong>{{ v.questionCount }}</strong> question{{ v.questionCount > 1 ? 's' : '' }}, {{ v.totalPoints }} points</li>
+            <li>Durée : <strong>{{ v.durationMinutes }} minutes</strong></li>
+            <li>À commencer avant le {{ v.deadline | date: 'd MMMM y, HH:mm' }}</li>
+          </ul>
+          @if (v.instructions) {
+            <h3>Consignes</h3>
+            <p class="pre">{{ v.instructions }}</p>
+          }
+          <p class="status-banner">
+            Le minuteur démarre dès que vous cliquez sur « Commencer » et ne s'arrête pas, même si vous fermez la page.
+            Vos réponses sont enregistrées au fur et à mesure ; à la fin du temps, le test est remis automatiquement.
+          </p>
+          @if (error()) { <p class="form-error" role="alert">{{ error() }}</p> }
+          <button type="button" (click)="start()" [disabled]="busy() !== null">
+            {{ busy() === 'start' ? 'Démarrage…' : 'Commencer le test' }}
+          </button>
+        </section>
+      }
+
+      @case ('COMMENCE') {
+        <div class="timer-bar" [class.low]="lowTime()">
+          <span class="title">{{ v.title }}</span>
+          <span>Temps restant :
+            <strong role="timer" aria-live="off" [attr.aria-label]="'Temps restant ' + remainingLabel()">{{ remainingLabel() }}</strong>
+          </span>
+        </div>
+
+        @if (error()) { <p class="form-error" role="alert">{{ error() }}</p> }
+
+        <ol class="questions">
+          @for (q of v.questions; track q.answerId; let i = $index; let first = $first) {
+            <li class="card question">
+              @if (q.type === 'QCM_UNIQUE' || q.type === 'QCM_MULTIPLE') {
+                <fieldset>
+                  <legend>
+                    @if (first) {
+                      <span #firstQuestion tabindex="-1" class="q-title">Question {{ i + 1 }} sur {{ v.questions.length }}</span>
+                    } @else {
+                      <span class="q-title">Question {{ i + 1 }} sur {{ v.questions.length }}</span>
+                    }
+                    <small class="muted"> · {{ q.points }} pt{{ q.points > 1 ? 's' : '' }} · {{ typeLabels[q.type] }}</small>
+                    <span class="statement">{{ q.statement }}</span>
+                  </legend>
+                  <div class="choices">
+                    @for (o of q.options; track o.id) {
+                      <label class="check choice">
+                        @if (q.type === 'QCM_UNIQUE') {
+                          <input type="radio" [name]="'q-' + q.answerId" [checked]="isChecked(q, o.id)"
+                                 (change)="toggleOption(q, o.id, $any($event.target).checked)" />
+                        } @else {
+                          <input type="checkbox" [checked]="isChecked(q, o.id)"
+                                 (change)="toggleOption(q, o.id, $any($event.target).checked)" />
+                        }
+                        {{ o.label }}
+                      </label>
+                    }
+                  </div>
+                </fieldset>
+              } @else {
+                <div class="q-head">
+                  @if (first) {
+                    <span #firstQuestion tabindex="-1" class="q-title">Question {{ i + 1 }} sur {{ v.questions.length }}</span>
+                  } @else {
+                    <span class="q-title">Question {{ i + 1 }} sur {{ v.questions.length }}</span>
+                  }
+                  <small class="muted"> · {{ q.points }} pt{{ q.points > 1 ? 's' : '' }} · {{ typeLabels[q.type] }}</small>
+                </div>
+                <p class="statement" [id]="'q-statement-' + q.answerId">{{ q.statement }}</p>
+                <label class="sr-only" [for]="'q-answer-' + q.answerId">Votre réponse à la question {{ i + 1 }}</label>
+                <textarea [id]="'q-answer-' + q.answerId" [class.code]="q.type === 'CODE'"
+                          [rows]="q.type === 'CODE' ? 12 : 6" maxlength="20000"
+                          [attr.spellcheck]="q.type === 'CODE' ? 'false' : null"
+                          [attr.aria-describedby]="'q-statement-' + q.answerId"
+                          [value]="textOf(q)" (input)="setText(q, $any($event.target).value)"></textarea>
+              }
+              <p class="save-state" aria-hidden="true">
+                @switch (saveStates()[q.answerId]) {
+                  @case ('saving') { Enregistrement… }
+                  @case ('saved') { ✓ Réponse enregistrée }
+                  @case ('error') { <span class="field-error">Non enregistrée : elle sera envoyée à la remise.</span> }
+                }
+              </p>
+            </li>
+          }
+        </ol>
+
+        @if (confirmSubmit()) {
+          <div class="status-banner confirm" role="group" aria-label="Confirmer la remise">
+            <p>
+              @if (unanswered()) {
+                {{ unanswered() }} question{{ unanswered() > 1 ? 's sont' : ' est' }} sans réponse.
+              }
+              Une fois remis, le test ne peut plus être modifié.
+            </p>
+            <div class="actions">
+              <button type="button" (click)="submit()" [disabled]="busy() !== null">
+                {{ busy() === 'submit' ? 'Remise…' : 'Remettre le test' }}
+              </button>
+              <button type="button" (click)="confirmSubmit.set(false)" [disabled]="busy() !== null">Continuer le test</button>
+            </div>
+          </div>
+        } @else {
+          <div class="actions">
+            <button type="button" (click)="confirmSubmit.set(true)">Terminer le test</button>
+          </div>
+        }
+      }
+
+      @case ('EXPIRE') {
+        <h1>{{ v.title }}</h1>
+        <p class="status-banner" role="alert">
+          La date limite pour commencer ce test ({{ v.deadline | date: 'd MMMM y, HH:mm' }}) est dépassée.
+          Contactez {{ v.companyName }} si vous souhaitez un nouveau lien.
+        </p>
+      }
+
+      @default {
+        <h1 #resultHeading tabindex="-1">Test remis, merci {{ v.candidateFirstName }} !</h1>
+        <p>
+          Vos réponses au test « {{ v.title }} » ont été transmises à {{ v.companyName }}
+          @if (v.submittedAt) { le {{ v.submittedAt | date: 'd MMMM y à HH:mm' }} }.
+          L'équipe de recrutement reviendra vers vous.
+        </p>
+      }
+    }
+  } @else {
+    <h1>Test en ligne</h1>
+    <p class="form-error" role="alert">{{ error() }}</p>
+  }
+</div>

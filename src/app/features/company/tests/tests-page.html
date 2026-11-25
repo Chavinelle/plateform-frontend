@@ -1,0 +1,28 @@
+<div class="page">
+  <h1>Tests en ligne</h1>
+  <p class="muted">
+    Composez des tests à partir de la banque de questions de l'entreprise. Les QCM sont corrigés automatiquement ;
+    les questions ouvertes et les exercices de code sont corrigés par un recruteur.
+  </p>
+
+  <div class="tabs" role="tablist" aria-label="Tests en ligne">
+    @for (t of tabs; track t.id; let i = $index) {
+      <button #tabButton type="button" role="tab" class="tab" [id]="'tab-' + t.id"
+              [attr.aria-selected]="active() === t.id" [attr.aria-controls]="'panel-' + t.id"
+              [tabIndex]="active() === t.id ? 0 : -1" [class.active]="active() === t.id"
+              (click)="select(t.id)" (keydown)="onKeydown($event, i)">
+        {{ t.label }}
+      </button>
+    }
+  </div>
+
+  @if (active() === 'tests') {
+    <section id="panel-tests" role="tabpanel" aria-labelledby="tab-tests" tabindex="0">
+      <app-test-list />
+    </section>
+  } @else {
+    <section id="panel-questions" role="tabpanel" aria-labelledby="tab-questions" tabindex="0">
+      <app-question-bank />
+    </section>
+  }
+</div>

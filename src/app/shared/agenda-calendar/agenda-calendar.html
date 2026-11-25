@@ -1,0 +1,87 @@
+<div class="toolbar">
+  <div class="row-actions" role="group" aria-label="Navigation dans l'agenda">
+    <button type="button" (click)="previous()">
+      <span aria-hidden="true">‹</span> Précédent
+    </button>
+    <button type="button" (click)="today()">Aujourd'hui</button>
+    <button type="button" (click)="next()">
+      Suivant <span aria-hidden="true">›</span>
+    </button>
+  </div>
+  <h2 class="period" aria-live="polite">{{ title() }}</h2>
+  <div class="row-actions" role="group" aria-label="Affichage">
+    @for (v of views; track v.value) {
+      <button type="button" [attr.aria-pressed]="view() === v.value" (click)="setView(v.value)">{{ v.label }}</button>
+    }
+  </div>
+</div>
+
+<p class="muted summary" aria-live="polite">
+  @if (loading()) { Chargement… } @else { {{ total() }} entretien{{ total() > 1 ? 's' : '' }} sur la période }
+</p>
+
+@if (view() === 'month') {
+  <div class="table-wrap">
+    <table class="month">
+      <caption class="sr-only">{{ title() }}</caption>
+      <thead>
+        <tr>
+          @for (w of weekdays; track $index) {
+            <th scope="col"><abbr [title]="w | date: 'EEEE'">{{ w | date: 'EEE' }}</abbr></th>
+          }
+        </tr>
+      </thead>
+      <tbody>
+        @for (week of weeks(); track week[0].key) {
+          <tr>
+            @for (d of week; track d.key) {
+              <td [class.outside]="!d.inPeriod" [class.today]="d.today" [attr.aria-current]="d.today ? 'date' : null">
+                <button type="button" class="day-number" (click)="openDay(d.date)"
+                        [attr.aria-label]="(d.date | date: 'EEEE d MMMM') + ' : ' + d.items.length + ' entretien(s), afficher la journée'">
+                  {{ d.date | date: 'd' }}
+                </button>
+                @if (d.items.length) {
+                  <ul class="events compact">
+                    @for (it of d.items; track it.event.id) {
+                      <li [class.cancelled]="it.event.cancelled">
+                        <a [routerLink]="it.event.link">
+                          <span class="time">{{ it.start | date: 'HH:mm' }}</span> {{ it.event.title }}
+                          @if (it.event.cancelled) { <span class="sr-only"> (annulé)</span> }
+                        </a>
+                      </li>
+                    }
+                  </ul>
+                }
+              </td>
+            }
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+} @else {
+  <div class="days" [class.week]="view() === 'week'">
+    @for (d of days(); track d.key) {
+      <section class="day" [class.today]="d.today" [attr.aria-labelledby]="'day-' + d.key">
+        <h3 [id]="'day-' + d.key" class="day-title">
+          {{ d.date | date: 'EEEE d MMMM' }}
+          @if (d.today) { <span class="badge">aujourd'hui</span> }
+        </h3>
+        @if (d.items.length) {
+          <ul class="events">
+            @for (it of d.items; track it.event.id) {
+              <li class="event" [class.cancelled]="it.event.cancelled">
+                <span class="time">{{ it.start | date: 'HH:mm' }} – {{ it.end | date: 'HH:mm' }}</span>
+                <a [routerLink]="it.event.link" class="event-title">{{ it.event.title }}</a>
+                <span class="muted">{{ it.event.subtitle }}</span>
+                <span class="badge">{{ it.event.statusLabel }}</span>
+              </li>
+            }
+          </ul>
+        } @else {
+          <p class="muted empty">Aucun entretien</p>
+        }
+      </section>
+    }
+  </div>
+}

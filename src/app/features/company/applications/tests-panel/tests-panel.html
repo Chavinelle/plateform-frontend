@@ -1,0 +1,109 @@
+@if (loading()) {
+  <p>Chargement…</p>
+} @else {
+  <p class="sr-only" role="status" aria-live="polite">{{ message() }}</p>
+  @if (message()) { <p class="form-info">{{ message() }}</p> }
+  @if (error()) { <p class="form-error" role="alert">{{ error() }}</p> }
+
+  <ul class="attempts">
+    @for (a of attempts(); track a.id) {
+      <li class="attempt">
+        <div class="attempt-head">
+          <strong>{{ a.testTitle }}</strong>
+          <span class="badge attempt-{{ a.status }}">{{ statusLabels[a.status] }}</span>
+        </div>
+        <p class="muted facts">
+          {{ a.questionCount }} question{{ a.questionCount > 1 ? 's' : '' }} · {{ a.durationMinutes }} min
+          · envoyé le {{ a.createdAt | date: 'd MMM y' }}{{ a.sentByName ? ' par ' + a.sentByName : '' }}
+        </p>
+        @switch (a.status) {
+          @case ('ENVOYE') { <p class="facts">À commencer avant le {{ a.deadline | date: 'd MMM y, HH:mm' }}.</p> }
+          @case ('EXPIRE') { <p class="facts">Non commencé avant le {{ a.deadline | date: 'd MMM y, HH:mm' }}.</p> }
+          @case ('COMMENCE') {
+            <p class="facts">Commencé le {{ a.startedAt | date: 'd MMM y, HH:mm' }},
+              fin au plus tard à {{ a.mustFinishBy | date: 'HH:mm' }}.</p>
+          }
+          @default {
+            <p class="facts">Remis le {{ a.submittedAt | date: 'd MMM y, HH:mm' }}.</p>
+            @if (a.status === 'CORRIGE') {
+              <p class="score">
+                Score : <strong>{{ a.scorePercent | number: '1.0-1' }} %</strong>
+                <span class="muted">({{ (a.autoScore ?? 0) + (a.manualScore ?? 0) | number: '1.0-2' }} / {{ a.maxScore }} points)</span>
+              </p>
+            } @else {
+              <p class="facts">
+                QCM : {{ a.autoScore ?? 0 | number: '1.0-2' }} points ·
+                <strong>{{ a.ungradedCount }} question{{ a.ungradedCount > 1 ? 's' : '' }} à corriger</strong>
+              </p>
+            }
+            <button type="button" (click)="toggleReview(a.id)"
+                    [attr.aria-expanded]="reviewId() === a.id" [attr.aria-controls]="'review-' + a.id">
+              {{ reviewId() === a.id ? 'Masquer les réponses' : (a.status === 'TERMINE' ? 'Corriger' : 'Voir les réponses') }}
+            </button>
+            @if (reviewId() === a.id) {
+              <app-test-attempt-review [id]="'review-' + a.id" [applicationId]="applicationId()" [attemptId]="a.id"
+                                       (changed)="onReviewed($event)" />
+            }
+          }
+        }
+
+        @if (canManage() && a.status === 'ENVOYE') {
+          @if (confirmCancelId() === a.id) {
+            <div class="status-banner confirm" role="group" [attr.aria-label]="'Confirmer l’annulation de ' + a.testTitle">
+              <p>Le lien cessera de fonctionner et le candidat sera prévenu par e-mail.</p>
+              <div class="actions">
+                <button type="button" class="danger" (click)="cancel(a)" [disabled]="busyId() === a.id">
+                  {{ busyId() === a.id ? 'Annulation…' : 'Confirmer l’annulation' }}
+                </button>
+                <button type="button" (click)="confirmCancelId.set(null)" [disabled]="busyId() === a.id">Retour</button>
+              </div>
+            </div>
+          } @else {
+            <button type="button" class="danger" (click)="confirmCancelId.set(a.id)">Annuler l’envoi</button>
+          }
+        }
+      </li>
+    } @empty {
+      <li class="muted">Aucun test envoyé à ce candidat.</li>
+    }
+  </ul>
+
+  @if (canSend()) {
+    @if (showForm()) {
+      <form class="send" [formGroup]="form" (ngSubmit)="send()" novalidate aria-labelledby="send-test-title">
+        <h3 id="send-test-title">Envoyer un test</h3>
+        @if (sendable().length) {
+          <div class="field">
+            <label for="send-test">Test</label>
+            <select id="send-test" formControlName="testId">
+              @for (t of sendable(); track t.id) {
+                <option [ngValue]="t.id">{{ t.title }} ({{ t.questionCount }} q., {{ t.durationMinutes }} min)</option>
+              }
+            </select>
+          </div>
+          <div class="field">
+            <label for="send-days">Délai pour commencer (jours)</label>
+            <input id="send-days" type="number" min="1" max="30" formControlName="deadlineDays"
+                   [attr.aria-invalid]="invalid(form.controls.deadlineDays)" aria-describedby="send-days-hint" />
+            <small id="send-days-hint" class="muted">Entre 1 et 30 jours. Le minuteur ne démarre que lorsque le candidat commence.</small>
+          </div>
+          <div class="field">
+            <label for="send-message">Message au candidat (facultatif)</label>
+            <textarea id="send-message" formControlName="message" rows="3"></textarea>
+          </div>
+          <div class="actions">
+            <button type="submit" [disabled]="sending()">{{ sending() ? 'Envoi…' : 'Envoyer le lien' }}</button>
+            <button type="button" (click)="showForm.set(false)" [disabled]="sending()">Annuler</button>
+          </div>
+        } @else {
+          <p class="muted">
+            Aucun test disponible : créez-en un dans la page « Tests », ou attendez la fin du test déjà envoyé.
+          </p>
+          <button type="button" (click)="showForm.set(false)">Fermer</button>
+        }
+      </form>
+    } @else {
+      <button type="button" (click)="openForm()">Envoyer un test</button>
+    }
+  }
+}

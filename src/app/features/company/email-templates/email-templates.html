@@ -1,0 +1,42 @@
+<div class="page">
+  <h1>Modèles d'e-mails</h1>
+  <p class="muted">
+    Personnalisez les e-mails envoyés aux candidats. Sans personnalisation, le texte par défaut s'applique.
+    @if (!canEdit()) { Seul l'administrateur de l'entreprise peut les modifier. }
+  </p>
+
+  <p class="sr-only" role="status" aria-live="polite">{{ message() }}</p>
+  @if (message()) { <p class="form-info">{{ message() }}</p> }
+  @if (error()) { <p class="form-error" role="alert">{{ error() }}</p> }
+
+  @if (selected(); as t) {
+    <section class="card" aria-labelledby="editor-title">
+      <h2 id="editor-title" #editorHeading tabindex="-1">{{ t.label }}</h2>
+      <app-email-template-editor [template]="t" [canEdit]="canEdit()" (saved)="onSaved($event)" (closed)="close()" />
+    </section>
+  }
+
+  @if (loading()) {
+    <p>Chargement…</p>
+  } @else {
+    <ul class="templates">
+      @for (t of templates(); track t.type) {
+        <li class="card template" [class.current]="t.type === selectedType()">
+          <div class="head">
+            <h2>{{ t.label }}</h2>
+            @if (t.customized) { <span class="badge badge-ok">Personnalisé</span> } @else { <span class="badge">Texte par défaut</span> }
+          </div>
+          <p class="muted">{{ t.description }}</p>
+          <p class="subject"><span class="muted">Objet :</span> {{ t.subject }}</p>
+          @if (t.customized && t.updatedAt) {
+            <p class="muted small">Modifié le {{ t.updatedAt | date: 'd MMM y' }}{{ t.updatedByName ? ' par ' + t.updatedByName : '' }}</p>
+          }
+          <button type="button" [id]="'open-' + t.type" (click)="open(t)"
+                  [attr.aria-label]="(canEdit() ? 'Modifier le modèle ' : 'Consulter le modèle ') + t.label">
+            {{ canEdit() ? 'Modifier' : 'Consulter' }}
+          </button>
+        </li>
+      }
+    </ul>
+  }
+</div>

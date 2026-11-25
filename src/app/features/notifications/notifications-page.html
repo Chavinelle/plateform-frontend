@@ -1,0 +1,55 @@
+<div class="page">
+  <div class="section-head">
+    <h1>Notifications</h1>
+    <div class="row-actions">
+      <a class="button-link" routerLink="/notifications/preferences">Préférences</a>
+      @if (unread() > 0) {
+        <button type="button" (click)="markAllRead()">Tout marquer comme lu</button>
+      }
+    </div>
+  </div>
+
+  <label class="check">
+    <input type="checkbox" [checked]="unreadOnly()" (change)="setUnreadOnly($any($event.target).checked)" />
+    Afficher seulement les non lues
+  </label>
+
+  <p class="sr-only" role="status" aria-live="polite">{{ message() }}</p>
+  @if (message()) { <p class="form-info">{{ message() }}</p> }
+  @if (error()) { <p class="form-error" role="alert">{{ error() }}</p> }
+
+  @if (loading() && !result()) {
+    <p>Chargement…</p>
+  } @else if (result(); as r) {
+    <ul class="list">
+      @for (n of r.content; track n.id) {
+        <li class="card item" [class.unread]="!n.read">
+          <div class="text">
+            @if (!n.read) { <span class="dot" aria-hidden="true"></span><span class="sr-only">Non lue : </span> }
+            @if (n.link) {
+              <a [routerLink]="n.link" (click)="open(n)" class="title">{{ n.title }}</a>
+            } @else {
+              <span class="title">{{ n.title }}</span>
+            }
+            @if (n.body) { <p class="body">{{ n.body }}</p> }
+            <span class="date muted">{{ n.createdAt | date: 'd MMMM y, HH:mm' }}</span>
+          </div>
+          @if (!n.read) {
+            <button type="button" class="link" (click)="markRead(n)"
+                    [attr.aria-label]="'Marquer comme lue : ' + n.title">Marquer comme lue</button>
+          }
+        </li>
+      } @empty {
+        <li class="muted">{{ unreadOnly() ? 'Aucune notification non lue.' : 'Aucune notification pour le moment.' }}</li>
+      }
+    </ul>
+
+    @if (r.totalPages > 1) {
+      <div class="pager">
+        <button type="button" (click)="goTo(r.page - 1)" [disabled]="r.page === 0">Précédent</button>
+        <span>Page {{ r.page + 1 }} / {{ r.totalPages }}</span>
+        <button type="button" (click)="goTo(r.page + 1)" [disabled]="r.page + 1 >= r.totalPages">Suivant</button>
+      </div>
+    }
+  }
+</div>

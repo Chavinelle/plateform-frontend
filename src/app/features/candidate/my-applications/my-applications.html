@@ -1,0 +1,72 @@
+ <div class="page page-wide">
+      <div class="section-head">
+        <h1>Mes candidatures</h1>
+        <button type="button" (click)="reload()" [disabled]="loading()">Actualiser</button>
+      </div>
+
+      <div class="filters">
+        <select (change)="onStatus($event)" aria-label="Filtrer par statut">
+          <option value="">Tous les statuts</option>
+          @for (s of statuses; track s.value) { <option [value]="s.value">{{ s.label }}</option> }
+        </select>
+      </div>
+
+      @if (error()) { <p class="form-error" role="alert">{{ error() }}</p> }
+
+      @if (loading() && !result()) {
+        <p>Chargement…</p>
+      } @else if (result(); as r) {
+        @if (r.content.length === 0) {
+          <div class="card">
+            @if (status() === '') {
+              <p><strong>Vous n'avez pas encore postulé.</strong></p>
+              <a class="button-link primary" routerLink="/offres">Chercher des offres</a>
+            } @else {
+              <p>Aucune candidature avec ce statut.</p>
+            }
+          </div>
+        } @else {
+          <ul class="application-list" [class.loading]="loading()">
+            @for (a of r.content; track a.id) {
+              <li class="application-card">
+                <div class="job-card-head">
+                  @if (a.companyHasLogo) {
+                    <img class="company-logo-sm" [src]="logoUrl(a)" [alt]="'Logo de ' + a.companyName" loading="lazy" />
+                  } @else {
+                    <div class="company-logo-sm placeholder" aria-hidden="true">{{ initials(a) }}</div>
+                  }
+                  <div>
+                    <h3><a [routerLink]="['/candidat/candidatures', a.id]">{{ a.jobTitle }}</a></h3>
+                    <span class="muted">{{ a.companyName }}{{ place(a) }}</span>
+                  </div>
+                </div>
+
+                <div class="application-status">
+                  <span class="badge app-status-{{ a.status }}">{{ statusLabel(a.status) }}</span>
+                  @if (a.stageName) { <small class="muted">Étape : {{ a.stageName }}</small> }
+                  <small class="muted">Postulé le {{ a.appliedAt | date: 'd MMM y' }}</small>
+                </div>
+
+                <div class="row-actions">
+                  <a class="button-link" [routerLink]="['/candidat/candidatures', a.id]">Voir le suivi</a>
+                  @if (a.jobAvailable) {
+                    <a class="button-link" [routerLink]="['/offres', a.jobId]">Voir l'offre</a>
+                  }
+                  @if (a.canWithdraw) {
+                  <button type="button" class="danger" (click)="withdraw(a)" [disabled]="busyId() === a.id">
+                    Retirer ma candidature
+                  </button>
+}
+                </div>
+              </li>
+            }
+          </ul>
+
+          <div class="pager">
+            <button type="button" (click)="goTo(r.page - 1)" [disabled]="r.page === 0">Précédent</button>
+            <span>Page {{ r.page + 1 }} / {{ totalPages() }} · {{ r.totalElements }} candidature(s)</span>
+            <button type="button" (click)="goTo(r.page + 1)" [disabled]="r.page + 1 >= r.totalPages">Suivant</button>
+          </div>
+        }
+      }
+    </div>

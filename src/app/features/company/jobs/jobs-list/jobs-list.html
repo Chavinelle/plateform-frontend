@@ -1,0 +1,102 @@
+  <div class="page page-wide">
+      <div class="section-head">
+        <h1>Mes offres</h1>
+        <a class="button-link primary" routerLink="/recruteur/offres/nouvelle">+ Nouvelle offre</a>
+      </div>
+
+      <div class="filters">
+        <input type="search" placeholder="Rechercher un titre…" (input)="onSearch($event)"
+               aria-label="Rechercher une offre" />
+        <select (change)="onStatusChange($event)" aria-label="Filtrer par statut">
+          <option value="">Toutes (hors archivées)</option>
+          @for (s of statuses; track s.value) {
+            <option [value]="s.value">{{ s.label }}</option>
+          }
+        </select>
+      </div>
+
+      @if (message()) { <p class="form-info" role="status">{{ message() }}</p> }
+      @if (error()) { <p class="form-error" role="alert">{{ error() }}</p> }
+
+      @if (loading() && !result()) {
+        <p>Chargement…</p>
+      } @else if (result(); as r) {
+        @if (r.content.length === 0) {
+          <p class="muted">Aucune offre ne correspond à votre recherche.</p>
+        } @else {
+          <div class="table-wrap">
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>Titre</th><th>Service</th><th>Contrat</th><th>Lieu</th>
+                  <th>Statut</th><th>Date limite</th><th>Vues</th><th>Mise à jour</th><th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (j of r.content; track j.id) {
+                  <tr>
+                    <td>
+                      <a [routerLink]="['/recruteur/offres', j.id]"><strong>{{ j.title }}</strong></a>
+                      <div class="muted"><small>par {{ j.createdByName }}</small></div>
+                    </td>
+                    <td>{{ j.departmentName ?? '—' }}</td>
+                    <td>{{ contractLabel(j) }}</td>
+                    <td>{{ place(j) }}</td>
+                    <td>
+                      <span class="badge status-{{ j.status }}">{{ statusLabel(j.status) }}</span>
+                      @if (j.moderatedAt) { <span class="badge moderated" [attr.title]="j.moderationReason">Retirée par la modération</span> }
+                      @if (j.scheduled) {
+                        <div><small class="muted">programmée le {{ j.publishedAt | date: 'd MMM y' }}</small></div>
+                      }
+                    </td>
+                    <td>{{ j.deadline ? (j.deadline | date: 'd MMM y') : '—' }}</td>
+                    <td>{{ j.viewsCount }}</td>
+                    <td>{{ j.updatedAt | date: 'd MMM y' }}</td>
+                    <td>
+                      <!-- action principale visible ; les autres dans le menu « ⋯ » -->
+                      <div class="row-actions">
+                        @if (hasApplications(j)) {
+                          <a class="button-link" [routerLink]="['/recruteur/offres', j.id, 'candidatures']">Candidatures</a>
+                        } @else if (j.editable) {
+                          <a class="button-link" [routerLink]="['/recruteur/offres', j.id]">Modifier</a>
+                        }
+                        @if (hasMenu(j)) {
+                          <button type="button" class="more-button" [cdkMenuTriggerFor]="rowMenu"
+                                  [attr.aria-busy]="busyId() === j.id"
+                                  [attr.aria-label]="'Autres actions pour « ' + j.title + ' »'">
+                            <app-nav-icon name="dots" [size]="18" />
+                          </button>
+                          <ng-template #rowMenu>
+                            <div class="menu" cdkMenu>
+                              @if (hasApplications(j) && j.editable) {
+                                <a class="menu-item" cdkMenuItem [routerLink]="['/recruteur/offres', j.id]">Modifier</a>
+                              }
+                              @for (t of j.allowedTransitions; track t) {
+                                <button type="button" class="menu-item" cdkMenuItem [cdkMenuItemDisabled]="busyId() === j.id" (cdkMenuItemTriggered)="changeStatus(j, t)">
+                                  {{ actionLabel(j.status, t) }}
+                                </button>
+                              }
+                              @if (j.status === 'BROUILLON' && j.editable) {
+                                <button type="button" class="menu-item" cdkMenuItem [cdkMenuItemDisabled]="busyId() === j.id" (cdkMenuItemTriggered)="duplicate(j)">Dupliquer</button>
+                                <hr class="menu-sep" />
+                                <button type="button" class="menu-item danger" cdkMenuItem [cdkMenuItemDisabled]="busyId() === j.id" (cdkMenuItemTriggered)="remove(j)">Supprimer</button>
+                              }
+                            </div>
+                          </ng-template>
+                        }
+                      </div>
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+
+          <div class="pager">
+            <button type="button" (click)="goTo(r.page - 1)" [disabled]="r.page === 0">Précédent</button>
+            <span>Page {{ r.page + 1 }} / {{ totalPages() }} · {{ r.totalElements }} offre(s)</span>
+            <button type="button" (click)="goTo(r.page + 1)" [disabled]="r.page + 1 >= r.totalPages">Suivant</button>
+          </div>
+        }
+      }
+    </div>

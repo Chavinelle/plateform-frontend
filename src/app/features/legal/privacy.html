@@ -1,0 +1,75 @@
+@let i = info;
+<article class="page legal">
+  <h1>Politique de confidentialité</h1>
+  <p class="updated">Dernière mise à jour : {{ i.lastUpdate }}</p>
+  <p class="draft">Projet de texte, à faire relire avant une mise en ligne publique. Il décrit le fonctionnement réel de la plateforme.</p>
+
+  <h2>Responsable du traitement</h2>
+  <p>{{ i.publisher }}, {{ i.address }}. Contact : <a [href]="'mailto:' + i.contactEmail">{{ i.contactEmail }}</a>.
+    Chaque entreprise est en outre responsable de l'usage qu'elle fait des candidatures qu'elle reçoit.</p>
+
+  <h2>Données collectées et finalités</h2>
+  <div class="table-wrap" tabindex="0" role="region" aria-label="Données collectées">
+    <table>
+      <caption class="sr-only">Données collectées, finalités et destinataires</caption>
+      <thead><tr><th scope="col">Données</th><th scope="col">Pourquoi</th><th scope="col">Qui y a accès</th></tr></thead>
+      <tbody>
+        <tr><td>Compte : nom, prénom, e-mail, mot de passe (stocké chiffré de façon irréversible)</td>
+          <td>Créer le compte et s'authentifier</td><td>Vous ; l'administrateur de la plateforme</td></tr>
+        <tr><td>Profil candidat : titre, ville, expériences, formations, compétences, langues, photo, CV et documents</td>
+          <td>Postuler et présenter sa candidature</td><td>Vous ; les entreprises auxquelles vous postulez ou qui vous ont ajouté à leur vivier</td></tr>
+        <tr><td>Candidatures : réponses aux questions, lettre, suivi des étapes, messages, réponses aux entretiens et aux tests</td>
+          <td>Gérer le recrutement</td><td>Vous ; l'entreprise concernée</td></tr>
+        <tr><td>Notes, évaluations et commentaires internes des recruteurs</td>
+          <td>Décision de recrutement de l'entreprise</td><td>L'équipe de recrutement de l'entreprise uniquement (jamais le candidat)</td></tr>
+        <tr><td>Notifications et préférences de notification</td>
+          <td>Vous informer des événements qui vous concernent</td><td>Vous</td></tr>
+        <tr><td>Journal d'audit : actions sensibles (connexions, décisions d'administration, exports…)</td>
+          <td>Sécurité et traçabilité</td><td>L'administrateur de la plateforme</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p>Aucune donnée n'est vendue ni utilisée à des fins publicitaires.</p>
+
+  <h2>Adresses IP</h2>
+  <p>La plateforme ne conserve pas votre adresse IP. Pour lutter contre les abus (signalements d'offres) et tracer les actions
+    sensibles, elle conserve seulement une empreinte non réversible de cette adresse.</p>
+
+  <h2>Durées de conservation</h2>
+  <ul>
+    <li>Codes de vérification d'adresse e-mail : 10 minutes.</li>
+    <li>Vivier de talents : 24 mois au plus sans nouvelle activité, puis suppression automatique.</li>
+    <li>Journal d'audit : 12 mois, puis suppression automatique.</li>
+    <li>Compte, profil et candidatures : tant que le compte existe ; vous pouvez les supprimer à tout moment (voir « Vos droits »).</li>
+  </ul>
+
+  <h2>Stockage dans votre navigateur</h2>
+  <p>La plateforme n'utilise pas de cookie publicitaire ni de mesure d'audience. Le stockage local de votre navigateur conserve
+    uniquement votre session de connexion (jeton et informations d'affichage), effacée à la déconnexion.</p>
+
+  <h2>Sécurité</h2>
+  <ul>
+    <li>Mots de passe chiffrés de façon irréversible ; verrouillage temporaire après plusieurs échecs.</li>
+    <li>Chaque entreprise n'accède qu'à ses propres données ; les notes internes ne sont jamais montrées aux candidats.</li>
+    <li>Les liens de test sont personnels ; seule une empreinte du lien est conservée.</li>
+  </ul>
+
+  <h2>Vos droits</h2>
+  <p>Vous disposez d'un droit d'accès, de rectification, d'effacement, d'opposition et de limitation du traitement.</p>
+  <ul>
+    <li>Rectifier : depuis votre profil ou les paramètres de votre entreprise.</li>
+    <li>Retirer une candidature : depuis « Mes candidatures ».</li>
+    <li>Quitter le vivier d'une entreprise : depuis votre tableau de bord.</li>
+    <li>Choisir vos notifications : depuis la page des préférences de notification.</li>
+    <li>Supprimer votre compte (candidat) : depuis « Mon profil », rubrique « Supprimer mon compte ». Votre profil, vos documents,
+      favoris et alertes sont supprimés ; vos candidatures deviennent anonymes (« Candidat supprimé ») et leur contenu est effacé,
+      y compris les messages et les notes des recruteurs. Les entreprises ne gardent que des chiffres (dates, étapes) pour leurs statistiques.
+      Votre adresse e-mail est aussi retirée du journal d'audit.</li>
+    <li>Si vous ne pouvez plus vous connecter, ou pour tout autre droit : écrivez à <a [href]="'mailto:' + i.contactEmail">{{ i.contactEmail }}</a> ;
+      l'administrateur de la plateforme procède alors à l'effacement.</li>
+  </ul>
+  <p>Vous pouvez également saisir l'{{ i.authority }}.</p>
+
+  <p>Voir aussi les <a routerLink="/conditions-utilisation">conditions d'utilisation</a> et les
+    <a routerLink="/mentions-legales">mentions légales</a>.</p>
+</article>

@@ -1,0 +1,91 @@
+<form [formGroup]="form" (ngSubmit)="submit()" novalidate class="editor">
+  @if (question()?.usedInTests) {
+    <p class="status-banner">
+      Cette question figure dans {{ question()!.usedInTests }} test{{ question()!.usedInTests > 1 ? 's' : '' }}
+      pas encore envoyé{{ question()!.usedInTests > 1 ? 's' : '' }} : vos modifications s'y appliqueront.
+    </p>
+  }
+
+  <div class="form-grid">
+    <div class="field">
+      <label for="q-type">Type de question</label>
+      <select id="q-type" formControlName="type">
+        @for (t of types; track t.value) {
+          <option [value]="t.value">{{ t.label }}</option>
+        }
+      </select>
+    </div>
+    <div class="field">
+      <label for="q-points">Points <span aria-hidden="true">*</span></label>
+      <input id="q-points" type="number" min="1" max="100" formControlName="points" required
+             [attr.aria-invalid]="invalid(form.controls.points)"
+             [attr.aria-describedby]="invalid(form.controls.points) ? 'q-points-error' : null" />
+      @if (invalid(form.controls.points)) {
+        <small id="q-points-error" class="field-error">Entre 1 et 100 points.</small>
+      }
+    </div>
+    <div class="field">
+      <label for="q-category">Catégorie</label>
+      <input id="q-category" formControlName="category" list="q-categories" placeholder="ex. Java, SQL, Anglais"
+             [attr.aria-invalid]="invalid(form.controls.category)" />
+      <datalist id="q-categories">
+        @for (c of categories(); track c) { <option [value]="c"></option> }
+      </datalist>
+    </div>
+  </div>
+
+  <div class="field">
+    <label for="q-statement">Énoncé <span aria-hidden="true">*</span></label>
+    <textarea id="q-statement" formControlName="statement" rows="4" required
+              [attr.aria-invalid]="invalid(form.controls.statement)"
+              [attr.aria-describedby]="invalid(form.controls.statement) ? 'q-statement-error' : 'q-statement-hint'"></textarea>
+    @if (invalid(form.controls.statement)) {
+      <small id="q-statement-error" class="field-error">L'énoncé est obligatoire (5000 caractères maximum).</small>
+    } @else {
+      <small id="q-statement-hint" class="muted">
+        @switch (type()) {
+          @case ('CODE') { Décrivez l'exercice, les entrées et la sortie attendues. Le code est corrigé par un recruteur. }
+          @case ('TEXTE') { La réponse est libre et corrigée par un recruteur. }
+          @default { Les QCM sont corrigés automatiquement. }
+        }
+      </small>
+    }
+  </div>
+
+  @if (choice()) {
+    <fieldset class="choices" formArrayName="options">
+      <legend>Choix ({{ options.length }} / {{ maxOptions }})</legend>
+      <p class="muted hint">
+        {{ multiple() ? 'Cochez toutes les bonnes réponses.' : 'Sélectionnez la bonne réponse.' }}
+        Les bonnes réponses ne sont jamais montrées au candidat.
+      </p>
+      <ol class="choice-list">
+        @for (o of options.controls; track o; let i = $index) {
+          <li class="choice" [formGroupName]="i">
+            <label class="check correct">
+              @if (multiple()) {
+                <input type="checkbox" formControlName="correct" />
+              } @else {
+                <input type="radio" name="q-correct" [checked]="o.controls.correct.value" (change)="markUnique(i)" />
+              }
+              <span class="sr-only">Choix {{ i + 1 }} :</span> bonne réponse
+            </label>
+            <label class="sr-only" [for]="'q-option-' + i">Libellé du choix {{ i + 1 }}</label>
+            <input #optionInput [id]="'q-option-' + i" formControlName="label" required
+                   [placeholder]="'Choix ' + (i + 1)" [attr.aria-invalid]="invalid(o.controls.label)" />
+            <button type="button" class="danger" (click)="removeOption(i)" [disabled]="options.length <= 2"
+                    [attr.aria-label]="'Supprimer le choix ' + (i + 1)">Supprimer</button>
+          </li>
+        }
+      </ol>
+      <button type="button" (click)="addOption()" [disabled]="options.length >= maxOptions">Ajouter un choix</button>
+    </fieldset>
+  }
+
+  @if (error()) { <p class="form-error" role="alert">{{ error() }}</p> }
+
+  <div class="actions">
+    <button type="submit" [disabled]="saving()">{{ saving() ? 'Enregistrement…' : 'Enregistrer la question' }}</button>
+    <button type="button" (click)="cancelled.emit()" [disabled]="saving()">Annuler</button>
+  </div>
+</form>

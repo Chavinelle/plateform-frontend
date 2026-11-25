@@ -1,0 +1,85 @@
+<div class="page">
+  <p><a routerLink="/admin/entreprises">← Entreprises</a></p>
+
+  @if (data(); as d) {
+    <div class="section-head">
+      <h1>{{ d.company.name }}</h1>
+      <span class="badge status-{{ d.company.status }}">{{ statusLabels[d.company.status] }}</span>
+    </div>
+    @if (d.company.statusReason) {
+      <p class="status-banner">Motif ({{ d.company.statusChangedAt | date: 'd MMM y' }}) : {{ d.company.statusReason }}</p>
+    }
+
+    <p class="sr-only" role="status" aria-live="polite">{{ message() }}</p>
+    @if (message()) { <p class="form-info">{{ message() }}</p> }
+    @if (error()) { <p class="form-error" role="alert">{{ error() }}</p> }
+
+    <section class="card" aria-labelledby="decision-title">
+      <h2 id="decision-title">Décision</h2>
+      @if (pending(); as to) {
+        <div class="decision">
+          <p>
+            @switch (to) {
+              @case ('VALIDEE') { L’entreprise pourra publier ses offres et son équipe aura accès à la plateforme. }
+              @case ('REFUSEE') { L’inscription sera refusée : les membres ne pourront plus se connecter. }
+              @case ('SUSPENDUE') { L’équipe perdra immédiatement l’accès et les offres ne seront plus visibles. }
+            }
+            Un e-mail est envoyé aux administrateurs de l’entreprise.
+          </p>
+          <label for="decision-reason">Motif {{ needsReason() ? '(obligatoire, communiqué à l’entreprise)' : '(facultatif)' }}</label>
+          <textarea #reasonInput id="decision-reason" rows="3" maxlength="1000" [value]="reason()"
+                    (input)="reason.set($any($event.target).value)" [attr.aria-required]="needsReason()"></textarea>
+          <div class="actions">
+            <button type="button" [class.danger]="to !== 'VALIDEE'" (click)="confirm()" [disabled]="busy()">
+              {{ busy() ? 'Enregistrement…' : 'Confirmer' }}
+            </button>
+            <button type="button" (click)="pending.set(null)" [disabled]="busy()">Annuler</button>
+          </div>
+        </div>
+      } @else {
+        <div class="actions">
+          @for (a of actions(); track a.to) {
+            <button type="button" [class.danger]="a.to !== 'VALIDEE'" (click)="ask(a.to)">{{ a.label }}</button>
+          }
+        </div>
+      }
+    </section>
+
+    <section class="card" aria-labelledby="info-title">
+      <h2 id="info-title">Informations</h2>
+      <dl class="info">
+        <dt>Inscrite le</dt><dd>{{ d.company.createdAt | date: 'd MMMM y' }}</dd>
+        <dt>Secteur</dt><dd>{{ d.company.sector ?? '—' }}</dd>
+        <dt>Taille</dt><dd>{{ d.size ?? '—' }}</dd>
+        <dt>Localisation</dt><dd>{{ d.company.city ?? '' }} {{ d.company.country ?? '' }}</dd>
+        <dt>Site web</dt><dd>{{ d.website ?? '—' }}</dd>
+        <dt>Offres</dt><dd>{{ d.company.jobs }}</dd>
+      </dl>
+      @if (d.description) { <p class="pre">{{ d.description }}</p> }
+    </section>
+
+    <section class="card" aria-labelledby="members-title">
+      <h2 id="members-title">Membres ({{ d.members.length }})</h2>
+      <div class="table-wrap">
+        <table class="table">
+          <caption class="sr-only">Membres de l’entreprise</caption>
+          <thead><tr><th scope="col">Nom</th><th scope="col">E-mail</th><th scope="col">Rôle</th><th scope="col">Statut</th></tr></thead>
+          <tbody>
+            @for (m of d.members; track m.id) {
+              <tr>
+                <th scope="row">{{ m.name }}</th>
+                <td>{{ m.email }} @if (!m.emailVerified) { <small class="muted block">e-mail non vérifié</small> }</td>
+                <td>{{ roleLabels[m.role] ?? m.role }}</td>
+                <td><span class="badge status-{{ m.status }}">{{ userStatusLabels[m.status] }}</span></td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </section>
+  } @else if (error()) {
+    <p class="form-error" role="alert">{{ error() }}</p>
+  } @else {
+    <p>Chargement…</p>
+  }
+</div>

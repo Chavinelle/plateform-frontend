@@ -1,0 +1,59 @@
+<div class="page page-wide">
+  <h1>Entreprises</h1>
+
+  <div class="filters" role="group" aria-label="Filtrer les entreprises">
+    <div class="field">
+      <label for="company-q">Rechercher</label>
+      <input id="company-q" type="search" [value]="q()" (input)="setQuery($any($event.target).value)" placeholder="Nom de l’entreprise" />
+    </div>
+    <div class="field">
+      <label for="company-status">Statut</label>
+      <select id="company-status" (change)="setStatus($any($event.target).value)">
+        <option value="" [selected]="status() === null">Tous</option>
+        @for (s of statuses; track s) { <option [value]="s" [selected]="status() === s">{{ statusLabels[s] }}</option> }
+      </select>
+    </div>
+    @if (loading()) { <span class="muted" role="status">Chargement…</span> }
+  </div>
+
+  @if (error()) { <p class="form-error" role="alert">{{ error() }}</p> }
+
+  @if (result(); as r) {
+    <p class="muted count">{{ r.totalElements }} entreprise{{ r.totalElements > 1 ? 's' : '' }}</p>
+    @if (r.content.length) {
+      <div class="table-wrap">
+        <table class="table">
+          <caption class="sr-only">Entreprises</caption>
+          <thead>
+            <tr><th scope="col">Entreprise</th><th scope="col">Administrateur</th><th scope="col">Statut</th>
+              <th scope="col">Membres</th><th scope="col">Offres</th><th scope="col">Inscrite le</th></tr>
+          </thead>
+          <tbody>
+            @for (c of r.content; track c.id) {
+              <tr>
+                <th scope="row">
+                  <a [routerLink]="['/admin/entreprises', c.id]">{{ c.name }}</a>
+                  @if (place(c)) { <small class="muted block">{{ place(c) }}</small> }
+                </th>
+                <td>{{ c.adminName ?? '—' }} @if (c.adminEmail) { <small class="muted block">{{ c.adminEmail }}</small> }</td>
+                <td><span class="badge status-{{ c.status }}">{{ statusLabels[c.status] }}</span></td>
+                <td class="num">{{ c.members }}</td>
+                <td class="num">{{ c.jobs }}</td>
+                <td>{{ c.createdAt | date: 'd MMM y' }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+      @if (r.totalPages > 1) {
+        <div class="pager">
+          <button type="button" (click)="page.set(r.page - 1)" [disabled]="r.page === 0">Précédent</button>
+          <span>Page {{ r.page + 1 }} / {{ r.totalPages }}</span>
+          <button type="button" (click)="page.set(r.page + 1)" [disabled]="r.page + 1 >= r.totalPages">Suivant</button>
+        </div>
+      }
+    } @else {
+      <p class="muted">{{ status() === 'EN_ATTENTE' ? 'Aucune inscription en attente de validation.' : 'Aucune entreprise.' }}</p>
+    }
+  }
+</div>

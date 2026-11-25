@@ -1,0 +1,21 @@
+<div class="mention-wrap">
+  <textarea #textarea [id]="inputId()" [rows]="rows()" [formControl]="control()" [attr.maxlength]="maxLength()"
+            [placeholder]="placeholder()"
+            [attr.aria-controls]="open() ? listId() : null"
+            [attr.aria-activedescendant]="activeOptionId()"
+            [attr.aria-describedby]="inputId() + '-hint'"
+            (input)="onInput()" (keydown)="onKeydown($event)" (blur)="close()" (click)="onInput()"></textarea>
+  <small [id]="inputId() + '-hint'" class="muted">Tapez « @ » pour mentionner un collègue.</small>
+
+  @if (open()) {
+    <ul class="mention-list" role="listbox" [id]="listId()" aria-label="Collègues à mentionner">
+      @for (p of matches(); track p.id; let i = $index) {
+        <li role="option" [id]="listId() + '-' + i" [attr.aria-selected]="i === activeIndex()"
+            [class.active]="i === activeIndex()" (mousedown)="pick($event, p)">
+          {{ p.name }}
+        </li>
+      }
+    </ul>
+  }
+  <span class="sr-only" aria-live="polite">{{ announcement() }}</span>
+</div>

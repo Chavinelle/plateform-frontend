@@ -1,0 +1,56 @@
+ <div class="page page-wide">
+      <h1>Mes favoris</h1>
+
+      @if (error()) { <p class="form-error" role="alert">{{ error() }}</p> }
+
+      @if (loading()) {
+        <p>Chargement…</p>
+      } @else if (items().length === 0) {
+        <div class="card">
+          <p><strong>Vous n'avez pas encore enregistré d'offre.</strong></p>
+          <p class="muted">Cliquez sur le cœur d'une offre pour la retrouver ici.</p>
+          <a class="button-link primary" routerLink="/offres">Chercher des offres</a>
+        </div>
+      } @else {
+        <ul class="application-list">
+          @for (s of items(); track s.jobId) {
+            <li class="application-card" [class.unavailable]="!s.available">
+              <div class="job-card-head">
+                @if (s.companyHasLogo) {
+                  <img class="company-logo-sm" [src]="logoUrl(s)" [alt]="'Logo de ' + s.companyName" loading="lazy" />
+                } @else {
+                  <div class="company-logo-sm placeholder" aria-hidden="true">{{ initials(s) }}</div>
+                }
+                <div>
+                  <h3>
+                    @if (s.available) {
+                      <a [routerLink]="['/offres', s.jobId]">{{ s.title }}</a>
+                    } @else {
+                      {{ s.title }}
+                    }
+                  </h3>
+                  <span class="muted">{{ s.companyName }}{{ place(s) }}</span>
+                </div>
+              </div>
+
+              <div class="application-status">
+                @if (s.contractType) { <span class="badge">{{ contractLabels[s.contractType] }}</span> }
+                @if (!s.available) { <span class="badge">N'est plus disponible</span> }
+                @if (s.applied) { <span class="badge badge-ok">Déjà postulé</span> }
+                @if (s.available && s.deadline) {
+                  <small class="muted">Jusqu'au {{ s.deadline | date: 'd MMM y' }}</small>
+                }
+                <small class="muted">Enregistrée le {{ s.savedAt | date: 'd MMM y' }}</small>
+              </div>
+
+              <div class="row-actions">
+                @if (s.available && !s.applied) {
+                  <a class="button-link primary" [routerLink]="['/offres', s.jobId, 'postuler']">Postuler</a>
+                }
+                <button type="button" (click)="remove(s)" [disabled]="busyId() === s.jobId">Retirer des favoris</button>
+              </div>
+            </li>
+          }
+        </ul>
+      }
+    </div>

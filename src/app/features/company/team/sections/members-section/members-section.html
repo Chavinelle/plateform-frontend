@@ -1,0 +1,53 @@
+<section class="card">
+      <h2>Membres de l'équipe</h2>
+
+      @if (error()) { <p class="form-error" role="alert">{{ error() }}</p> }
+
+      @if (loading()) {
+        <p>Chargement…</p>
+      } @else {
+        <div class="table-wrap">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Nom</th><th>E-mail</th><th>Rôle</th><th>Statut</th>
+                @if (canManage()) { <th></th> }
+              </tr>
+            </thead>
+            <tbody>
+              @for (m of members(); track m.id) {
+                <tr>
+                  <td>
+                    {{ m.firstName }} {{ m.lastName }}
+                    @if (m.you) { <span class="badge">vous</span> }
+                  </td>
+                  <td>{{ m.email }}</td>
+                  <td>
+                    @if (canManage() && !m.you && m.status === 'ACTIF') {
+                      <select (change)="changeRole(m, $event)" [attr.aria-label]="'Rôle de ' + m.firstName">
+                        @for (r of roles; track r) {
+                          <option [value]="r" [selected]="r === m.role">{{ roleLabel(r) }}</option>
+                        }
+                      </select>
+                    } @else {
+                      {{ roleLabel(m.role) }}
+                    }
+                  </td>
+                  <td>{{ statusLabel(m.status) }}</td>
+                  @if (canManage()) {
+                    <td>
+                      @if (!m.you && m.status === 'ACTIF') {
+                        <button type="button" class="danger" (click)="remove(m)">Retirer</button>
+                      }
+                    </td>
+                  }
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+        @if (!canManage()) {
+          <p class="muted">Seul l'administrateur de l'entreprise peut modifier l'équipe.</p>
+        }
+      }
+    </section>

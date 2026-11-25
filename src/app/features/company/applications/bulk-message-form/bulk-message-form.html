@@ -1,0 +1,37 @@
+<form [formGroup]="form" (ngSubmit)="send()" novalidate class="bulk-message">
+  <div class="field">
+    <label for="bulk-message-body">Message</label>
+    <textarea #area id="bulk-message-body" formControlName="body" rows="8" [attr.maxlength]="max"
+              aria-describedby="bulk-message-hint"></textarea>
+    <small id="bulk-message-hint" class="muted">
+      {{ length() }} / {{ max }} caractères. Les variables sont remplacées pour chaque candidat ;
+      chacun reçoit le message dans son propre fil, avec une notification et un e-mail (sans le contenu).
+    </small>
+  </div>
+
+  <div class="variables" role="group" aria-label="Insérer une variable">
+    @for (v of variables; track v.name) {
+      <button type="button" class="small" (click)="insert(v.name)"
+              [attr.aria-label]="'Insérer la variable ' + v.name + ' (' + v.label + ')'">{{ '{' + v.name + '}' }}</button>
+    }
+  </div>
+
+  @if (error()) { <p class="form-error" role="alert">{{ error() }}</p> }
+
+  @if (preview(); as p) {
+    <section class="preview" aria-labelledby="bulk-preview-title">
+      <h3 id="bulk-preview-title">Aperçu pour {{ p.candidateName }}</h3>
+      <pre tabindex="0" aria-label="Texte du message en aperçu">{{ p.body }}</pre>
+    </section>
+  }
+
+  <div class="actions">
+    <button type="submit" [disabled]="busy() !== null">
+      {{ busy() === 'send' ? 'Envoi…' : 'Envoyer à ' + selection().length + ' candidat' + (selection().length > 1 ? 's' : '') }}
+    </button>
+    <button type="button" (click)="showPreview()" [disabled]="busy() !== null">
+      {{ busy() === 'preview' ? 'Aperçu…' : 'Aperçu' }}
+    </button>
+    <button type="button" (click)="cancelled.emit()" [disabled]="busy() === 'send'">Annuler</button>
+  </div>
+</form>

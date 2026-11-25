@@ -1,0 +1,51 @@
+// Accueil public : bandeau de recherche, dernières offres, étapes et appels à l'action.
+.hero { padding: 4.5rem 1rem 4rem; margin: -2rem -1.25rem 2.5rem; }
+.hero h1 { font-size: clamp(2rem, 5vw, 3.1rem); font-weight: 780; letter-spacing: -.035em; max-width: 18ch; margin: 0 auto .9rem; }
+.accent { background: var(--text-gradient); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.hero-lead { max-width: 58ch; margin: 0 auto; font-size: 1.08rem; }
+.hero-badge {
+  display: inline-flex; align-items: center; gap: .45rem; margin: 0 0 1.25rem; padding: .35rem .85rem;
+  font-size: .82rem; font-weight: 600; color: var(--primary);
+  background: var(--surface); border: 1px solid var(--primary-border); border-radius: 999px; box-shadow: var(--shadow-xs);
+}
+.hero-search { margin-top: 2rem; }
+
+.section-head { align-items: flex-end; margin-bottom: 1.25rem; }
+.section-head h2 { font-size: 1.45rem; }
+.eyebrow { margin-bottom: .3rem; }
+
+.steps { margin: 4rem 0 0; text-align: center; }
+.steps h2 { font-size: 1.6rem; margin: 0 0 2rem; }
+.steps ol { list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(min(240px, 100%), 1fr)); gap: 1.25rem; }
+.steps li {
+  padding: 1.75rem 1.5rem; text-align: left;
+  background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); box-shadow: var(--shadow-sm);
+}
+.steps h3 { margin: 1rem 0 .4rem; font-size: 1.05rem; }
+.steps p { margin: 0; color: var(--text-muted); font-size: .92rem; }
+.step-icon, .cta-icon {
+  display: inline-grid; place-items: center; width: 44px; height: 44px; border-radius: 12px;
+  background: var(--primary-soft); color: var(--primary);
+}
+
+.cta-row { margin-top: 3rem; gap: 1.25rem; }
+.cta-card {
+  display: flex; flex-direction: column; align-items: flex-start; gap: .5rem; padding: 2rem;
+  background: var(--brand-soft-gradient); border: 1px solid var(--primary-border); border-radius: var(--radius-xl);
+}
+.cta-card h2 { margin: .75rem 0 0; font-size: 1.3rem; }
+.cta-card p { color: var(--text-muted); margin: 0 0 .75rem; }
+.cta-card .button-link { min-height: 44px; }
+
+// carte « entreprises » : aplat de la marque, texte blanc (contraste ≥ 6:1 sur tout le dégradé)
+.cta-card.dark { background: var(--brand-gradient); border-color: transparent; color: var(--on-primary); }
+.cta-card.dark h2 { color: var(--on-primary); }
+.cta-card.dark p { color: var(--on-primary); opacity: .9; }
+.cta-card.dark .cta-icon { background: rgb(255 255 255 / .16); color: var(--on-primary); }
+.cta-card.dark .button-link { background: var(--surface); color: var(--text); border-color: transparent; }
+.cta-card.dark .button-link:hover { background: var(--surface-2); }
+
+@media (max-width: 600px) {
+  .hero { padding: 2.5rem 1rem; margin: -1rem -.5rem 1.5rem; }
+  .cta-card { padding: 1.4rem; }
+}

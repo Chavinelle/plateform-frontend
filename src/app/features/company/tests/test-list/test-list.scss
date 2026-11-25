@@ -1,0 +1,14 @@
+:host { display: block; }
+.section-head h2 { margin: 0; font-size: 1.25rem; }
+.archived-toggle { margin: .5rem 0 1rem; }
+.tests { list-style: none; padding: 0; margin: 0; }
+.test.archived { background: var(--surface-2); }
+.test-head { display: flex; gap: .5rem; align-items: center; flex-wrap: wrap; }
+.test-head h3 { margin: 0; font-size: 1.1rem; }
+.badge-warn { background: var(--warning-soft); color: var(--warning); }
+.facts { margin: .35rem 0; font-variant-numeric: tabular-nums; }
+.instructions { white-space: pre-wrap; margin: 0 0 .5rem; }
+.link { background: none; border: 0; padding: 0; color: var(--primary); text-decoration: underline; cursor: pointer; }
+.test-questions { margin: .5rem 0; padding-left: 1.25rem; display: flex; flex-direction: column; gap: .3rem; }
+.block { display: block; }
+.small { font-size: .9rem; margin: .5rem 0; }

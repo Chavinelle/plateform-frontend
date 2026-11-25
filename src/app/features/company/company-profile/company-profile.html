@@ -1,0 +1,145 @@
+ <div class="page">
+      <h1>Mon entreprise</h1>
+
+      @if (loading()) {
+        <p>Chargement…</p>
+      } @else if (loadError()) {
+        <p class="form-error" role="alert">{{ loadError() }}</p>
+      } @else if (company(); as c) {
+
+        @if (statusMessage()) {
+          <p class="status-banner" role="status">{{ statusMessage() }}</p>
+        }
+
+        <!-- Bannière et logo -->
+        <section class="card">
+          <div class="company-banner">
+            @if (bannerUrl()) {
+              <img [src]="bannerUrl()" alt="Bannière de l'entreprise" />
+            }
+          </div>
+          <div class="company-head">
+            <div class="avatar">
+              @if (logoUrl()) {
+                <img class="avatar-img" [src]="logoUrl()" alt="Logo de l'entreprise" />
+              } @else {
+                <span>{{ initials() }}</span>
+              }
+            </div>
+            <div>
+              <strong>{{ c.name }}</strong>
+              <span class="badge" [class.badge-ok]="c.status === 'VALIDEE'">{{ statusLabel() }}</span>
+            </div>
+          </div>
+
+          @if (canEdit()) {
+            <div class="actions">
+              <label class="file-button">
+                {{ logoUrl() ? 'Changer le logo' : 'Ajouter un logo' }}
+                <input type="file" accept="image/jpeg,image/png" (change)="onImageSelected('logo', $event)" hidden />
+              </label>
+              @if (logoUrl()) { <button type="button" (click)="removeImage('logo')">Supprimer le logo</button> }
+
+              <label class="file-button">
+                {{ bannerUrl() ? 'Changer la bannière' : 'Ajouter une bannière' }}
+                <input type="file" accept="image/jpeg,image/png" (change)="onImageSelected('banner', $event)" hidden />
+              </label>
+              @if (bannerUrl()) { <button type="button" (click)="removeImage('banner')">Supprimer la bannière</button> }
+            </div>
+            <p><small class="muted">JPG ou PNG. Logo : 2 Mo maximum. Bannière : 4 Mo maximum.</small></p>
+            @if (imageBusy()) { <p class="form-info">Envoi en cours…</p> }
+            @if (imageError()) { <p class="form-error" role="alert">{{ imageError() }}</p> }
+          }
+        </section>
+
+        <!-- Informations -->
+        <form [formGroup]="form" (ngSubmit)="save()" novalidate>
+          <section class="card">
+            <h2>Informations générales</h2>
+            <div class="form-grid">
+              <div class="field full">
+                <label for="name">Nom de l'entreprise *</label>
+                <input id="name" formControlName="name" />
+                @if (bad('name')) { <small class="field-error">Le nom est obligatoire (150 caractères max).</small> }
+              </div>
+              <div class="field">
+                <label for="sector">Secteur</label>
+                <input id="sector" formControlName="sector" list="ref-SECTEUR" autocomplete="off" />
+                <app-ref-datalist kind="SECTEUR" />
+              </div>
+              <div class="field">
+                <label for="size">Taille</label>
+                <select id="size" formControlName="size">
+                  <option value="">— Non précisée —</option>
+                  @for (s of sizes; track s) { <option [value]="s">{{ s }} salariés</option> }
+                </select>
+              </div>
+              <div class="field">
+                <label for="country">Pays</label>
+                <input id="country" formControlName="country" />
+              </div>
+              <div class="field">
+                <label for="city">Ville</label>
+                <input id="city" formControlName="city" list="ref-VILLE" autocomplete="off" />
+                <app-ref-datalist kind="VILLE" />
+              </div>
+              <div class="field full">
+                <label for="website">Site web</label>
+                <input id="website" type="url" formControlName="website" placeholder="https://" />
+                @if (bad('website')) { <small class="field-error">Lien invalide (https://…).</small> }
+              </div>
+            </div>
+          </section>
+
+          <section class="card">
+            <h2>Présentation</h2>
+            <div class="form-grid">
+              <div class="field full">
+                <label for="description">Description</label>
+                <textarea id="description" rows="6" formControlName="description"></textarea>
+                <small class="muted">{{ form.controls.description.value.length }} / 5000</small>
+                @if (bad('description')) { <small class="field-error">5000 caractères maximum.</small> }
+              </div>
+              <div class="field full">
+                <label for="coreValues">Nos valeurs</label>
+                <textarea id="coreValues" rows="4" formControlName="coreValues"></textarea>
+                <small class="muted">{{ form.controls.coreValues.value.length }} / 3000</small>
+                @if (bad('coreValues')) { <small class="field-error">3000 caractères maximum.</small> }
+              </div>
+            </div>
+          </section>
+
+          <section class="card">
+            <h2>Réseaux sociaux</h2>
+            <div class="form-grid">
+              <div class="field">
+                <label for="linkedinUrl">LinkedIn</label>
+                <input id="linkedinUrl" type="url" formControlName="linkedinUrl" placeholder="https://" />
+                @if (bad('linkedinUrl')) { <small class="field-error">Lien invalide (https://…).</small> }
+              </div>
+              <div class="field">
+                <label for="facebookUrl">Facebook</label>
+                <input id="facebookUrl" type="url" formControlName="facebookUrl" placeholder="https://" />
+                @if (bad('facebookUrl')) { <small class="field-error">Lien invalide (https://…).</small> }
+              </div>
+              <div class="field">
+                <label for="xUrl">X</label>
+                <input id="xUrl" type="url" formControlName="xUrl" placeholder="https://" />
+                @if (bad('xUrl')) { <small class="field-error">Lien invalide (https://…).</small> }
+              </div>
+            </div>
+          </section>
+
+          @if (message()) { <p class="form-info" role="status">{{ message() }}</p> }
+          @if (error()) { <p class="form-error" role="alert">{{ error() }}</p> }
+
+          @if (canEdit()) {
+            <div class="actions">
+              <button type="submit" [disabled]="saving()">{{ saving() ? 'Enregistrement…' : 'Enregistrer' }}</button>
+            </div>
+          } @else {
+            <p class="muted">Seul l'administrateur de l'entreprise peut modifier ces informations.</p>
+          }
+        </form>
+      }
+    </div>

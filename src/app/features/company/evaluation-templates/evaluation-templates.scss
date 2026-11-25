@@ -1,0 +1,11 @@
+.templates { list-style: none; padding: 0; margin: 0; }
+.template.archived { background: var(--surface-2); }
+.template-head { display: flex; gap: .5rem; align-items: center; flex-wrap: wrap; }
+.template-head h2 { margin: 0; font-size: 1.15rem; }
+.archived-toggle { margin: .5rem 0 1rem; }
+.criteria-table { margin: .5rem 0; }
+.criteria-table th[scope='row'] { text-align: left; font-weight: 500; }
+.block { display: block; }
+.percent { display: inline-block; min-width: 3rem; font-variant-numeric: tabular-nums; }
+.percent-bar { display: inline-block; vertical-align: middle; width: 120px; height: 6px; background: var(--surface-3); border-radius: 3px; overflow: hidden; }
+.percent-bar span { display: block; height: 100%; background: var(--primary-solid); }

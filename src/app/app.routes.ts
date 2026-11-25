@@ -1,3 +1,131 @@
 import { Routes } from '@angular/router';
+import { authGuard, guestGuard, roleGuard } from '../core/guards/auth.guards';
+export const routes: Routes = [
+  { path: '', pathMatch: 'full',
+    loadComponent: () => import('./features/home/home').then(m => m.Home) },
 
-export const routes: Routes = [];
+  // Pages publiques d'authentification (inaccessibles une fois connecté)
+  { path: 'login', canActivate: [guestGuard],
+    loadComponent: () => import('./features/auth/login/login').then(m => m.Login) },
+  { path: 'inscription', canActivate: [guestGuard],
+    loadComponent: () => import('./features/auth/register/register').then(m => m.Register) },
+  { path: 'verification-email', canActivate: [guestGuard],
+    loadComponent: () => import('./features/auth/verify-email/verify-email').then(m => m.VerifyEmail) },
+  { path: 'mot-de-passe-oublie', canActivate: [guestGuard],
+    loadComponent: () => import('./features/auth/forgot-password/forgot-password').then(m => m.ForgotPassword) },
+  { path: 'reinitialisation-mot-de-passe', canActivate: [guestGuard],
+    loadComponent: () => import('./features/auth/reset-password/reset-password').then(m => m.ResetPassword) },
+
+  // Espaces protégés par rôle
+ {
+  path: 'candidat',
+  canActivate: [roleGuard(['CANDIDAT'])],
+  children: [
+    { path: '', data: { title: 'Espace candidat' },
+      loadComponent: () => import('./features/space/space').then(m => m.Space) },
+    { path: 'tableau-de-bord', data: { title: 'Tableau de bord' },
+      loadComponent: () => import('./features/candidate/candidate-dashboard/candidate-dashboard').then(m => m.CandidateDashboard) },
+    { path: 'profil',
+      loadComponent: () => import('./features/candidate/profile/profile').then(m => m.Profile) },
+    { path: 'candidatures',
+  loadComponent: () => import('./features/candidate/my-applications/my-applications').then(m => m.MyApplications) },
+{ path: 'candidatures/:id',
+  loadComponent: () => import('./features/candidate/my-application-detail/my-application-detail').then(m => m.MyApplicationDetailPage) },
+{ path: 'entretiens',
+  loadComponent: () => import('./features/candidate/my-calendar/my-calendar').then(m => m.MyCalendar) },
+  { path: 'favoris',
+  loadComponent: () => import('./features/candidate/saved-jobs/saved-jobs').then(m => m.SavedJobs) },
+]
+ },
+ {
+  path: 'recruteur',
+  canActivate: [roleGuard(['RECRUTEUR', 'MANAGER', 'ADMIN_ENTREPRISE'])],
+  children: [
+    { path: '', data: { title: 'Espace recruteur' },
+      loadComponent: () => import('./features/space/space').then(m => m.Space) },
+    { path: 'entreprise',
+      loadComponent: () => import('./features/company/company-profile/company-profile').then(m => m.CompanyProfile) },
+    { path: 'equipe',
+      loadComponent: () => import('./features/company/team/team').then(m => m.Team) },
+    { path: 'offres',
+  loadComponent: () => import('./features/company/jobs/jobs-list/jobs-list').then(m => m.JobsList) },
+  { path: 'offres/nouvelle',
+  loadComponent: () => import('./features/company/jobs/job-form/job-form').then(m => m.JobForm) },
+{ path: 'offres/:id',
+  loadComponent: () => import('./features/company/jobs/job-form/job-form').then(m => m.JobForm) },
+{ path: 'offres/:id/candidatures',
+  loadComponent: () => import('./features/company/applications/job-applications/job-applications').then(m => m.JobApplications) },
+{ path: 'offres/:id/candidatures/ajouter',
+  loadComponent: () => import('./features/company/applications/manual-application/manual-application').then(m => m.ManualApplication) },
+{ path: 'offres/:id/comparer',
+  loadComponent: () => import('./features/company/applications/candidate-comparison/candidate-comparison').then(m => m.CandidateComparison) },
+{ path: 'offres/:id/kanban',
+  loadComponent: () => import('./features/company/applications/job-board/job-board').then(m => m.JobBoardPage) },
+{ path: 'candidatures/:id',
+  loadComponent: () => import('./features/company/applications/application-detail/application-detail').then(m => m.ApplicationDetail) },
+{ path: 'tableau-de-bord', data: { title: 'Tableau de bord' },
+  loadComponent: () => import('./features/company/dashboard/dashboard').then(m => m.Dashboard) },
+{ path: 'grilles',
+  loadComponent: () => import('./features/company/evaluation-templates/evaluation-templates').then(m => m.EvaluationTemplates) },
+{ path: 'emails', canActivate: [roleGuard(['RECRUTEUR', 'ADMIN_ENTREPRISE'])],
+  loadComponent: () => import('./features/company/email-templates/email-templates').then(m => m.EmailTemplates) },
+{ path: 'vivier', data: { title: 'Vivier de talents' },
+  loadComponent: () => import('./features/company/talent-pool/talent-pool').then(m => m.TalentPool) },
+{ path: 'tests',
+  loadComponent: () => import('./features/company/tests/tests-page').then(m => m.TestsPage) },
+{ path: 'agenda',
+  loadComponent: () => import('./features/company/company-calendar/company-calendar').then(m => m.CompanyCalendar) },
+{ path: 'pipeline',
+  loadComponent: () => import('./features/company/company-pipeline/company-pipeline').then(m => m.CompanyPipeline) },
+    ]
+},
+  {
+    path: 'admin', canActivate: [roleGuard(['SUPER_ADMIN'])],
+    children: [
+      { path: '', pathMatch: 'full', redirectTo: 'entreprises' },
+      { path: 'entreprises', data: { title: 'Entreprises' },
+        loadComponent: () => import('./features/admin/admin-companies/admin-companies').then(m => m.AdminCompanies) },
+      { path: 'entreprises/:id', data: { title: 'Entreprise' },
+        loadComponent: () => import('./features/admin/admin-company-detail/admin-company-detail').then(m => m.AdminCompanyDetailPage) },
+      { path: 'signalements', data: { title: 'Signalements' },
+        loadComponent: () => import('./features/admin/admin-reports/admin-reports').then(m => m.AdminReports) },
+      { path: 'referentiels', data: { title: 'Référentiels' },
+        loadComponent: () => import('./features/admin/admin-referentials/admin-referentials').then(m => m.AdminReferentials) },
+      { path: 'journal', data: { title: 'Journal d’audit' },
+        loadComponent: () => import('./features/admin/admin-audit/admin-audit').then(m => m.AdminAudit) },
+      { path: 'utilisateurs', data: { title: 'Comptes' },
+        loadComponent: () => import('./features/admin/admin-users/admin-users').then(m => m.AdminUsers) }
+    ]
+  },
+
+  // Pages légales (publiques)
+  { path: 'conditions-utilisation', data: { title: 'Conditions d’utilisation' },
+    loadComponent: () => import('./features/legal/terms').then(m => m.Terms) },
+  { path: 'confidentialite', data: { title: 'Politique de confidentialité' },
+    loadComponent: () => import('./features/legal/privacy').then(m => m.Privacy) },
+  { path: 'compte-supprime', data: { title: 'Compte supprimé' },
+    loadComponent: () => import('./features/legal/account-deleted').then(m => m.AccountDeleted) },
+  { path: 'mentions-legales', data: { title: 'Mentions légales' },
+    loadComponent: () => import('./features/legal/legal-notice').then(m => m.LegalNotice) },
+
+  // Notifications : tout utilisateur connecté (candidat ou entreprise)
+  { path: 'notifications/preferences', canActivate: [authGuard], data: { title: 'Préférences de notification' },
+    loadComponent: () => import('./features/notifications/notification-preferences/notification-preferences').then(m => m.NotificationPreferences) },
+  { path: 'notifications', canActivate: [authGuard], data: { title: 'Notifications' },
+    loadComponent: () => import('./features/notifications/notifications-page').then(m => m.NotificationsPage) },
+  // Passage d'un test en ligne : le lien reçu par e-mail suffit (pas de connexion)
+  { path: 'test/:token', data: { title: 'Test en ligne' },
+    loadComponent: () => import('./features/public/take-test/take-test').then(m => m.TakeTest) },
+  { path: 'invitation',
+  loadComponent: () => import('./features/auth/accept-invitation/accept-invitation').then(m => m.AcceptInvitation) },
+  { path: 'offres',
+  loadComponent: () => import('./features/public/job-search/job-search').then(m => m.JobSearch) },
+{ path: 'offres/:id',
+  loadComponent: () => import('./features/public/job-detail/job-detail').then(m => m.JobDetail) },
+{ path: 'entreprises/:id',
+  loadComponent: () => import('./features/public/company-page/company-page').then(m => m.CompanyPage) },
+ { path: 'offres/:id/postuler',
+  canActivate: [roleGuard(['CANDIDAT'])],
+  loadComponent: () => import('./features/candidate/application-form/application-form').then(m => m.ApplicationForm) },
+  { path: '**', redirectTo: '' }
+];

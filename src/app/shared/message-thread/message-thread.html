@@ -1,0 +1,43 @@
+<p class="sr-only" role="status" aria-live="polite">{{ announce() }}</p>
+
+@if (loading()) {
+  <p>Chargement des messages…</p>
+} @else {
+  @if (messages().length) {
+    <ol #list class="messages" tabindex="0" aria-label="Messages, du plus ancien au plus récent">
+      @for (m of messages(); track m.id) {
+        <li class="message" [class.mine]="m.mine" [class.other-side]="m.side !== (side() === 'company' ? 'ENTREPRISE' : 'CANDIDAT')">
+          <div class="meta">
+            <span class="author">{{ m.mine ? 'Vous' : m.authorName }}</span>
+            <time [attr.datetime]="m.createdAt">{{ m.createdAt | date: 'd MMM y, HH:mm' }}</time>
+          </div>
+          <p class="body">{{ m.body }}</p>
+          @if (m.mine && m.read) { <span class="read">Lu</span> }
+        </li>
+      }
+    </ol>
+  } @else {
+    <p class="muted">Aucun message pour le moment.</p>
+  }
+
+  @if (error()) { <p class="form-error" role="alert">{{ error() }}</p> }
+
+  @if (thread()?.canWrite) {
+    <form [formGroup]="form" (ngSubmit)="send()" novalidate class="compose">
+      <label [for]="'message-body-' + applicationId()">Votre message</label>
+      <textarea [id]="'message-body-' + applicationId()" formControlName="body" rows="3" [attr.maxlength]="max"
+                (keydown)="onKeydown($event)" [attr.aria-describedby]="'message-hint-' + applicationId()"></textarea>
+      <small [id]="'message-hint-' + applicationId()" class="muted">
+        {{ length() }} / {{ max }} caractères · Ctrl + Entrée pour envoyer
+        @if (side() === 'candidate') { · l'équipe de recrutement sera prévenue }
+        @else { · le candidat sera prévenu par e-mail (sans le contenu) }
+      </small>
+      <div class="actions">
+        <button type="submit" [disabled]="sending()">{{ sending() ? 'Envoi…' : 'Envoyer' }}</button>
+        <button type="button" (click)="refresh()" [disabled]="sending()">Actualiser</button>
+      </div>
+    </form>
+  } @else if (thread()?.closedReason) {
+    <p class="status-banner">{{ thread()!.closedReason }}</p>
+  }
+}

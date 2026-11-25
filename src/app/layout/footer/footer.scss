@@ -1,0 +1,29 @@
+.footer { border-top: 1px solid var(--border); background: var(--surface); color: var(--text-muted); font-size: .9rem; }
+.footer a { color: var(--text-muted); }
+.footer a:hover { color: var(--text); }
+ul { list-style: none; padding: 0; margin: 0; }
+
+// version complète (pages publiques et candidats)
+.inner {
+  max-width: 1200px; margin: 0 auto; padding: 3rem clamp(1rem, 3vw, 2rem) 2rem;
+  display: grid; grid-template-columns: 2fr repeat(3, minmax(0, 1fr)); gap: 2rem;
+}
+.footer .brand { display: inline-flex; align-items: center; gap: .6rem; font-weight: 750; font-size: 1.05rem; color: var(--text); text-decoration: none; }
+.about p { margin: .9rem 0 0; max-width: 32ch; line-height: 1.6; }
+h2 { font-size: .78rem; font-weight: 700; letter-spacing: .07em; text-transform: uppercase; color: var(--text); margin: .4rem 0 .9rem; }
+.inner li + li { margin-top: .55rem; }
+.copyright { max-width: 1200px; margin: 0 auto; padding: 1.25rem clamp(1rem, 3vw, 2rem); border-top: 1px solid var(--border); font-size: .85rem; }
+
+// version compacte (espaces avec barre latérale)
+.compact {
+  display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: .5rem 1.5rem;
+  padding: 1rem 2rem; font-size: .84rem;
+}
+.compact p { margin: 0; }
+.legal-links { display: flex; flex-wrap: wrap; gap: .25rem 1.25rem; }
+
+@media (max-width: 800px) {
+  .inner { grid-template-columns: repeat(2, minmax(0, 1fr)); padding-top: 2rem; }
+  .about { grid-column: 1 / -1; }
+  .compact { padding: 1rem; }
+}

@@ -1,0 +1,8 @@
+.tabs { display: flex; gap: .25rem; border-bottom: 2px solid var(--border); margin: 1rem 0; }
+.tab {
+  background: none; border: 0; border-bottom: 3px solid transparent; border-radius: 0;
+  padding: .5rem 1rem; margin-bottom: -2px; color: var(--text); font-weight: 600; cursor: pointer;
+}
+.tab.active { border-bottom-color: var(--primary); color: var(--primary); }
+.tab:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+[role='tabpanel']:focus-visible { outline: 2px solid var(--primary); outline-offset: 4px; }

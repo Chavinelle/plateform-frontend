@@ -1,0 +1,261 @@
+    <div class="page">
+      <div class="section-head">
+        <h1>{{ job()?.title ?? 'Nouvelle offre' }}</h1>
+        <a class="button-link" routerLink="/recruteur/offres">← Mes offres</a>
+      </div>
+
+      @if (loading()) {
+        <p>Chargement…</p>
+      } @else if (loadError()) {
+        <p class="form-error" role="alert">{{ loadError() }}</p>
+      } @else {
+
+        @if (job(); as j) {
+          <div class="card job-status">
+            <div class="actions">
+              <span class="badge status-{{ j.status }}">{{ statusLabel(j.status) }}</span>
+              @if (j.scheduled) {
+                <small class="muted">publication programmée le {{ j.publishedAt | date: 'd MMM y, HH:mm' }}</small>
+              }
+              <small class="muted">créée par {{ j.createdByName }}</small>
+            </div>
+            <div class="row-actions">
+              @for (t of j.allowedTransitions; track t) {
+                <button type="button" (click)="changeStatus(t)" [disabled]="busy()">
+                  {{ actionLabel(j.status, t) }}
+                </button>
+              }
+              @if (j.status === 'BROUILLON' && j.editable) {
+                <button type="button" (click)="duplicate()" [disabled]="busy()">Dupliquer</button>
+                <button type="button" class="danger" (click)="remove()" [disabled]="busy()">Supprimer</button>
+              }
+            </div>
+          </div>
+          @if (job()?.moderatedAt) {
+            <p class="status-banner moderated" role="status">
+              <strong>Offre retirée par la modération</strong> le {{ job()!.moderatedAt | date: 'd MMM y' }} :
+              elle n'est plus visible et ne peut pas être republiée.
+              @if (job()!.moderationReason) { Motif : {{ job()!.moderationReason }} }
+            </p>
+          }
+          @if (locked()) {
+            <p class="status-banner" role="status">
+              Cette offre n'est pas modifiable (statut ou droits). Elle est affichée en lecture seule.
+            </p>
+          }
+        }
+
+        @if (message()) { <p class="form-info" role="status">{{ message() }}</p> }
+        @if (error()) { <p class="form-error" role="alert">{{ error() }}</p> }
+
+        <nav class="stepper" aria-label="Étapes de l'offre">
+          @for (s of steps; track s.n) {
+            <button type="button" class="step" [class.active]="step() === s.n"
+                    [class.invalid]="s.n <= 3 && stepInvalid(s.n)"
+                    [disabled]="s.n > 3 && !isEdit()" (click)="goTo(s.n)">
+              <span class="step-num">{{ s.n }}</span> {{ s.label }}
+            </button>
+          }
+        </nav>
+        @if (!isEdit()) {
+          <p class="muted"><small>
+            Les questions et le pipeline se débloquent dès que le brouillon est enregistré.
+          </small></p>
+        }
+
+        <!-- Étapes 1 à 3 : un seul formulaire -->
+        @if (step() <= 3) {
+          <form [formGroup]="form" (ngSubmit)="save()" novalidate>
+
+            @if (step() === 1) {
+              <section class="card">
+                <h2>Informations générales</h2>
+                <div class="form-grid">
+                  <div class="field full">
+                    <label for="title">Intitulé du poste *</label>
+                    <input id="title" formControlName="title" />
+                    @if (bad('title')) { <small class="field-error">Le titre est obligatoire (150 caractères max).</small> }
+                  </div>
+                  <div class="field">
+                    <label for="departmentId">Service</label>
+                    <select id="departmentId" formControlName="departmentId">
+                      <option [ngValue]="null">— Aucun —</option>
+                      @for (d of departments(); track d.id) { <option [ngValue]="d.id">{{ d.name }}</option> }
+                    </select>
+                  </div>
+                  <div class="field">
+                    <label for="contractType">Type de contrat</label>
+                    <select id="contractType" formControlName="contractType">
+                      <option value="">— À préciser —</option>
+                      @for (c of contractTypes; track c.value) { <option [value]="c.value">{{ c.label }}</option> }
+                    </select>
+                  </div>
+                  <div class="field">
+                    <label for="experienceLevel">Niveau d'expérience</label>
+                    <select id="experienceLevel" formControlName="experienceLevel">
+                      <option value="">— Indifférent —</option>
+                      @for (e of experienceLevels; track e.value) { <option [value]="e.value">{{ e.label }}</option> }
+                    </select>
+                  </div>
+                  <div class="field">
+                    <label for="remotePolicy">Télétravail</label>
+                    <select id="remotePolicy" formControlName="remotePolicy">
+                      @for (r of remotePolicies; track r.value) { <option [value]="r.value">{{ r.label }}</option> }
+                    </select>
+                  </div>
+                  <div class="field">
+                    <label for="city">Ville</label>
+                    <input id="city" formControlName="city" list="ref-VILLE" autocomplete="off" />
+                    <app-ref-datalist kind="VILLE" />
+                  </div>
+                  <div class="field">
+                    <label for="country">Pays</label>
+                    <input id="country" formControlName="country" />
+                  </div>
+                  <div class="field">
+                    <label for="positionsCount">Nombre de postes</label>
+                    <input id="positionsCount" type="number" min="1" max="1000" formControlName="positionsCount" />
+                    @if (bad('positionsCount')) { <small class="field-error">Entre 1 et 1000.</small> }
+                  </div>
+                  <div class="field">
+                    <label for="deadline">Date limite de candidature</label>
+                    <input id="deadline" type="date" formControlName="deadline" [min]="today" />
+                    @if (bad('deadline')) { <small class="field-error">La date limite ne peut pas être dans le passé.</small> }
+                  </div>
+                </div>
+              </section>
+            }
+
+            @if (step() === 2) {
+              <section class="card">
+                <h2>Description du poste</h2>
+                <div class="form-grid">
+                  <div class="field full">
+                    <label for="description">Description *</label>
+                    <textarea id="description" rows="6" formControlName="description"></textarea>
+                    <small class="muted">Obligatoire pour publier.</small>
+                    @if (bad('description')) { <small class="field-error">10000 caractères maximum.</small> }
+                  </div>
+                  <div class="field full">
+                    <label for="missions">Missions</label>
+                    <textarea id="missions" rows="5" formControlName="missions"></textarea>
+                    @if (bad('missions')) { <small class="field-error">10000 caractères maximum.</small> }
+                  </div>
+                  <div class="field full">
+                    <label for="requiredProfile">Profil recherché</label>
+                    <textarea id="requiredProfile" rows="5" formControlName="requiredProfile"></textarea>
+                    @if (bad('requiredProfile')) { <small class="field-error">10000 caractères maximum.</small> }
+                  </div>
+                  <div class="field full">
+                    <label for="benefits">Avantages</label>
+                    <textarea id="benefits" rows="3" formControlName="benefits"></textarea>
+                    @if (bad('benefits')) { <small class="field-error">5000 caractères maximum.</small> }
+                  </div>
+
+                  <div class="field full">
+                    <label for="skillBox">Compétences recherchées</label>
+                    <app-ref-datalist kind="COMPETENCE" />
+                    <div class="inline-form">
+                      <input id="skillBox" #skillBox placeholder="Ex. Java, puis Entrée" list="ref-COMPETENCE" autocomplete="off"
+                             (keydown.enter)="$event.preventDefault(); addSkill(skillBox)" [disabled]="locked()" />
+                      <button type="button" (click)="addSkill(skillBox)" [disabled]="locked()">Ajouter</button>
+                    </div>
+                    @if (skillError()) { <small class="field-error">{{ skillError() }}</small> }
+                    <ul class="chip-list">
+                      @for (s of skills(); track s) {
+                        <li class="chip">
+                          <span>{{ s }}</span>
+                          @if (!locked()) {
+                            <button type="button" class="icon" (click)="removeSkill(s)" [attr.aria-label]="'Retirer ' + s">×</button>
+                          }
+                        </li>
+                      }
+                    </ul>
+                  </div>
+
+                  <div class="field">
+                    <label for="salaryMin">Salaire minimum</label>
+                    <input id="salaryMin" type="number" min="0" step="any" formControlName="salaryMin" />
+                    @if (bad('salaryMin')) { <small class="field-error">Montant positif.</small> }
+                  </div>
+                  <div class="field">
+                    <label for="salaryMax">Salaire maximum</label>
+                    <input id="salaryMax" type="number" min="0" step="any" formControlName="salaryMax" />
+                    @if (bad('salaryMax')) { <small class="field-error">Montant positif.</small> }
+                  </div>
+                  <div class="field">
+                    <label for="salaryCurrency">Devise</label>
+                    <input id="salaryCurrency" formControlName="salaryCurrency" maxlength="3"
+                           list="currencies" placeholder="EUR" />
+                    <datalist id="currencies">
+                      @for (c of currencies; track c) { <option [value]="c"></option> }
+                    </datalist>
+                    @if (bad('salaryCurrency')) { <small class="field-error">Code à 3 lettres (ex. EUR).</small> }
+                  </div>
+                </div>
+              </section>
+            }
+
+            @if (step() === 3) {
+              <section class="card">
+                <h2>Équipe de recrutement et publication</h2>
+                <div class="form-grid">
+                  <div class="field">
+                    <label for="managerId">Responsable du recrutement</label>
+                    <select id="managerId" formControlName="managerId">
+                      <option [ngValue]="null">— Aucun —</option>
+                      @for (m of activeMembers(); track m.id) {
+                        <option [ngValue]="m.id">{{ m.firstName }} {{ m.lastName }}</option>
+                      }
+                    </select>
+                  </div>
+                  <div class="field">
+                    <label for="publishAt">Publication programmée</label>
+                    <input id="publishAt" type="datetime-local" formControlName="publishAt" />
+                    <small class="muted">Vide : l'offre est visible dès sa publication.</small>
+                  </div>
+                  <div class="field full">
+                    <strong>Évaluateurs</strong>
+                    @for (m of activeMembers(); track m.id) {
+                      <label class="check">
+                        <input type="checkbox" [checked]="evaluatorIds().includes(m.id)"
+                               (change)="onEvaluator(m.id, $event)" [disabled]="locked()" />
+                        {{ m.firstName }} {{ m.lastName }}
+                        <small class="muted">({{ roleLabel(m.role) }})</small>
+                      </label>
+                    }
+                  </div>
+                </div>
+              </section>
+            }
+
+            <div class="actions">
+              @if (step() > 1) { <button type="button" (click)="prev()">Précédent</button> }
+              @if (step() < 3) { <button type="button" (click)="next()">Suivant</button> }
+              @if (step() === 3 && isEdit()) { <button type="button" (click)="next()">Suivant : questions</button> }
+              @if (!locked()) {
+                <button type="submit" [disabled]="saving()">
+                  {{ saving() ? 'Enregistrement…' : (isEdit() ? 'Enregistrer' : 'Enregistrer le brouillon') }}
+                </button>
+              }
+            </div>
+          </form>
+        }
+
+        <!-- Étapes 4 et 5 : éditeurs autonomes, sur une offre déjà enregistrée -->
+        @if (step() === 4 && job(); as j) {
+          <app-questions-editor [jobId]="j.id" [readonly]="questionsReadonly()" />
+          <div class="actions">
+            <button type="button" (click)="prev()">Précédent</button>
+            <button type="button" (click)="next()">Suivant : pipeline</button>
+          </div>
+        }
+        @if (step() === 5 && job(); as j) {
+          <app-pipeline-editor [jobId]="j.id" [readonly]="locked()" />
+          <div class="actions">
+            <button type="button" (click)="prev()">Précédent</button>
+            <a class="button-link" routerLink="/recruteur/offres">Terminer</a>
+          </div>
+        }
+      }
+    </div>

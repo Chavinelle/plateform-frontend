@@ -1,0 +1,45 @@
+@if (layout.sidebarOpen()) {
+  <!-- fond du panneau (petit écran) : un clic referme ; ignoré par les lecteurs d'écran (Échap et les liens suffisent) -->
+  <div class="backdrop" aria-hidden="true" (click)="layout.closeSidebar()"></div>
+}
+<aside class="sidebar" [class.open]="layout.sidebarOpen()" id="app-sidebar" aria-label="Navigation de l'espace">
+  <a routerLink="/" class="brand" aria-label="Recrutement, accueil du site">
+    <span class="brand-mark" aria-hidden="true">R</span>
+    <span class="brand-name">Recrutement</span>
+  </a>
+
+  <nav aria-label="Navigation principale">
+    @for (group of groups(); track $index) {
+      <div class="group">
+        @if (group.title) { <p class="group-title" [id]="'nav-group-' + $index">{{ group.title }}</p> }
+        <ul [attr.aria-labelledby]="group.title ? 'nav-group-' + $index : null">
+          @for (link of group.links; track link.path) {
+            <li>
+              <a [routerLink]="link.path" routerLinkActive="active" ariaCurrentWhenActive="page"
+                 [routerLinkActiveOptions]="{ exact: !!link.exact }">
+                <app-nav-icon [name]="link.icon" />
+                <span>{{ link.label }}</span>
+              </a>
+            </li>
+          }
+        </ul>
+      </div>
+    }
+  </nav>
+
+  @if (user(); as u) {
+    <div class="account">
+      <app-theme-toggle [showLabel]="true" [block]="true" />
+      <div class="me">
+        <span class="avatar-sm" aria-hidden="true">{{ initials() }}</span>
+        <span class="who">
+          <span class="name">{{ u.firstName }} {{ u.lastName }}</span>
+          <span class="role">{{ roleLabel() }}</span>
+        </span>
+        <button type="button" class="icon logout" (click)="logout()" aria-label="Se déconnecter" title="Se déconnecter">
+          <app-nav-icon name="logout" />
+        </button>
+      </div>
+    </div>
+  }
+</aside>
